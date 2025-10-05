@@ -1,6 +1,3 @@
-# Prerequisites
-*.d
-
 # Compiled Object files
 *.slo
 *.lo
@@ -11,12 +8,6 @@
 *.gch
 *.pch
 
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
 # Compiled Dynamic libraries
 *.so
 *.dylib
@@ -24,7 +15,6 @@
 
 # Fortran module files
 *.mod
-*.smod
 
 # Compiled Static libraries
 *.lai
@@ -37,7 +27,21 @@
 *.out
 *.app
 
-# debug information files
-*.dwo
-/.vs/02-Bubble
-/.vs/NinjaGear
+# CMake
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+*.cmake
+# ^ May need to add future .cmake files as exceptions
+
+# Test logs
+Testing/*
+
+# Test input
+test/gtc/*.dds
+
+# Project Files
+*.cbp
+*.user
