@@ -72,7 +72,7 @@ void Game::setCurrentScene(const string& name)
 	auto it = levels.find(name);
 	if (it != levels.end()) {
 		currentScene = it->second;
-		currentScene->init(screenWidth, screenHeight);
+		currentScene->init();
 	}
 }
 

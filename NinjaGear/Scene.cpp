@@ -8,8 +8,8 @@
 #define SCREEN_X 0
 #define SCREEN_Y 0
 
-#define INIT_PLAYER_X_TILES 4
-#define INIT_PLAYER_Y_TILES 19
+#define INIT_PLAYER_X_TILES 0
+#define INIT_PLAYER_Y_TILES 0
 
 
 Scene::Scene()
@@ -40,7 +40,7 @@ Scene::~Scene()
 }
 
 
-void Scene::init(int screenWidth, int screenHeight)
+void Scene::init()
 {
 	initShaders();
 	loadTileMaps();
@@ -56,8 +56,8 @@ void Scene::init(int screenWidth, int screenHeight)
 	player->setPosition(glm::vec2(INIT_PLAYER_X_TILES * maps[0]->getTileSize(), INIT_PLAYER_Y_TILES * maps[0]->getTileSize()));
 	player->setTileMap(maps[0]);
   // Calculate projection based on map size
-	int mapWidthInPixels = map->mapSize.x * map->getTileSize();
-	int mapHeightInPixels = map->mapSize.y * map->getTileSize();
+	int mapWidthInPixels = maps[0]->mapSize.x * maps[0]->getTileSize();
+	int mapHeightInPixels = maps[0]->mapSize.y * maps[0]->getTileSize();
 	projection = glm::ortho(0.f, float(mapWidthInPixels), float(mapHeightInPixels), 0.f);
 	currentTime = 0.0f;
 }

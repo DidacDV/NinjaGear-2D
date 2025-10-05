@@ -20,7 +20,7 @@ public:
 	Scene(const vector<string>& tileMapFiles);
 	~Scene();
 
-	void init(int screenWidth, int screenHeight);
+	void init();
 	void update(int deltaTime);
 	void render();
 
