@@ -8,8 +8,8 @@
 #define SCREEN_X 0
 #define SCREEN_Y 0
 
-#define INIT_PLAYER_X_TILES 4
-#define INIT_PLAYER_Y_TILES 25
+#define INIT_PLAYER_X_TILES 0
+#define INIT_PLAYER_Y_TILES 0
 
 
 Scene::Scene()
@@ -27,7 +27,7 @@ Scene::~Scene()
 }
 
 
-void Scene::init()
+void Scene::init(int screenWidth, int screenHeight)
 {
 	initShaders();
 	map = TileMap::createTileMap("levels/outisde_1.txt", glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
@@ -35,7 +35,12 @@ void Scene::init()
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram);
 	player->setPosition(glm::vec2(INIT_PLAYER_X_TILES * map->getTileSize(), INIT_PLAYER_Y_TILES * map->getTileSize()));
 	player->setTileMap(map);
-	projection = glm::ortho(0.f, float(SCREEN_WIDTH), float(SCREEN_HEIGHT), 0.f);
+
+	// Calculate projection based on map size
+	int mapWidthInPixels = map->mapSize.x * map->getTileSize();
+	int mapHeightInPixels = map->mapSize.y * map->getTileSize();
+	projection = glm::ortho(0.f, float(mapWidthInPixels), float(mapHeightInPixels), 0.f);
+
 	currentTime = 0.0f;
 }
 

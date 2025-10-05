@@ -19,7 +19,7 @@ public:
 	Scene();
 	~Scene();
 
-	void init();
+	void init(int screenWidth, int screenHeight);
 	void update(int deltaTime);
 	void render();
 

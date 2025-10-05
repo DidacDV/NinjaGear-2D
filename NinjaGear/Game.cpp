@@ -3,11 +3,11 @@
 #include "Game.h"
 
 
-void Game::init()
+void Game::init(int screenWidth, int screenHeight)
 {
 	bPlay = true;
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-	scene.init();
+	scene.init(screenWidth, screenHeight);
 }
 
 bool Game::update(int deltaTime)
