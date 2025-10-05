@@ -4,6 +4,8 @@
 
 #include <GLFW/glfw3.h>
 #include "Scene.h"
+#include "Level.h"
+#include "Menu.h"
 #include <map>
 #include <string>
 
