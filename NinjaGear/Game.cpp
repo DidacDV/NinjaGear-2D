@@ -3,7 +3,7 @@
 #include "Game.h"
 
 
-void Game::init()
+void Game::init(int screenWidth, int screenHeight)
 {
 	bPlay = true;
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -72,7 +72,7 @@ void Game::setCurrentScene(const string& name)
 	auto it = levels.find(name);
 	if (it != levels.end()) {
 		currentScene = it->second;
-		currentScene->init();
+		currentScene->init(screenWidth, screenHeight);
 	}
 }
 

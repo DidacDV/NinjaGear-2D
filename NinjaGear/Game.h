@@ -28,7 +28,7 @@ public:
 		return G;
 	}
 	
-	void init();
+	void init(int screenHeight, int screenWidth);
 	bool update(int deltaTime);
 	void render();
 	

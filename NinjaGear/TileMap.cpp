@@ -95,25 +95,28 @@ void TileMap::prepareArrays(const glm::vec2& minCoords, ShaderProgram& program)
 	vector<float> vertices;
 
 	nTiles = 0;
+
+	// Add small padding to prevent texture bleeding
+	float padding = 0.001f;
+
 	for (int j = 0; j < mapSize.y; j++)
 	{
 		for (int i = 0; i < mapSize.x; i++)
 		{
 			tile = map[j * mapSize.x + i];
-			if (tile < 0) continue;          // empty tile if -1
+			if (tile < 0) continue;          //empty tile if -1
 			if (tile >= tilesheetSize.x * tilesheetSize.y) continue;
 
 			nTiles++;
 
-
 			posTile = glm::vec2(minCoords.x + i * tileSize, minCoords.y + j * tileSize);
 
-			//0 base indexing
+			//0 based with padding to delete green lines
 			texCoordTile[0] = glm::vec2(
-				float(tile % tilesheetSize.x) / tilesheetSize.x,
-				float(tile / tilesheetSize.x) / tilesheetSize.y
+				float(tile % tilesheetSize.x) / tilesheetSize.x + padding,
+				float(tile / tilesheetSize.x) / tilesheetSize.y + padding
 			);
-			texCoordTile[1] = texCoordTile[0] + tileTexSize;
+			texCoordTile[1] = texCoordTile[0] + tileTexSize - glm::vec2(padding * 2.0f, padding * 2.0f);
 
 			//first tri
 			vertices.insert(vertices.end(), {
@@ -200,33 +203,3 @@ bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, i
 	
 	return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

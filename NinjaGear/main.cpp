@@ -38,15 +38,18 @@ int main(void)
 		return -1;
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Ninja Gear", NULL, NULL);
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	int screenWidth = mode->width;
+	int screenHeight = mode->height;
+
+	window = glfwCreateWindow(screenWidth / 2, screenHeight / 2, "Ninja Gear", NULL, NULL); //if u want fullscreen, change first NULL to monitor
 	if (!window)
 	{
 		glfwTerminate();
 		return -1;
 	}
 
-	/* Set window initial position */
-	glfwSetWindowPos(window, 100, 100);
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 
@@ -60,7 +63,7 @@ int main(void)
 	glewInit();
 
 	/* Init step of the game loop */
-	Game::instance().init();
+	Game::instance().init(screenWidth / 2, screenHeight / 2);
 	timePreviousFrame = glfwGetTime();
 
 	/* Loop until the user closes the window */
