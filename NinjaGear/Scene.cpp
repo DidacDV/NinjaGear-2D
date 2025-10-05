@@ -14,23 +14,21 @@
 
 Scene::Scene()
 {
-	player = new Player();
+	this->currentTime = 0.0f;
 	mapFiles = {
-		"levels/outisde_1.txt",
-		"levels/test.txt"
+		"levels/base_menu.txt",
 	};
 }
 
-Scene::Scene(const vector<string>& tileMapFiles, Player* player)
+Scene::Scene(const vector<string>& tileMapFiles)
 {
-	this->player = player;
+	cout << "detecting tilemaps" << endl;
+	this->currentTime = 0.0f;
 	mapFiles = tileMapFiles;
 }
 
 Scene::~Scene()
 {
-	if(player != NULL)
-		delete player;
 	for (unsigned int i = 0; i < maps.size(); i++)
 	{
 		if (maps[i] != NULL)
@@ -44,17 +42,12 @@ void Scene::init()
 {
 	initShaders();
 	loadTileMaps();
-
 	if (maps.empty()) {
 		cout << "ERROR: No tilemaps loaded!" << endl;
 		return;
 	}
 
-	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram);
-
-	player->setPosition(glm::vec2(INIT_PLAYER_X_TILES * maps[0]->getTileSize(), INIT_PLAYER_Y_TILES * maps[0]->getTileSize()));
-	player->setTileMap(maps[0]);
-  // Calculate projection based on map size
+	// Calculate projection based on map size
 	int mapWidthInPixels = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeightInPixels = maps[0]->mapSize.y * maps[0]->getTileSize();
 	projection = glm::ortho(0.f, float(mapWidthInPixels), float(mapHeightInPixels), 0.f);
@@ -64,7 +57,6 @@ void Scene::init()
 void Scene::update(int deltaTime)
 {
 	currentTime += deltaTime;
-	player->update(deltaTime);
 }
 
 void Scene::render()
@@ -77,7 +69,6 @@ void Scene::render()
 	texProgram.setUniformMatrix4f("modelview", modelview);
 	texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
 	for (unsigned int i = 0; i < maps.size(); i++)maps[i]->render();
-	player->render();
 }
 
 void Scene::initShaders()

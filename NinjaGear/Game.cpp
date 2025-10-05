@@ -10,12 +10,15 @@ void Game::init(int screenWidth, int screenHeight)
 	//Create the player
 	this->player = new Player();
 	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
+	//Create the levels (scenes) and add them to the game
+	vector<string> titlesScreenMaps = { "levels/base_menu.txt" };
+	Scene* baseMenu = new Menu(titlesScreenMaps);
+
 	vector<string> level1Maps = { "levels/outisde_1.txt"};
-	vector<string> level2Maps = { "levels/test.txt" };
-	Scene* level1 = new Scene(level1Maps, player);
-	Scene* level2 = new Scene(level2Maps, player);
+	Scene* level1 = new Level(level1Maps, player, 10, 10);
+
 	addScene("level1", level1);
-	addScene("level2", level2);
+	addScene("menu", baseMenu);
 	setCurrentScene("level1");
 }
 
@@ -40,7 +43,7 @@ void Game::keyPressed(int key)
 	if(key == GLFW_KEY_ESCAPE) // Escape code
 		bPlay = false;
 	else if (key == GLFW_KEY_Z) // Escape code
-		this->player->setSpriteSheet("images/bub.png");
+		setCurrentScene("menu");
 	keys[key] = true;
 }
 

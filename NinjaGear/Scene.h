@@ -17,21 +17,18 @@ class Scene
 
 public:
 	Scene();
-	Scene(const vector<string>& tileMapFiles, Player* player);
-	~Scene();
+	Scene(const vector<string>& tileMapFiles);
+	virtual ~Scene();
 
-	void init();
-	void update(int deltaTime);
-	void render();
+	virtual void init();
+	virtual void update(int deltaTime);
+	virtual void render();
 
-private:
+protected:
 	void initShaders();
 	void loadTileMaps();
-
-private:
 	vector<string> mapFiles;
 	vector<TileMap*> maps;
-	Player *player;
 	ShaderProgram texProgram;
 	float currentTime;
 	glm::mat4 projection;
