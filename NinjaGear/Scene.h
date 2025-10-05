@@ -17,7 +17,7 @@ class Scene
 
 public:
 	Scene();
-	Scene(const vector<string>& tileMapFiles);
+	Scene(const vector<string>& tileMapFiles, Player* player);
 	~Scene();
 
 	void init();
