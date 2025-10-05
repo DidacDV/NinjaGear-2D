@@ -4,7 +4,8 @@
 
 #include <GLFW/glfw3.h>
 #include "Scene.h"
-
+#include <map>
+#include <string>
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 320
@@ -40,12 +41,17 @@ public:
 
 	bool getKey(int key) const;
 
+	//Level (scene) management
+	void addScene(const string& name, Scene* scene);
+	void setCurrentScene(const string& name);
+	Scene* getCurrentScene() const;
+
 private:
 	bool bPlay; // Continue to play game?
 	bool keys[GLFW_KEY_LAST+1]; // Store key states so that 
 							    // we can have access at any time
-	Scene scene;
-
+	map<string, Scene*> levels;
+	Scene* currentScene;
 };
 
 

@@ -11,7 +11,6 @@ using namespace std;
 TileMap *TileMap::createTileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProgram &program)
 {
 	TileMap *map = new TileMap(levelFile, minCoords, program);
-	
 	return map;
 }
 
@@ -25,7 +24,7 @@ TileMap::TileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProg
 TileMap::~TileMap()
 {
 	if(map != NULL)
-		delete map;
+		delete[] map;
 }
 
 
@@ -50,8 +49,7 @@ bool TileMap::loadLevel(const string &levelFile)
 	ifstream fin;
 	string line, tilesheetFile;
 	stringstream sstream;
-	char tile;
-	
+
 	fin.open(levelFile.c_str());
 	if(!fin.is_open())
 		return false;
@@ -183,6 +181,11 @@ bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, i
 	x0 = pos.x / tileSize;
 	x1 = (pos.x + size.x - 1) / tileSize;
 	y = (pos.y + size.y - 1) / tileSize;
+
+	if (x0 < 0) x0 = 0;
+	if (x1 >= mapSize.x) x1 = mapSize.x - 1;
+	if (y < 0 || y >= mapSize.y) return false;
+
 	for(int x=x0; x<=x1; x++)
 	{
 		if(map[y*mapSize.x+x] != 0)

@@ -17,6 +17,7 @@ class Scene
 
 public:
 	Scene();
+	Scene(const vector<string>& tileMapFiles);
 	~Scene();
 
 	void init();
@@ -25,9 +26,11 @@ public:
 
 private:
 	void initShaders();
+	void loadTileMaps();
 
 private:
-	TileMap *map;
+	vector<string> mapFiles;
+	vector<TileMap*> maps;
 	Player *player;
 	ShaderProgram texProgram;
 	float currentTime;
