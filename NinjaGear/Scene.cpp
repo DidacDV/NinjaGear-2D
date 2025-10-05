@@ -8,39 +8,57 @@
 #define SCREEN_X 0
 #define SCREEN_Y 0
 
-#define INIT_PLAYER_X_TILES 0
-#define INIT_PLAYER_Y_TILES 0
+#define INIT_PLAYER_X_TILES 4
+#define INIT_PLAYER_Y_TILES 19
 
 
 Scene::Scene()
 {
-	map = NULL;
 	player = NULL;
+	mapFiles = {
+		"levels/outisde_1.txt",
+		"levels/test.txt"
+	};
+}
+
+Scene::Scene(const vector<string>& tileMapFiles)
+{
+	player = NULL;
+	mapFiles = tileMapFiles;
 }
 
 Scene::~Scene()
 {
-	if(map != NULL)
-		delete map;
 	if(player != NULL)
 		delete player;
+	for (unsigned int i = 0; i < maps.size(); i++)
+	{
+		if (maps[i] != NULL)
+			delete maps[i];
+	}
+	maps.clear();
 }
 
 
 void Scene::init(int screenWidth, int screenHeight)
 {
 	initShaders();
-	map = TileMap::createTileMap("levels/outisde_1.txt", glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
+	loadTileMaps();
+
+	if (maps.empty()) {
+		cout << "ERROR: No tilemaps loaded!" << endl;
+		return;
+	}
+
 	player = new Player();
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram);
-	player->setPosition(glm::vec2(INIT_PLAYER_X_TILES * map->getTileSize(), INIT_PLAYER_Y_TILES * map->getTileSize()));
-	player->setTileMap(map);
 
-	// Calculate projection based on map size
+	player->setPosition(glm::vec2(INIT_PLAYER_X_TILES * maps[0]->getTileSize(), INIT_PLAYER_Y_TILES * maps[0]->getTileSize()));
+	player->setTileMap(maps[0]);
+  // Calculate projection based on map size
 	int mapWidthInPixels = map->mapSize.x * map->getTileSize();
 	int mapHeightInPixels = map->mapSize.y * map->getTileSize();
 	projection = glm::ortho(0.f, float(mapWidthInPixels), float(mapHeightInPixels), 0.f);
-
 	currentTime = 0.0f;
 }
 
@@ -53,14 +71,13 @@ void Scene::update(int deltaTime)
 void Scene::render()
 {
 	glm::mat4 modelview;
-
 	texProgram.use();
 	texProgram.setUniformMatrix4f("projection", projection);
 	texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
 	modelview = glm::mat4(1.0f);
 	texProgram.setUniformMatrix4f("modelview", modelview);
 	texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
-	map->render();
+	for (unsigned int i = 0; i < maps.size(); i++)maps[i]->render();
 	player->render();
 }
 
@@ -92,6 +109,20 @@ void Scene::initShaders()
 	texProgram.bindFragmentOutput("outColor");
 	vShader.free();
 	fShader.free();
+}
+
+void Scene::loadTileMaps()
+{
+	for (const string& file : mapFiles) {
+		TileMap* map = TileMap::createTileMap(file, glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
+		if (map != NULL) {
+			maps.push_back(map);
+			cout << "Loaded: " << file << endl;
+		}
+		else {
+			cout << "Failed to load: " << file << endl;
+		}
+	}
 }
 
 
