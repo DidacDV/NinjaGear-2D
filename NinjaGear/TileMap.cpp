@@ -11,6 +11,7 @@ using namespace std;
 TileMap *TileMap::createTileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProgram &program)
 {
 	TileMap *map = new TileMap(levelFile, minCoords, program);
+	map->blockedTiles = unordered_set<int>(std::begin(BLOCKED_TILES), std::end(BLOCKED_TILES));
 	return map;
 }
 
@@ -96,7 +97,7 @@ void TileMap::prepareArrays(const glm::vec2& minCoords, ShaderProgram& program)
 
 	nTiles = 0;
 
-	// Add small padding to prevent texture bleeding
+	//padding to prevent texture bleeding
 	float padding = 0.001f;
 
 	for (int j = 0; j < mapSize.y; j++)
@@ -141,65 +142,84 @@ void TileMap::prepareArrays(const glm::vec2& minCoords, ShaderProgram& program)
 	texCoordLocation = program.bindVertexAttribute("texCoord", 2, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 }
 
+bool TileMap::isTileBlocked(int x, int y) const
+{
+	int tileId = map[y * mapSize.x + x];
+	return blockedTiles.find(tileId) != blockedTiles.end();
+}
+
+void TileMap::addBlockedTiles(const vector<int> tilesToBlock, int count) {
+	for (int i = 0; i < count; ++i) {
+		blockedTiles.insert(tilesToBlock[i]);
+	}
+}
+
 // Collision tests for axis aligned bounding boxes.
 // Method collisionMoveDown also corrects Y coordinate if the box is
 // already intersecting a tile below.
 
-bool TileMap::collisionMoveLeft(const glm::ivec2 &pos, const glm::ivec2 &size) const
+bool TileMap::collisionMoveLeft(const glm::ivec2& pos, const glm::ivec2& size) const
 {
-	int x, y0, y1;
-	
-	x = pos.x / tileSize;
-	y0 = pos.y / tileSize;
-	y1 = (pos.y + size.y - 1) / tileSize;
-	for(int y=y0; y<=y1; y++)
+	int x = pos.x / tileSize;
+	int y0 = pos.y / tileSize;
+	int y1 = (pos.y + size.y - 1) / tileSize;
+
+	if (x < 0)
+		cout << "LEAVING LEVEL";
+
+	for (int y = y0; y <= y1; y++)
 	{
-		if(map[y*mapSize.x+x] != 0)
+		if (isTileBlocked(x, y))
 			return true;
 	}
-	
+
 	return false;
 }
 
-bool TileMap::collisionMoveRight(const glm::ivec2 &pos, const glm::ivec2 &size) const
+bool TileMap::collisionMoveRight(const glm::ivec2& pos, const glm::ivec2& size) const
 {
-	int x, y0, y1;
-	
-	x = (pos.x + size.x - 1) / tileSize;
-	y0 = pos.y / tileSize;
-	y1 = (pos.y + size.y - 1) / tileSize;
-	for(int y=y0; y<=y1; y++)
+	int x = pos.x / tileSize;
+
+	if (x >= SCREEN_WIDTH_TILES)
+		cout << "LEAVING LEVEL";
+
+	int y0 = pos.y / tileSize;
+	int y1 = (pos.y + size.y - 1) / tileSize;
+
+	for (int y = y0; y <= y1; y++)
 	{
-		if(map[y*mapSize.x+x] != 0)
+		if (isTileBlocked(x, y))
 			return true;
 	}
-	
+
 	return false;
 }
 
-bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, int *posY) const
+bool TileMap::collisionMoveDown(const glm::ivec2& pos, const glm::ivec2& size) const
 {
-	int x0, x1, y;
-	
-	x0 = pos.x / tileSize;
-	x1 = (pos.x + size.x - 1) / tileSize;
-	y = (pos.y + size.y - 1) / tileSize;
+	int x0 = pos.x / tileSize;
+	int x1 = (pos.x + size.x - 1) / tileSize;
+	int y = (pos.y + size.y - 1) / tileSize;
 
-	if (x0 < 0) x0 = 0;
-	if (x1 >= mapSize.x) x1 = mapSize.x - 1;
-	if (y < 0 || y >= mapSize.y) return false;
-
-	for(int x=x0; x<=x1; x++)
+	for (int x = x0; x <= x1; x++)
 	{
-		if(map[y*mapSize.x+x] != 0)
-		{
-			if(*posY - tileSize * y + size.y <= 4)
-			{
-				*posY = tileSize * y - size.y;
-				return true;
-			}
-		}
+		if (isTileBlocked(x, y))
+			return true;
 	}
-	
+	return false;
+}
+
+bool TileMap::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) const
+{
+	int x0 = pos.x / tileSize;
+	int x1 = (pos.x + size.x - 1) / tileSize;
+	int y = pos.y / tileSize;
+
+	for (int x = x0; x <= x1; x++)
+	{
+		if (isTileBlocked(x, y))
+			return true;
+	}
+
 	return false;
 }
