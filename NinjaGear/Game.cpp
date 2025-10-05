@@ -7,11 +7,13 @@ void Game::init(int screenWidth, int screenHeight)
 {
 	bPlay = true;
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-
+	//Create the player
+	this->player = new Player();
+	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
 	vector<string> level1Maps = { "levels/outisde_1.txt"};
 	vector<string> level2Maps = { "levels/test.txt" };
-	Scene* level1 = new Scene(level1Maps);
-	Scene* level2 = new Scene(level2Maps);
+	Scene* level1 = new Scene(level1Maps, player);
+	Scene* level2 = new Scene(level2Maps, player);
 	addScene("level1", level1);
 	addScene("level2", level2);
 	setCurrentScene("level1");
@@ -37,6 +39,8 @@ void Game::keyPressed(int key)
 {
 	if(key == GLFW_KEY_ESCAPE) // Escape code
 		bPlay = false;
+	else if (key == GLFW_KEY_Z) // Escape code
+		this->player->setSpriteSheet("images/bub.png");
 	keys[key] = true;
 }
 
@@ -79,6 +83,11 @@ void Game::setCurrentScene(const string& name)
 Scene* Game::getCurrentScene() const
 {
 	return currentScene;
+}
+
+Player* Game::getPlayer() const
+{
+	return player;
 }
 
 

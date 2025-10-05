@@ -14,16 +14,16 @@
 
 Scene::Scene()
 {
-	player = NULL;
+	player = new Player();
 	mapFiles = {
 		"levels/outisde_1.txt",
 		"levels/test.txt"
 	};
 }
 
-Scene::Scene(const vector<string>& tileMapFiles)
+Scene::Scene(const vector<string>& tileMapFiles, Player* player)
 {
-	player = NULL;
+	this->player = player;
 	mapFiles = tileMapFiles;
 }
 
@@ -50,7 +50,6 @@ void Scene::init()
 		return;
 	}
 
-	player = new Player();
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram);
 
 	player->setPosition(glm::vec2(INIT_PLAYER_X_TILES * maps[0]->getTileSize(), INIT_PLAYER_Y_TILES * maps[0]->getTileSize()));
