@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "Game.h"
+#include <iostream>
 
 
 void Game::init(int screenWidth, int screenHeight)
@@ -19,7 +20,7 @@ void Game::init(int screenWidth, int screenHeight)
 		"levels/Jungle_vegetation.txt"
 	};
 	Level* Jungle1 = new Level(jungle_layers, player, 10, 10);
-	Jungle1->addEnemy("images/enemies/cyclope.png", 5, 10);
+	Jungle1->addEnemy("images/enemies/cyclope.png", 15, 10);
 	//Jungle1->addEnemy("images/enemies/cyclope.png", 10, 5);
 	//Jungle1->addEnemy("images/enemies/cyclope.png", 5, 5);
 	addScene("Jungle1", Jungle1);
@@ -39,8 +40,18 @@ void Game::render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// Render the current scene (level in top 90%)
 	if (currentScene != NULL)
 		currentScene->render();
+
+	// Render the menu UI (bottom 10%)
+	auto it = levels.find("menu");
+	if (it != levels.end()) {
+		Scene* menuScene = it->second;
+		if (menuScene != nullptr) {
+			menuScene->render();
+		}
+	}
 }
 
 void Game::keyPressed(int key)
@@ -87,6 +98,11 @@ void Game::setCurrentScene(const string& name)
 	if (it != levels.end()) {
 		currentScene = it->second;
 		currentScene->init();
+	}
+
+	auto it2 = levels.find("menu");
+	if (it2 != levels.end()) {
+		it2->second->init();
 	}
 }
 

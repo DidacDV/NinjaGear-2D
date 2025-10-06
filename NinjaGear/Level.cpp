@@ -62,7 +62,7 @@ void Level::init()
 	//Initialize enemies
 	for (unsigned int i = 0; i < enemies.size(); i++)
 	{
-		enemies[i]->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
+		enemies[i]->init(glm::ivec2(SCREEN_X+650.0f, SCREEN_Y), this->texProgram);
 		enemies[i]->setTileMap(maps[0]);
 	}
 
@@ -128,6 +128,13 @@ void Level::render()
 {
 	glm::mat4 modelview;
 	texProgram.use();
+
+	int actualWindowWidth = 1280;  
+	int actualWindowHeight = 720;  
+	int sectionHeight = actualWindowHeight * 0.9f; 
+	int sectionY = actualWindowHeight * 0.1f;        
+	glViewport(0, sectionY, actualWindowWidth, sectionHeight);
+
 	texProgram.setUniformMatrix4f("projection", projection);
 	texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
 
