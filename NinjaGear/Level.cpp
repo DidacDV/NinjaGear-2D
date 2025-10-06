@@ -36,6 +36,16 @@ Level::Level(const vector<string>& tileMapFiles, Player* player, int initPlayerX
 Level::~Level()
 {
 	Scene::~Scene();
+	for (unsigned int i = 0; i < enemies.size(); i++)
+	{
+		if (enemies[i] != nullptr)
+		{
+			delete enemies[i];
+			enemies[i] = nullptr;
+		}
+	}
+	enemies.clear();
+	this->player = nullptr;
 }
 
 void Level::init() 
@@ -44,9 +54,17 @@ void Level::init()
 	//Projection matrix override
 	projection = glm::ortho(0.f, float(CAMERA_WIDTH), float(CAMERA_HEIGHT), 0.f);
 	
+	// Initialize player
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
 	player->setTileMap(maps[0]);
+
+	//Initialize enemies
+	for (unsigned int i = 0; i < enemies.size(); i++)
+	{
+		enemies[i]->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
+		enemies[i]->setTileMap(maps[0]);
+	}
 
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeight = maps[0]->mapSize.y * maps[0]->getTileSize();
@@ -74,6 +92,7 @@ void Level::update(int deltaTime)
 {
 	Scene::update(deltaTime);
 	player->update(deltaTime);
+	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->update(deltaTime);
 	updateCameraSector();
 }
 
@@ -123,6 +142,16 @@ void Level::render()
 	for (unsigned int i = 0; i < maps.size(); i++)
 		maps[i]->render();
 
+	// Render all enemies
+	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->render(view);
 	// Player render - pass the view matrix
 	player->render(view);
+}
+
+// Helper method to add enemies
+void Level::addEnemy(const string& spriteSheet, int initX, int initY)
+{
+    Enemy* enemy = new Enemy();
+    enemy->setSpriteSheet(spriteSheet); //TODO FIX HARDCODE VALUE
+    enemies.push_back(enemy);
 }

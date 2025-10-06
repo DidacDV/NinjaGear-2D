@@ -18,8 +18,10 @@ void Game::init(int screenWidth, int screenHeight)
 		"levels/Jungle_background.txt",
 		"levels/Jungle_vegetation.txt"
 	};
-	Scene* Jungle1 = new Level(jungle_layers, player, 10, 10);
-
+	Level* Jungle1 = new Level(jungle_layers, player, 10, 10);
+	Jungle1->addEnemy("images/enemies/cyclope.png", 5, 10);
+	//Jungle1->addEnemy("images/enemies/cyclope.png", 10, 5);
+	//Jungle1->addEnemy("images/enemies/cyclope.png", 5, 5);
 	addScene("Jungle1", Jungle1);
 	addScene("menu", baseMenu);
 	setCurrentScene("Jungle1");

@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene.h"
+#include "Enemy.h"
 class Level :
     public Scene
 {
@@ -11,11 +12,15 @@ class Level :
     void init() override;
     void update(int deltaTime) override;
 	void render() override;
-    
+	// Enemy management
+    void addEnemy(const string& spriteSheet, int initX, int initY);
 
     private:
+        //Player
         Player* player;
         int initPlayerX, initPlayerY;
+        // Enemies
+        vector<Enemy*> enemies;
         // Camera sector traking
         int currentSectorI;  
         int currentSectorJ;  
