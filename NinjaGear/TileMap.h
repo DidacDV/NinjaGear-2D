@@ -12,7 +12,11 @@
 // it builds a single VBO that contains all tiles. As a result the render
 // method draws the whole map independently of what is visible.
 
-const int BLOCKED_TILES[] = { 0, 1, 22, 44, 45 };
+const int BLOCKED_TILES[] = { 
+							  0, 1, 22, 44, 45,       // DESERT
+							  //199, 198, 176, 155, 154, 178, 182, 198, 200 //JUNGLE
+							  - 1
+							};
 
 class TileMap
 {
@@ -41,6 +45,9 @@ public:
 	void addBlockedTiles(const vector<int> tilesToBlock, int count);
 
 	glm::ivec2 mapSize;
+
+	int width() const { return mapSize.x; }
+	int height() const { return mapSize.y; }
 
 private:
 	bool loadLevel(const string &levelFile);

@@ -16,6 +16,18 @@ class Level :
     private:
         Player* player;
         int initPlayerX, initPlayerY;
+        // Camera sector traking
+        int currentSectorI;  
+        int currentSectorJ;  
+        int numSectorsI;     
+        int numSectorsJ;     
+        int sectorWidth;     
+        int sectorHeight;
 
+        float cameraOffsetX;
+        float cameraOffsetY;
+
+        void updateCameraSector();
+        void calculateCameraOffset();
 };
 

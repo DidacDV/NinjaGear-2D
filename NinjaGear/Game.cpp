@@ -14,12 +14,15 @@ void Game::init(int screenWidth, int screenHeight)
 	vector<string> titlesScreenMaps = { "levels/base_menu.txt" };
 	Scene* baseMenu = new Menu(titlesScreenMaps);
 
-	vector<string> level1Maps = { "levels/outisde_1.txt"};
-	Scene* level1 = new Level(level1Maps, player, 10, 10);
+	vector<string> jungle_layers = { 
+		"levels/Jungle_background.txt",
+		"levels/Jungle_vegetation.txt"
+	};
+	Scene* Jungle1 = new Level(jungle_layers, player, 10, 10);
 
-	addScene("level1", level1);
+	addScene("Jungle1", Jungle1);
 	addScene("menu", baseMenu);
-	setCurrentScene("level1");
+	setCurrentScene("Jungle1");
 }
 
 bool Game::update(int deltaTime)
@@ -40,10 +43,12 @@ void Game::render()
 
 void Game::keyPressed(int key)
 {
-	if(key == GLFW_KEY_ESCAPE) // Escape code
+	if (key == GLFW_KEY_ESCAPE) // Escape code
 		bPlay = false;
-	else if (key == GLFW_KEY_Z) // Escape code
+	else if (key == GLFW_KEY_Z) // Change menu
 		setCurrentScene("menu");
+	else if (key == GLFW_KEY_X) // Change sprite
+		player->setSpriteSheet("images/characters/ninja_blue/SpriteSheet.png");
 	keys[key] = true;
 }
 
