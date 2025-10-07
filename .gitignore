@@ -40,3 +40,4 @@
 *.dwo
 /.vs/02-Bubble
 /.vs/NinjaGear
+/NinjaGear/Debug
