@@ -1,6 +1,8 @@
 #pragma once
 #include "Scene.h"
+#include "Player.h"
 #include "Enemy.h"
+
 class Level :
     public Scene
 {

@@ -129,8 +129,8 @@ void Level::render()
 	glm::mat4 modelview;
 	texProgram.use();
 
-	int actualWindowWidth = 1280;  
-	int actualWindowHeight = 720;  
+	int actualWindowWidth = globalScreenWidth/2;
+	int actualWindowHeight = globalScreenHeight/2;
 	int sectionHeight = actualWindowHeight * 0.9f; 
 	int sectionY = actualWindowHeight * 0.1f;        
 	glViewport(0, sectionY, actualWindowWidth, sectionHeight);

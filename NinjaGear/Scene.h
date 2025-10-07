@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include "ShaderProgram.h"
 #include "TileMap.h"
-#include "Player.h"
+#include "Globals.h"
 
 
 // Scene contains all the entities of our game.
