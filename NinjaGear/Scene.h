@@ -27,6 +27,7 @@ public:
 protected:
 	void initShaders();
 	void loadTileMaps();
+	void setupViewport(float heightPercent, float yOffsetPercent);
 	vector<string> mapFiles;
 	vector<TileMap*> maps;
 	ShaderProgram texProgram;

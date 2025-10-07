@@ -39,15 +39,7 @@ void Menu::render()
 	}
 	glm::mat4 modelview;
 	texProgram.use();
-	int actualWindowWidth = globalScreenWidth / 2;
-	int actualWindowHeight = globalScreenHeight / 2;
-	int sectionHeight = actualWindowHeight * 0.1f;
-	int sectionY = 0;
-
-	// Use proportional width based on camera aspect ratio
-	int sectionWidth = (actualWindowWidth * CAMERA_WIDTH) / 1280;
-
-	glViewport(0, sectionY, actualWindowWidth, sectionHeight);
+	setupViewport(0.1f, 0.0f);
 
 	int mapHeightInPixels = maps[0]->mapSize.y * maps[0]->getTileSize();
 

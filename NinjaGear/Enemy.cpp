@@ -16,13 +16,15 @@ enum EnemyAnims
 	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
 };
 
+enum Direction { LEFT, RIGHT, UP, DOWN };
+Direction currentDirection = DOWN;
+
 
 void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram)
 {
 	const float FRAME_WIDTH = 1.0f / 4.0f;
 	const float FRAME_HEIGHT = 1.0f / 4.0f;
 	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
-
 	bJumping = false;
 	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
 	sprite = Sprite::createSprite(QUAD_SIZE, glm::vec2(0.25f, 0.25f), &spritesheet, &shaderProgram);
@@ -79,8 +81,13 @@ void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram)
 void Enemy::update(int deltaTime)
 {
 	sprite->update(deltaTime);
+
+	glm::vec2 playerPos = Game::instance().getPlayerPosition();
+
+	if (checkPlayerVisibility(playerPos)) cout << "I see you!" << endl;
 	if (Game::instance().getKey(GLFW_KEY_J))
 	{
+		currentDirection = LEFT;
 		if (sprite->animation() != MOVE_LEFT)
 			sprite->changeAnimation(MOVE_LEFT);
 		posEnemy.x -= 2;
@@ -92,6 +99,7 @@ void Enemy::update(int deltaTime)
 	}
 	else if (Game::instance().getKey(GLFW_KEY_L))
 	{
+		currentDirection = RIGHT;
 		if (sprite->animation() != MOVE_RIGHT)
 			sprite->changeAnimation(MOVE_RIGHT);
 		posEnemy.x += 2;
@@ -103,6 +111,7 @@ void Enemy::update(int deltaTime)
 	}
 	else if (Game::instance().getKey(GLFW_KEY_K))
 	{
+		currentDirection = DOWN;
 		if (sprite->animation() != MOVE_DOWN)
 			sprite->changeAnimation(MOVE_DOWN);
 		posEnemy.y += 2;  // Move down (increase Y)
@@ -114,6 +123,7 @@ void Enemy::update(int deltaTime)
 	}
 	else if (Game::instance().getKey(GLFW_KEY_I))
 	{
+		currentDirection = UP;
 		if (sprite->animation() != MOVE_UP)
 			sprite->changeAnimation(MOVE_UP);
 		posEnemy.y -= 2;  // Move down (increase Y)
@@ -125,14 +135,21 @@ void Enemy::update(int deltaTime)
 	}
 	else
 	{
-		if (sprite->animation() == MOVE_LEFT)
-			sprite->changeAnimation(STAND_LEFT);
-		else if (sprite->animation() == MOVE_RIGHT)
-			sprite->changeAnimation(STAND_RIGHT);
-		else if (sprite->animation() == MOVE_DOWN)
-			sprite->changeAnimation(STAND_DOWN);
-		else if (sprite->animation() == MOVE_UP)
-			sprite->changeAnimation(STAND_UP);
+		// Cambia la animación de pie según la dirección actual
+		switch (currentDirection) {
+			case LEFT:
+				sprite->changeAnimation(STAND_LEFT);
+				break;
+			case RIGHT:
+				sprite->changeAnimation(STAND_RIGHT);
+				break;
+			case DOWN:
+				sprite->changeAnimation(STAND_DOWN);
+				break;
+			case UP:
+				sprite->changeAnimation(STAND_UP);
+				break;
+		}
 	}
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
 }
@@ -157,6 +174,30 @@ void Enemy::setSpriteSheet(const string& spriteSheet)
 {
 	this->spriteSheet = spriteSheet;
 	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
+}
+
+bool Enemy::checkPlayerVisibility(const glm::vec2 playerPos)
+{
+	float distanceToPlayer = glm::distance(glm::vec2(posEnemy), playerPos);
+	const float MAX_VISION_DISTANCE = 200.0f;
+
+	bool playerVisible = false;
+	if (distanceToPlayer <= MAX_VISION_DISTANCE) {
+		glm::vec2 dirVec;
+		switch (currentDirection) {
+		case LEFT:  dirVec = glm::vec2(-1, 0); break;
+		case RIGHT: dirVec = glm::vec2(1, 0); break;
+		case UP:    dirVec = glm::vec2(0, -1); break;
+		case DOWN:  dirVec = glm::vec2(0, 1); break;
+		}
+		glm::vec2 toPlayer = glm::normalize(playerPos - glm::vec2(posEnemy));
+		float dot = glm::dot(dirVec, toPlayer);
+		if (dot > 0.99f) { 
+			playerVisible = map->hasLineOfSight(glm::vec2(posEnemy), playerPos);
+		}
+	}
+
+	return playerVisible;
 }
 
 

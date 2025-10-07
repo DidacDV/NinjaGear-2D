@@ -8,21 +8,28 @@ void Game::init(int screenWidth, int screenHeight)
 {
 	bPlay = true;
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-	//Create the player
+	/* PLAYER */
 	this->player = new Player();
 	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
-	//Create the levels (scenes) and add them to the game
+	
 	vector<string> titlesScreenMaps = { "levels/base_menu.txt" };
 	Scene* baseMenu = new Menu(titlesScreenMaps);
+	/* LEVELS */
 
+	// Jungle level layers
 	vector<string> jungle_layers = { 
 		"levels/Jungle_background.txt",
 		"levels/Jungle_vegetation.txt"
 	};
-	Level* Jungle1 = new Level(jungle_layers, player, 10, 10);
-	Jungle1->addEnemy("images/enemies/cyclope.png", 15, 10);
-	//Jungle1->addEnemy("images/enemies/cyclope.png", 10, 5);
-	//Jungle1->addEnemy("images/enemies/cyclope.png", 5, 5);
+	// Enemy configurations for the jungle level
+	vector<EnemyConfig> jungleEnemies = {
+	{35, 10, "images/enemies/cyclope.png", new Enemy()},
+	{10, 5,  "images/enemies/cyclope.png", new Enemy()},
+	{5,  5,  "images/enemies/cyclope.png", new Enemy()}
+	};
+
+	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies);
+
 	addScene("Jungle1", Jungle1);
 	addScene("menu", baseMenu);
 	setCurrentScene("Jungle1");
@@ -114,6 +121,10 @@ Scene* Game::getCurrentScene() const
 Player* Game::getPlayer() const
 {
 	return player;
+}
+
+glm::vec2 Game::getPlayerPosition() const {
+	return player->getPosition();
 }
 
 

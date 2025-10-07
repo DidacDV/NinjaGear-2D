@@ -15,12 +15,14 @@ Level::Level()
 	this->initPlayerY = 0;
 }
 
-Level::Level(const vector<string>& tileMapFiles, Player* player, int initPlayerX, int initPlayerY)
+Level::Level(const vector<string>& tileMapFiles, Player* player, 
+	int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs)
 	: Scene(tileMapFiles)
 {
 	this->player = player;
 	this->initPlayerX = initPlayerX;
 	this->initPlayerY = initPlayerY;
+	this->enemyConfigs = enemyConfigs;
 
 	//Initialize camera sector tracking variables
 	currentSectorI = 0;
@@ -60,11 +62,7 @@ void Level::init()
 	player->setTileMap(maps[0]);
 
 	//Initialize enemies
-	for (unsigned int i = 0; i < enemies.size(); i++)
-	{
-		enemies[i]->init(glm::ivec2(SCREEN_X+650.0f, SCREEN_Y), this->texProgram);
-		enemies[i]->setTileMap(maps[0]);
-	}
+	initializeEnemies();
 
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeight = maps[0]->mapSize.y * maps[0]->getTileSize();
@@ -128,12 +126,7 @@ void Level::render()
 {
 	glm::mat4 modelview;
 	texProgram.use();
-
-	int actualWindowWidth = globalScreenWidth/2;
-	int actualWindowHeight = globalScreenHeight/2;
-	int sectionHeight = actualWindowHeight * 0.9f; 
-	int sectionY = actualWindowHeight * 0.1f;        
-	glViewport(0, sectionY, actualWindowWidth, sectionHeight);
+	setupViewport(0.9f, 0.1f);
 
 	texProgram.setUniformMatrix4f("projection", projection);
 	texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
@@ -159,6 +152,17 @@ void Level::render()
 void Level::addEnemy(const string& spriteSheet, int initX, int initY)
 {
     Enemy* enemy = new Enemy();
-    enemy->setSpriteSheet(spriteSheet); //TODO FIX HARDCODE VALUE
+    enemy->setSpriteSheet(spriteSheet);
     enemies.push_back(enemy);
+}
+
+void Level::initializeEnemies() {
+	for (const auto& config : enemyConfigs) {
+		Enemy* enemy = config.enemyInstance;
+		enemy->setSpriteSheet(config.spriteSheet);
+		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
+		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
+		enemy->setTileMap(maps[0]);
+		enemies.push_back(enemy);
+	}
 }

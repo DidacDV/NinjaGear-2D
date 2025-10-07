@@ -23,6 +23,7 @@ public:
 	void setPosition(const glm::vec2 &pos);
 	void setSpriteSheet(const string& spriteSheet);
 	glm::ivec2 getPosition() { return posPlayer; }
+	glm::vec2 getPositionFloat() { return glm::vec2(posPlayer); }
 
 private:
 	bool bJumping;

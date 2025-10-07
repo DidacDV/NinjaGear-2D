@@ -3,6 +3,7 @@
 #include "Sprite.h"
 #include "TileMap.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/norm.hpp>
 #include <string>
 
 class Enemy
@@ -25,5 +26,6 @@ private:
 	Sprite* sprite;
 	TileMap* map;
 	string spriteSheet;
+	bool checkPlayerVisibility(const glm::vec2 playerPos);
 };
 
