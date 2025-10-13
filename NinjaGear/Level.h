@@ -3,6 +3,8 @@
 #include "Player.h"
 #include "Enemy.h"
 
+class Enemy;
+
 struct EnemyConfig {
     int xTile;
     int yTile;
