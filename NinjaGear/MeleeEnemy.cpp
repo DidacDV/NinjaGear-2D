@@ -98,7 +98,7 @@ void MeleeEnemy::initializeAnimations()
 	sprite->addKeyframe(DANCE, glm::vec2(3.0f * FRAME_WIDTH, 5.0f * FRAME_HEIGHT));
 	sprite->addKeyframe(DANCE, glm::vec2(3.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
 
-	sprite->changeAnimation(STAND_DOWN); // Cambia a una animación que tenga keyframes válidos
+	sprite->changeAnimation(STAND_DOWN); 
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
 }
 
@@ -129,19 +129,16 @@ void MeleeEnemy::updateTracking(int deltaTime, const glm::vec2& playerPos)
     trackingTimer += deltaTime;
     pathUpdateTimer += deltaTime;
 
-    // Check if tracking time expired
     if (trackingTimer >= MAX_TRACKING_TIME) {
         stopTracking();
         return;
     }
 
-    // Periodically recalculate path (player is moving)
     if (pathUpdateTimer >= PATH_UPDATE_INTERVAL) {
         glm::ivec2 goalTile = Pathfinder::instance().worldToTile(
             playerPos, map->getTileSize()
         );
 
-        // Only recalculate if player moved to different tile
         if (goalTile != lastTargetTile) {
             glm::ivec2 startTile = Pathfinder::instance().worldToTile(
                 glm::vec2(posEnemy), map->getTileSize()
@@ -154,8 +151,6 @@ void MeleeEnemy::updateTracking(int deltaTime, const glm::vec2& playerPos)
         }
         pathUpdateTimer = 0;
     }
-
-    // Follow the current path
     if (!currentPath.empty()) {
         followPath(deltaTime);
     }
@@ -163,13 +158,8 @@ void MeleeEnemy::updateTracking(int deltaTime, const glm::vec2& playerPos)
 
 void MeleeEnemy::followPath(int deltaTime)
 {
-    std::cout << "followPath called: index=" << currentPathIndex
-        << "/" << currentPath.size() << std::endl; 
 
-    if (currentPathIndex >= currentPath.size()) {
-        std::cout << "Reached end of path!" << std::endl; 
-        return;
-    }
+    if (currentPathIndex >= currentPath.size()) return;
 
     glm::ivec2 targetTile = currentPath[currentPathIndex];
     glm::vec2 targetPos = glm::vec2(
@@ -177,26 +167,18 @@ void MeleeEnemy::followPath(int deltaTime)
         targetTile.y * map->getTileSize()
     );
 
-    std::cout << "Current pos: (" << posEnemy.x << ", " << posEnemy.y << ")" << std::endl; 
-    std::cout << "Target pos: (" << targetPos.x << ", " << targetPos.y << ")" << std::endl; 
-
     glm::vec2 direction = targetPos - glm::vec2(posEnemy);
     float distance = glm::length(direction);
 
     std::cout << "Distance: " << distance << std::endl; 
     if (distance < 2.0f) {
         currentPathIndex++;
-        std::cout << "Reached waypoint, moving to next" << std::endl; 
     }
     else {
         direction = glm::normalize(direction);
         float moveAmount = moveSpeed * map->getTileSize() * (deltaTime / 1000.0f);
-
-        std::cout << "Moving by: " << moveAmount << std::endl; 
         posEnemy.x += direction.x * moveAmount;
         posEnemy.y += direction.y * moveAmount;
-
-        std::cout << "New pos: (" << posEnemy.x << ", " << posEnemy.y << ")" << std::endl;
     }
 }
 
