@@ -15,15 +15,16 @@ enum EnemyAnims
 	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
 };
 
-void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram)
+void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap)
 {
 	//Template that every enemy will follow. 
 	initializeSprite(shaderProgram);
+	map = tileMap;
+	cachedTileSize = static_cast<float>(map->getTileSize());
 	bJumping = false;
 	tileMapDispl = tileMapPos;
 	currentDirection = DOWN;
 	initializeAnimations();
-
 }
 
 void Enemy::update(int deltaTime)
@@ -200,4 +201,107 @@ void Enemy::initializeAnimations()
 
 	sprite->changeAnimation(STAND_DOWN);
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
+}
+
+// Path following logic using the Pathfinder class
+void Enemy::followPath(int deltaTime)
+{
+	if (currentPathIndex >= static_cast<int>(currentPath.size())) return;
+	glm::vec2 enemyPos(posEnemy);
+
+	//Skip close nodes
+	while (currentPathIndex < static_cast<int>(currentPath.size())) {
+		glm::vec2 targetPos = tileToWorld(currentPath[currentPathIndex]);
+		float distance = glm::length(targetPos - enemyPos);
+
+		if (distance < 4.0f) {
+			++currentPathIndex;
+			continue;
+		}
+		break;
+	}
+
+	if (currentPathIndex < static_cast<int>(currentPath.size())) {
+		glm::vec2 targetPos = tileToWorld(currentPath[currentPathIndex]);
+		glm::vec2 direction = targetPos - enemyPos;
+		float distance = glm::length(direction);
+
+		if (distance > 0.1f) { // MIN_MOVE_DISTANCE
+			direction = glm::normalize(direction);
+			float moveAmount = moveSpeed * cachedTileSize * (deltaTime / 1000.0f);
+			posEnemy += direction * moveAmount;
+
+			changeAnimationsForDirection(direction);
+		}
+	}
+}
+
+void Enemy::changeAnimationsForDirection(glm::vec2 direction)
+{
+	cout << "Base Enemy changeAnimationsForDirection called. This should be overridden." << endl;
+}
+
+// Common helpers
+int Enemy::findClosestPathIndex(const std::vector<glm::ivec2>& path, const glm::vec2& worldPos) const
+{
+	if (path.empty()) return 0;
+	const int startIdx = (currentPathIndex < static_cast<int>(path.size())) ? currentPathIndex : 0;
+	float bestDist = std::numeric_limits<float>::max();
+	int bestIdx = startIdx;
+
+	for (int i = startIdx; i < static_cast<int>(path.size()); ++i) {
+		float d = glm::length(glm::vec2(path[i].x * cachedTileSize, path[i].y * cachedTileSize) - worldPos);
+		if (d < bestDist) {
+			bestDist = d;
+			bestIdx = i;
+		}
+	}
+
+	if (bestIdx == startIdx && bestDist < cachedTileSize * 0.35f && bestIdx + 1 < static_cast<int>(path.size())) {
+		return bestIdx + 1;
+	}
+
+	return bestIdx;
+}
+
+bool Enemy::followPathToTarget(int deltaTime, const glm::ivec2& targetTile)
+{
+	if (currentPath.empty() || currentPathIndex >= static_cast<int>(currentPath.size())) {
+		return true; // Path completado
+	}
+
+	followPath(deltaTime);
+
+	glm::vec2 targetPos = tileToWorld(targetTile);
+	float distToTarget = glm::length(targetPos - posEnemy);
+
+	if (distToTarget < cachedTileSize * 1.5f) {
+		currentPath.clear();
+		currentPathIndex = 0;
+		return true;
+	}
+
+	return false;
+}
+
+int Enemy::findClosestNodeInPath(const std::vector<glm::ivec2>& path, const glm::vec2& worldPos, int startIdx) const
+{
+	if (path.empty()) return 0;
+
+	float bestDist = std::numeric_limits<float>::max();
+	int bestIdx = startIdx;
+
+	for (int i = startIdx; i < static_cast<int>(path.size()); ++i) {
+		float d = glm::length(glm::vec2(path[i].x * cachedTileSize, path[i].y * cachedTileSize) - worldPos);
+		if (d < bestDist) {
+			bestDist = d;
+			bestIdx = i;
+		}
+	}
+
+	if (bestIdx == startIdx && bestDist < cachedTileSize * 0.35f && bestIdx + 1 < static_cast<int>(path.size())) {
+		return bestIdx + 1;
+	}
+
+	return bestIdx;
 }

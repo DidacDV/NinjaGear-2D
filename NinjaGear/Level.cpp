@@ -160,9 +160,8 @@ void Level::initializeEnemies() {
 	for (const auto& config : enemyConfigs) {
 		Enemy* enemy = config.enemyInstance;
 		enemy->setSpriteSheet(config.spriteSheet);
-		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
+		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0]);
 		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
-		enemy->setTileMap(maps[0]);
 		enemies.push_back(enemy);
 	}
 }
