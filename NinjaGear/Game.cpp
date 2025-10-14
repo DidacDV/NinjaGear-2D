@@ -15,8 +15,8 @@ void Game::init(int screenWidth, int screenHeight)
 	Scene* baseMenu = new Menu(titlesScreenMaps);
 
 	vector<string> jungle_layers = { 
-		"levels/Jungle_background.txt",
-		"levels/Jungle_vegetation.txt"
+		"levels/Outside_background.txt",
+		"levels/Outside_decoration.txt"
 	};
 	Scene* Jungle1 = new Level(jungle_layers, player, 10, 10);
 
