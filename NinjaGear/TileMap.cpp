@@ -60,9 +60,11 @@ bool TileMap::loadLevel(const string &levelFile)
 	getline(fin, line);
 	sstream.str(line);
 	sstream >> mapSize.x >> mapSize.y;
+	sstream.clear();
 	getline(fin, line);
 	sstream.str(line);
 	sstream >> tileSize >> blockSize;
+	sstream.clear();
 	getline(fin, line);
 	sstream.str(line);
 	sstream >> tilesheetFile;
@@ -71,6 +73,7 @@ bool TileMap::loadLevel(const string &levelFile)
 	tilesheet.setWrapT(GL_CLAMP_TO_EDGE);
 	tilesheet.setMinFilter(GL_NEAREST);
 	tilesheet.setMagFilter(GL_NEAREST);
+	sstream.clear();
 	getline(fin, line);
 	sstream.str(line);
 	sstream >> tilesheetSize.x >> tilesheetSize.y;

@@ -4,7 +4,7 @@
 #define SCREEN_X 0
 #define SCREEN_Y 0
 
-#define CAMERA_WIDTH 480  
+#define CAMERA_WIDTH 320  
 #define CAMERA_HEIGHT 320
 
 Level::Level()
