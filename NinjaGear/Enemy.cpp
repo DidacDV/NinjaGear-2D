@@ -29,10 +29,6 @@ void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram)
 void Enemy::update(int deltaTime)
 {
 	sprite->update(deltaTime);
-
-	glm::vec2 playerPos = Game::instance().getPlayerPosition();
-
-	if (checkPlayerVisibility(playerPos)) cout << "I see you!" << endl;
 	if (Game::instance().getKey(GLFW_KEY_J))
 	{
 		currentDirection = LEFT;
@@ -83,7 +79,6 @@ void Enemy::update(int deltaTime)
 	}
 	else
 	{
-		// Cambia la animación de pie según la dirección actual
 		switch (currentDirection) {
 			case LEFT:
 				sprite->changeAnimation(STAND_LEFT);
@@ -156,6 +151,7 @@ void Enemy::initializeSprite(ShaderProgram& shaderProgram) {
 
 void Enemy::initializeAnimations() 
 {
+	//DEFAULT ANIMATIONS. TO BE OVERRIDEN BY CHILD CLASSES
 	const float FRAME_WIDTH = 1.0f / 4.0f;
 	const float FRAME_HEIGHT = 1.0f / 4.0f;
 	sprite->setNumberAnimations(9);
@@ -202,6 +198,6 @@ void Enemy::initializeAnimations()
 	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
 	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
 
-	sprite->changeAnimation(STAND_DOWN); // Cambia a una animación que tenga keyframes válidos
+	sprite->changeAnimation(STAND_DOWN);
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
 }

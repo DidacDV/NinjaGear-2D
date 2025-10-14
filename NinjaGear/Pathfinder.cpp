@@ -9,11 +9,8 @@ vector<glm::ivec2> Pathfinder::findPath(
     const glm::ivec2& goal,
     TileMap* tileMap)
 {
-    if (!tileMap || !isWalkable(goal, tileMap)) {
-        return vector<glm::ivec2>();
-    }
+    if (!tileMap || !isWalkable(goal, tileMap)) return {};
 
-    // A* implementation
     using Node = pair<float, glm::ivec2>; // (fScore, position)
     priority_queue<Node, vector<Node>, NodeCompare> openSet;
 
@@ -21,7 +18,7 @@ vector<glm::ivec2> Pathfinder::findPath(
     map<glm::ivec2, float, ivec2Compare> gScore;
     map<glm::ivec2, float, ivec2Compare> fScore;
 
-    gScore[start] = 0;
+    gScore[start] = 0.0f;
     fScore[start] = heuristic(start, goal);
     openSet.push({ fScore[start], start });
 
@@ -29,27 +26,23 @@ vector<glm::ivec2> Pathfinder::findPath(
         glm::ivec2 current = openSet.top().second;
         openSet.pop();
 
-        if (current == goal) {
-            return reconstructPath(cameFrom, current);
-        }
+        if (current == goal) return reconstructPath(cameFrom, current);
 
         for (const glm::ivec2& neighbor : getNeighbors(current)) {
             if (!isWalkable(neighbor, tileMap)) continue;
 
-            float tentativeGScore = gScore[current] + 1.0f;
+            float g = gScore[current] + 1.0f;
 
-            if (gScore.find(neighbor) == gScore.end() ||
-                tentativeGScore < gScore[neighbor]) {
-
+            if (gScore.find(neighbor) == gScore.end() || g < gScore[neighbor]) {
                 cameFrom[neighbor] = current;
-                gScore[neighbor] = tentativeGScore;
-                fScore[neighbor] = tentativeGScore + heuristic(neighbor, goal);
+                gScore[neighbor] = g;
+                fScore[neighbor] = g + heuristic(neighbor, goal);
                 openSet.push({ fScore[neighbor], neighbor });
             }
         }
     }
 
-    return vector<glm::ivec2>(); // No path found
+    return {}; 
 }
 
 float Pathfinder::heuristic(const glm::ivec2& a, const glm::ivec2& b) const {

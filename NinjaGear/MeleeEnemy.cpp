@@ -24,10 +24,17 @@ void MeleeEnemy::update(int deltaTime)
         if (checkPlayerVisibility(playerPos)) {
             startTracking(playerPos);
         }
+        else {
+            startPatrol();
+        }
         break;
 
     case State::TRACKING:
         updateTracking(deltaTime, playerPos);
+        break;
+
+    case State::PATROLLING:
+        updatePatrol(deltaTime, playerPos);
         break;
 
     case State::RETURNING:
@@ -102,26 +109,16 @@ void MeleeEnemy::initializeAnimations()
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
 }
 
+// Path following logic
 void MeleeEnemy::startTracking(const glm::vec2& playerPos)
 {
-    std::cout << "I see you! Starting tracking..." << std::endl;
+    //State change
     currentState = State::TRACKING;
+    //Start timers
     trackingTimer = 0;
     pathUpdateTimer = 0;
-
-    // Calculate initial path
-    glm::ivec2 startTile = Pathfinder::instance().worldToTile(
-        posEnemy,
-        map->getTileSize()
-    );
-    glm::ivec2 goalTile = Pathfinder::instance().worldToTile(
-        playerPos, map->getTileSize()
-    );
-
-
-    currentPath = Pathfinder::instance().findPath(startTile, goalTile, map);
-    currentPathIndex = 0;
-    lastTargetTile = goalTile;
+	//Calculate initial path
+    recalculatePathToPlayer(playerPos);
 }
 
 void MeleeEnemy::updateTracking(int deltaTime, const glm::vec2& playerPos)
@@ -129,63 +126,167 @@ void MeleeEnemy::updateTracking(int deltaTime, const glm::vec2& playerPos)
     trackingTimer += deltaTime;
     pathUpdateTimer += deltaTime;
 
-    if (trackingTimer >= MAX_TRACKING_TIME) {
+    const float MAX_TRACKING_DISTANCE = 160.0f; 
+    cout << glm::length(playerPos - posEnemy) << endl;
+    if ((glm::length(playerPos - posEnemy) > MAX_TRACKING_DISTANCE) || trackingTimer >= MAX_TRACKING_TIME) {
         stopTracking();
         return;
     }
 
-    if (pathUpdateTimer >= PATH_UPDATE_INTERVAL) {
-        glm::ivec2 goalTile = Pathfinder::instance().worldToTile(
-            playerPos, map->getTileSize()
-        );
 
+    if (pathUpdateTimer >= PATH_UPDATE_INTERVAL) {
+		// Recalculate path to detect if the player has moved
+        glm::ivec2 goalTile = Pathfinder::instance().worldToTile(playerPos, map->getTileSize());
         if (goalTile != lastTargetTile) {
-            glm::ivec2 startTile = Pathfinder::instance().worldToTile(
-                glm::vec2(posEnemy), map->getTileSize()
-            );
-            currentPath = Pathfinder::instance().findPath(
-                startTile, goalTile, map
-            );
-            currentPathIndex = 0;
-            lastTargetTile = goalTile;
+            recalculatePathToPlayer(playerPos);
         }
         pathUpdateTimer = 0;
     }
+
     if (!currentPath.empty()) {
+		//If the path is not empty, follow it
         followPath(deltaTime);
     }
 }
 
 void MeleeEnemy::followPath(int deltaTime)
 {
+    if (currentPathIndex >= static_cast<int>(currentPath.size())) return;
 
-    if (currentPathIndex >= currentPath.size()) return;
+    const float tileSize = static_cast<float>(map->getTileSize());
+    glm::vec2 enemyPos(posEnemy);
 
-    glm::ivec2 targetTile = currentPath[currentPathIndex];
-    glm::vec2 targetPos = glm::vec2(
-        targetTile.x * map->getTileSize(),
-        targetTile.y * map->getTileSize()
-    );
+    while (currentPathIndex < static_cast<int>(currentPath.size())) {
+        glm::vec2 targetPos(currentPath[currentPathIndex].x * tileSize,
+            currentPath[currentPathIndex].y * tileSize);
+        glm::vec2 direction = targetPos - enemyPos;
+        float distance = glm::length(direction);
 
-    glm::vec2 direction = targetPos - glm::vec2(posEnemy);
-    float distance = glm::length(direction);
+        if (distance < 4.0f) { // NODE_THRESHOLD
+            ++currentPathIndex;
+            continue;
+        }
 
-    std::cout << "Distance: " << distance << std::endl; 
-    if (distance < 2.0f) {
-        currentPathIndex++;
+        if (distance > 0.1f) { // MIN_MOVE_DISTANCE
+            direction = glm::normalize(direction);
+            float moveAmount = moveSpeed * tileSize * (deltaTime / 1000.0f);
+            posEnemy += direction * moveAmount;
+
+            if (std::abs(direction.x) > std::abs(direction.y)) {
+                sprite->changeAnimation(direction.x > 0 ? MOVE_RIGHT : MOVE_LEFT);
+            }
+            else {
+                sprite->changeAnimation(direction.y > 0 ? MOVE_DOWN : MOVE_UP);
+            }
+        }
+        return;
     }
-    else {
-        direction = glm::normalize(direction);
-        float moveAmount = moveSpeed * map->getTileSize() * (deltaTime / 1000.0f);
-        posEnemy.x += direction.x * moveAmount;
-        posEnemy.y += direction.y * moveAmount;
-    }
+
+    sprite->changeAnimation(STAND_DOWN);
 }
 
 void MeleeEnemy::stopTracking()
 {
-    std::cout << "Stopping tracking..." << std::endl;
-    currentState = State::IDLE;
+    startPatrol();
     currentPath.clear();
     currentPathIndex = 0;
+}
+
+int MeleeEnemy::findClosestPathIndex(const std::vector<glm::ivec2>& path, const glm::vec2& worldPos) const
+{
+    if (path.empty()) return 0;
+
+    const float tileSize = static_cast<float>(map->getTileSize());
+    float bestDist = std::numeric_limits<float>::max();
+    int bestIdx = 0;
+
+    for (int i = 0; i < static_cast<int>(path.size()); ++i) {
+        float d = glm::length(glm::vec2(path[i].x * tileSize, path[i].y * tileSize) - worldPos);
+        if (d < bestDist) {
+            bestDist = d;
+            bestIdx = i;
+        }
+    }
+
+    if (bestIdx == 0 && bestDist < tileSize * 0.35f && static_cast<int>(path.size()) > 1) {
+        return 1;
+    }
+
+    return bestIdx;
+}
+
+void MeleeEnemy::recalculatePathToPlayer(const glm::vec2& playerPos)
+{
+    currentPath = Pathfinder::instance().findPath(
+        // Enemy position
+        Pathfinder::instance().worldToTile(glm::vec2(posEnemy), map->getTileSize()),
+        //Player position
+        Pathfinder::instance().worldToTile(playerPos, map->getTileSize()),
+        map
+    );
+
+    currentPathIndex = findClosestPathIndex(currentPath, glm::vec2(posEnemy));
+    lastTargetTile = Pathfinder::instance().worldToTile(playerPos, map->getTileSize());
+
+}
+
+// Patrolling logic
+
+void MeleeEnemy::initializePatrol()
+{
+    patrolStartTile = glm::ivec2(
+        Pathfinder::instance().worldToTile(glm::vec2(posEnemy), map->getTileSize()).x,
+        std::max(0, Pathfinder::instance().worldToTile(glm::vec2(posEnemy), map->getTileSize()).y - 5)
+    );
+
+    patrolEndTile = glm::ivec2(
+        Pathfinder::instance().worldToTile(glm::vec2(posEnemy), map->getTileSize()).x,
+        std::min(map->height() - 1, Pathfinder::instance().worldToTile(glm::vec2(posEnemy), map->getTileSize()).y + 5)
+    );
+
+    // Initialize animation to DOWN (moving to end)
+    sprite->changeAnimation(MOVE_DOWN);
+    patrolInitialized = true;
+    movingToEnd = true;
+}
+
+void MeleeEnemy::startPatrol()
+{
+    if (!patrolInitialized) {
+        initializePatrol();
+    }
+
+    currentState = State::PATROLLING;
+
+    glm::ivec2 targetTile = movingToEnd ? patrolEndTile : patrolStartTile;
+    calculatePatrolPath(targetTile);
+}
+
+void MeleeEnemy::calculatePatrolPath(const glm::ivec2& targetTile)
+{
+    glm::ivec2 startTile = Pathfinder::instance().worldToTile(glm::vec2(posEnemy), map->getTileSize());
+
+    currentPath = Pathfinder::instance().findPath(startTile, targetTile, map);
+    currentPathIndex = findClosestPathIndex(currentPath, glm::vec2(posEnemy));
+}
+
+void MeleeEnemy::updatePatrol(int deltaTime, const glm::vec2& playerPos)
+{
+    // Check if player became visible
+    if (checkPlayerVisibility(playerPos)) {
+        startTracking(playerPos);
+        return;
+    }
+
+    // Follow current patrol path
+    if (!currentPath.empty() && currentPathIndex < static_cast<int>(currentPath.size())) {
+        followPath(deltaTime);
+    }
+    else {
+        // Reached endpoint, switch direction
+        (movingToEnd) ? sprite->changeAnimation(MOVE_DOWN) : sprite->changeAnimation(MOVE_UP);
+        movingToEnd = !movingToEnd;
+        glm::ivec2 nextTarget = movingToEnd ? patrolEndTile : patrolStartTile;
+        calculatePatrolPath(nextTarget);
+    }
 }
