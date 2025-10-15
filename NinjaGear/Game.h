@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "Level.h"
 #include "Menu.h"
+#include "UIManager.h"
 #include <map>
 #include <string>
 
@@ -58,6 +59,7 @@ private:
 							    // we can have access at any time
 	map<string, Scene*> levels;
 	Scene* currentScene;
+	UIManager* uiManager;
 };
 
 
