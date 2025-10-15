@@ -30,5 +30,14 @@ private:
     void calculatePatrolPath(const glm::ivec2& targetTile);
     void updatePatrol(int deltaTime, const glm::vec2& playerPos);
 
+    // Attacking
+    int attackingTimer = 0;
+    const int MAX_ATTACKING_TIME = 5000;  
+    const float MAX_ATTACKING_DISTANCE = 160.0f; 
+    glm::ivec2 attackingTile; 
+
+    void startAttacking(const glm::vec2& playerPos);
+    void updateAttacking(int deltaTime, const glm::vec2& playerPos);
+    void stopAttacking();
 };
 

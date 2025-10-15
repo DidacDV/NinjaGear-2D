@@ -11,7 +11,7 @@ void RangedEnemy::initializeAnimations()
 	cachedTileSize = static_cast<float>(map->getTileSize());
 	const float FRAME_WIDTH = 1.0f / 4.0f;
 	const float FRAME_HEIGHT = 1.0f / 4.0f;
-	sprite->setNumberAnimations(9);
+	sprite->setNumberAnimations(8);
 	// STANDING ANIMATIONS
 	sprite->setAnimationSpeed(STAND_DOWN, 8);
 	sprite->addKeyframe(STAND_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
@@ -76,7 +76,7 @@ void RangedEnemy::update(int deltaTime)
 		break;
 
 	case State::ATTACKING:
-
+		updateAttacking(deltaTime, playerPos);
 		break;
 	}
 
@@ -122,6 +122,11 @@ void RangedEnemy::calculatePatrolPath(const glm::ivec2& targetTile)
 
 void RangedEnemy::updatePatrol(int deltaTime, const glm::vec2& playerPos)
 {
+	if (checkPlayerVisibility(playerPos)) {
+		startAttacking(playerPos);
+		return;
+	}
+
 	glm::ivec2 currentTarget = movingToEnd ? patrolEndTile : patrolStartTile;
 
 	if (!followPathToTarget(deltaTime, currentTarget)) return;
@@ -152,3 +157,44 @@ void RangedEnemy::changeAnimationsForDirection(glm::vec2 direction)
 }
 
 // Attacking logic 
+void RangedEnemy::startAttacking(const glm::vec2& playerPos)
+{
+	currentState = State::ATTACKING;
+	attackingTimer = 0;
+	attackingTile = getEnemyTile();  
+
+	glm::vec2 directionToPlayer = glm::normalize(playerPos - posEnemy);
+	changeAnimationsForDirection(directionToPlayer);
+}
+
+void RangedEnemy::updateAttacking(int deltaTime, const glm::vec2& playerPos)
+{
+	attackingTimer += deltaTime;
+
+
+	float distanceToPlayer = glm::length(playerPos - posEnemy);
+	if (distanceToPlayer > MAX_ATTACKING_DISTANCE || attackingTimer >= MAX_ATTACKING_TIME) {
+		stopAttacking();
+		return;
+	}
+
+
+	glm::ivec2 currentTile = getEnemyTile();
+	if (currentTile != attackingTile) {
+		posEnemy = glm::vec2(
+			attackingTile.x * map->getTileSize(),
+			attackingTile.y * map->getTileSize()
+		);
+	}
+
+	glm::vec2 directionToPlayer = glm::normalize(playerPos - posEnemy);
+	changeAnimationsForDirection(directionToPlayer);
+}
+
+void RangedEnemy::stopAttacking()
+{
+	currentState = State::PATROLLING;
+
+	if (!patrolInitialized) initializePatrol();
+	calculatePatrolPath(movingToEnd ? patrolEndTile : patrolStartTile);
+}
