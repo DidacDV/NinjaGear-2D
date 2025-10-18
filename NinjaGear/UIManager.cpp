@@ -7,8 +7,8 @@
 
 UIManager::UIManager()
 {
-    health = 0;
-    maxHealth = 100;
+    health = 3.5f;
+    maxHealth = 5.f;
     currentWeapon = 0;
     rank = 0;
     currentObject = 0;
@@ -31,12 +31,12 @@ void UIManager::init()
 
     Shader vShader, fShader;
 
-    vShader.initFromFile(VERTEX_SHADER, "shaders/simple.vert");
+    vShader.initFromFile(VERTEX_SHADER, "shaders/texture.vert");
     if (!vShader.isCompiled()) {
         std::cout << "UI Vertex Shader Error:\n" << vShader.log() << std::endl;
     }
 
-    fShader.initFromFile(FRAGMENT_SHADER, "shaders/simple.frag");
+    fShader.initFromFile(FRAGMENT_SHADER, "shaders/texture.frag");
     if (!fShader.isCompiled()) {
         std::cout << "UI Fragment Shader Error:\n" << fShader.log() << std::endl;
     }
@@ -55,6 +55,20 @@ void UIManager::init()
     vShader.free();
     fShader.free();
 
+    if (!fullHeartTexture.loadFromFile("images/ui/FullHeart.png", TEXTURE_PIXEL_FORMAT_RGBA)) {
+        std::cout << "ERROR: Could not load star_filled.png" << std::endl;
+    }
+    if (!halfHeartTexture.loadFromFile("images/ui/HalfHeart.png", TEXTURE_PIXEL_FORMAT_RGBA)) {
+        std::cout << "ERROR: Could not load star_empty.png" << std::endl;
+    }
+    if (!emptyHeartTexture.loadFromFile("images/ui/EmptyHeart.png", TEXTURE_PIXEL_FORMAT_RGBA)) {
+        std::cout << "ERROR: Could not load star_empty.png" << std::endl;
+    }
+
+
+    textRenderer = new Text("resources/NormalFont.ttf", 24, screenWidth, screenHeight * 0.15);
+    calculateLayout();
+    
     initQuad();
 }
 
@@ -85,6 +99,22 @@ void UIManager::initQuad()
     glBindVertexArray(0);
 }
 
+void UIManager::calculateLayout() {
+    float rightColumnX = screenWidth - screenWidth / 3;
+    float LINE_HEIGHT = screenHeight * 0.15f / 2;
+    uiPositions.life_text_pos = glm::vec2(MARGIN_LEFT, MARGIN_TOP);
+    uiPositions.life_value_pos = glm::vec2(MARGIN_LEFT + 70, MARGIN_TOP);  // After "LIFE" text
+
+    uiPositions.rank_text_pos = glm::vec2(MARGIN_LEFT, MARGIN_TOP + LINE_HEIGHT);
+    uiPositions.rank_value_pos = glm::vec2(MARGIN_LEFT + 70, MARGIN_TOP + LINE_HEIGHT);
+
+    uiPositions.weapon_text_pos = glm::vec2(rightColumnX, MARGIN_TOP);
+    uiPositions.weapon_value_pos = glm::vec2(rightColumnX + 110, MARGIN_TOP - 5);  // After text
+
+    uiPositions.object_text_pos= glm::vec2(rightColumnX, MARGIN_TOP + LINE_HEIGHT);
+    uiPositions.object_value_pos = glm::vec2(rightColumnX + 110, MARGIN_TOP + LINE_HEIGHT - 5);
+}
+
 void UIManager::update(int deltaTime, Player* player)
 {
     //if (player != nullptr) {
@@ -93,12 +123,20 @@ void UIManager::update(int deltaTime, Player* player)
     //}
 }
 
+void UIManager::renderFixedText() {
+    textRenderer->RenderText("LIFE", uiPositions.life_text_pos.x, uiPositions.life_text_pos.y, 0.8, glm::vec3(1.0f));
+    textRenderer->RenderText("NINJA  RANK", uiPositions.rank_text_pos.x, uiPositions.rank_text_pos.y, 0.8, glm::vec3(1.0f));
+
+    textRenderer->RenderText("WEAPON", uiPositions.weapon_text_pos.x, uiPositions.weapon_text_pos.y, 0.8, glm::vec3(1.0f));
+    textRenderer->RenderText("OBJECT", uiPositions.object_text_pos.x, uiPositions.object_text_pos.y, 0.8, glm::vec3(1.0f));
+}
+
 void UIManager::render()
 {
     glm::mat4 modelview;
 
     texProgram.use();
-    setupViewport(0.1, 0.);
+    setupViewport(0.15, 0.); //15% of the screen
 
     texProgram.setUniformMatrix4f("projection", projection);
     texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
@@ -113,26 +151,14 @@ void UIManager::render()
     texProgram.setUniformMatrix4f("modelview", modelview);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    // HEALTH PANEL border
-    texProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
-    renderPanel(glm::vec2(10, 10), glm::vec2(200, 40));
+    renderFixedText();
 
-    // HEALTH BAR (red fill)
-    float healthPercent = (maxHealth > 0) ? (float)health / (float)maxHealth : 0.0f;
-    texProgram.setUniform4f("color", 0.8f, 0.1f, 0.1f, 1.0f);
-    renderPanel(glm::vec2(15, 15), glm::vec2(190 * 0.1, 30));
+    glBindVertexArray(vao);
+    texProgram.use();
+    texProgram.setUniformMatrix4f("projection", projection);
+    texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
 
-    // CURRENT WEAPON
-    texProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
-    renderPanel(glm::vec2(220, 10), glm::vec2(100, 40));
-
-    // RANK panel
-    texProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
-    renderPanel(glm::vec2(330, 10), glm::vec2(80, 40));
-
-    // CURRENT OBJECT panel
-    texProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
-    renderPanel(glm::vec2(420, 10), glm::vec2(100, 40));
+    renderHealth(uiPositions.life_value_pos, health, maxHealth);
 
     glBindVertexArray(0);
 }
@@ -147,12 +173,43 @@ void UIManager::setupViewport(float heightPercent, float yOffsetPercent)
         static_cast<float>(sectionHeight), 0.f);
 }
 
-void UIManager::renderPanel(const glm::vec2& position, const glm::vec2& size)
+void UIManager::renderPanel(const glm::vec2& position, const glm::vec2& size, Texture* texture, const glm::vec4& color)
 {
-    glm::mat4 modelview = glm::mat4(1.0f);
+    if (texture)
+        texture->use();
+    else
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+    texProgram.setUniform4f("color", color.r, color.g, color.b, color.a);
+
+    glm::mat4 modelview(1.0f);
     modelview = glm::translate(modelview, glm::vec3(position.x, position.y, 0.0f));
     modelview = glm::scale(modelview, glm::vec3(size.x, size.y, 1.0f));
-
     texProgram.setUniformMatrix4f("modelview", modelview);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void UIManager::renderHealth(const glm::vec2& position, float currentHealth, float maxHealth)
+{
+    float heartSize = 24.f;
+    float heartSpacing = 25.0f;
+
+    for (int i = 0; i < (int)maxHealth; ++i) {
+        Texture* tex = nullptr;
+        float heartValue = currentHealth - i;
+
+        if (heartValue >= 1.0f) {
+            tex = &fullHeartTexture;          
+        }
+        else if (heartValue >= 0.5f) {
+            tex = &halfHeartTexture;      
+        }
+        else {
+            tex = &emptyHeartTexture;     
+        }
+
+        glm::vec2 heartPos = position + glm::vec2(i * heartSpacing, -3); //-5 to center hearts with life 
+        renderPanel(heartPos, glm::vec2(heartSize, heartSize), tex);
+    }
 }
