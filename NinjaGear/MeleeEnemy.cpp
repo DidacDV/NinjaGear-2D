@@ -107,12 +107,10 @@ void MeleeEnemy::initializeAnimations()
 // Tracking logic
 void MeleeEnemy::startTracking(const glm::vec2& playerPos)
 {
-    //State change
+    originalPatrolPosition = movingToEnd ? patrolEndTile : patrolStartTile; 
     currentState = State::TRACKING;
-    //Start timers
     trackingTimer = 0;
     pathUpdateTimer = 0;
-	//Calculate initial path
     recalculatePathToPlayer(playerPos);
 }
 
@@ -140,18 +138,11 @@ void MeleeEnemy::stopTracking()
     currentState = State::RETURNING;
     if (!patrolInitialized) initializePatrol();
 
-    glm::ivec2 currentTile = getEnemyTile();
-    float distToStart = glm::length(glm::vec2(currentTile - patrolStartTile));
-    float distToEnd = glm::length(glm::vec2(currentTile - patrolEndTile));
-
-    glm::ivec2 returnTarget = (distToStart <= distToEnd) ? patrolStartTile : patrolEndTile;
-    movingToEnd = (distToStart > distToEnd);
-
     glm::ivec2 startTile = getEnemyTile();
-    currentPath = Pathfinder::instance().findPath(startTile, returnTarget, map);
-
+    currentPath = Pathfinder::instance().findPath(startTile, originalPatrolPosition, map);
     currentPathIndex = findClosestNodeInPath(currentPath, glm::vec2(posEnemy));
 
+    movingToEnd = (originalPatrolPosition == patrolEndTile);
 }
 
 void MeleeEnemy::recalculatePathToPlayer(const glm::vec2& playerPos)
@@ -185,7 +176,8 @@ void MeleeEnemy::startPatrol()
     if (!patrolInitialized) initializePatrol();
 
     currentState = State::PATROLLING;
-    calculatePatrolPath(movingToEnd ? patrolEndTile : patrolStartTile);
+    originalPatrolPosition = movingToEnd ? patrolEndTile : patrolStartTile;
+    calculatePatrolPath(originalPatrolPosition);
 }
 
 void MeleeEnemy::calculatePatrolPath(const glm::ivec2& targetTile)
@@ -226,7 +218,8 @@ void MeleeEnemy::updateReturning(int deltaTime, const glm::vec2& playerPos)
         return;
     }
 
-    startPatrol();
+    currentState = State::PATROLLING;
+    calculatePatrolPath(movingToEnd ? patrolEndTile : patrolStartTile);
 }
 
 void MeleeEnemy::changeAnimationsForDirection(glm::vec2 direction)

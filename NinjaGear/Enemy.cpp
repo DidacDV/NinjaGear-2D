@@ -120,36 +120,6 @@ void Enemy::setSpriteSheet(const string& spriteSheet)
 	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
 }
 
-bool Enemy::checkPlayerVisibility(const glm::vec2 playerPos)
-{
-	float distanceToPlayer = glm::distance(glm::vec2(posEnemy), playerPos);
-	const float MAX_VISION_DISTANCE = 200.0f;
-
-	bool playerVisible = false;
-	if (distanceToPlayer <= MAX_VISION_DISTANCE) {
-		glm::vec2 dirVec;
-		switch (currentDirection) {
-		case LEFT:  dirVec = glm::vec2(-1, 0); break;
-		case RIGHT: dirVec = glm::vec2(1, 0); break;
-		case UP:    dirVec = glm::vec2(0, -1); break;
-		case DOWN:  dirVec = glm::vec2(0, 1); break;
-		}
-		glm::vec2 toPlayer = glm::normalize(playerPos - glm::vec2(posEnemy));
-		float dot = glm::dot(dirVec, toPlayer);
-		if (dot > 0.99f) { 
-			playerVisible = map->hasLineOfSight(glm::vec2(posEnemy), playerPos);
-		}
-	}
-
-	return playerVisible;
-}
-
-void Enemy::initializeSprite(ShaderProgram& shaderProgram) {
-	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
-	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
-	sprite = Sprite::createSprite(QUAD_SIZE, glm::vec2(0.25f, 0.25f), &spritesheet, &shaderProgram);
-}
-
 void Enemy::initializeAnimations() 
 {
 	//DEFAULT ANIMATIONS. TO BE OVERRIDEN BY CHILD CLASSES
@@ -201,6 +171,36 @@ void Enemy::initializeAnimations()
 
 	sprite->changeAnimation(STAND_DOWN);
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
+}
+
+void Enemy::initializeSprite(ShaderProgram& shaderProgram) {
+	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
+	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
+	sprite = Sprite::createSprite(QUAD_SIZE, glm::vec2(0.25f, 0.25f), &spritesheet, &shaderProgram);
+}
+
+bool Enemy::checkPlayerVisibility(const glm::vec2 playerPos)
+{
+	float distanceToPlayer = glm::distance(glm::vec2(posEnemy), playerPos);
+	const float MAX_VISION_DISTANCE = 200.0f;
+
+	bool playerVisible = false;
+	if (distanceToPlayer <= MAX_VISION_DISTANCE) {
+		glm::vec2 dirVec;
+		switch (currentDirection) {
+		case LEFT:  dirVec = glm::vec2(-1, 0); break;
+		case RIGHT: dirVec = glm::vec2(1, 0); break;
+		case UP:    dirVec = glm::vec2(0, -1); break;
+		case DOWN:  dirVec = glm::vec2(0, 1); break;
+		}
+		glm::vec2 toPlayer = glm::normalize(playerPos - glm::vec2(posEnemy));
+		float dot = glm::dot(dirVec, toPlayer);
+		if (dot > 0.85f) { 
+			playerVisible = map->hasLineOfSight(glm::vec2(posEnemy), playerPos);
+		}
+	}
+
+	return playerVisible;
 }
 
 // Path following logic using the Pathfinder class

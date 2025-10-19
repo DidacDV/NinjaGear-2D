@@ -150,9 +150,11 @@ void RangedEnemy::changeAnimationsForDirection(glm::vec2 direction)
 		newDirection = direction.y > 0 ? DOWN : UP;
 	}
 
+
+	this->currentDirection = newDirection;
+
 	if (sprite->animation() != newAnimation) {
 		sprite->changeAnimation(newAnimation);
-		this->currentDirection = newDirection;
 	}
 }
 

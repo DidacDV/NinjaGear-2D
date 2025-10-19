@@ -34,6 +34,7 @@ private:
     glm::vec2 spawnPosition;
     glm::ivec2 patrolStartTile;
     glm::ivec2 patrolEndTile;
+    glm::ivec2 originalPatrolPosition;
     bool patrolInitialized = false;
     bool movingToEnd = true;
     void initializePatrol();
