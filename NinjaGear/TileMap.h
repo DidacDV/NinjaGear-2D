@@ -6,6 +6,7 @@
 #include "Texture.h"
 #include "ShaderProgram.h"
 #include <unordered_set>
+#include "GeometryUtils.h"
 
 // Class Tilemap is capable of loading a tile map from a text file in a very
 // simple format (see level01.txt for an example). With this information
@@ -44,6 +45,7 @@ public:
 	bool collisionMoveRight(const glm::ivec2 &pos, const glm::ivec2 &size) const;
 	bool collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size) const;
 	bool collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) const;
+	bool hasLineOfSight(const glm::vec2& from, const glm::vec2& to) const;
 	//NEW FUNCTIONS
 	void addBlockedTiles(const vector<int> tilesToBlock, int count);
 
@@ -51,11 +53,10 @@ public:
 
 	int width() const { return mapSize.x; }
 	int height() const { return mapSize.y; }
-
+	bool isTileBlocked(int x, int y) const;
 private:
 	bool loadLevel(const string &levelFile);
 	void prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program);
-	bool isTileBlocked(int x, int y) const;
 
 private:
 	GLuint vao;

@@ -4,9 +4,8 @@
 #include <vector>
 #include "TileMap.h"
 
-
 using namespace std;
-
+using namespace GeometryUtils;
 
 TileMap *TileMap::createTileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProgram &program)
 {
@@ -144,6 +143,10 @@ void TileMap::prepareArrays(const glm::vec2& minCoords, ShaderProgram& program)
 
 bool TileMap::isTileBlocked(int x, int y) const
 {
+	if (x < 0 || x >= mapSize.x || y < 0 || y >= mapSize.y) {
+		return true;
+	}
+
 	int tileId = map[y * mapSize.x + x];
 	return blockedTiles.find(tileId) != blockedTiles.end();
 }
@@ -216,4 +219,24 @@ bool TileMap::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) con
 	}
 
 	return false;
+}
+
+bool TileMap::hasLineOfSight(const glm::vec2& from, const glm::vec2& to) const 
+{
+	glm::vec2 fromTile = glm::vec2(from.x / tileSize, from.y / tileSize);
+	glm::vec2 toTile = glm::vec2(to.x / tileSize, to.y / tileSize);
+	float distance = diagonalDistance(fromTile, toTile);
+	int steps = static_cast<int>(distance);
+
+	for (int i = 0; i <= steps; i++) {
+		float t = (steps == 0) ? 0.0f : static_cast<float>(i) / static_cast<float>(steps);
+		glm::vec2 point = lerpPoint(fromTile, toTile, t);
+		glm::ivec2 tilePos = roundPoint(point);
+
+		if (isTileBlocked(tilePos.x, tilePos.y)) {
+			return false;
+		}
+	}
+
+	return true;
 }

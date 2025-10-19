@@ -15,14 +15,15 @@ class Player
 {
 
 public:
-	void init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram);
-	void update(int deltaTime);
-	void render(const glm::mat4& view = glm::mat4(1.0f));
+	virtual void init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram);
+	virtual void update(int deltaTime);
+	virtual void render(const glm::mat4& view = glm::mat4(1.0f));
 	
 	void setTileMaps(const vector<TileMap*>& tileMaps);
 	void setPosition(const glm::vec2 &pos);
 	void setSpriteSheet(const string& spriteSheet);
 	glm::ivec2 getPosition() { return posPlayer; }
+	glm::vec2 getPositionFloat() { return glm::vec2(posPlayer); }
 
 private:
 	bool collisionMoveLeft(const glm::ivec2& pos, const glm::ivec2& size) const;

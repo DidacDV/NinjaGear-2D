@@ -1,0 +1,243 @@
+#include "MeleeEnemy.h"
+#include <iostream>
+
+enum MeleeEnemyAnims
+{
+	STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
+	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
+	DANCE
+};
+
+void MeleeEnemy::update(int deltaTime)
+{
+	sprite->update(deltaTime);
+    glm::vec2 playerPos = Game::instance().getPlayerPosition();
+
+    // State machine logic
+    switch (currentState) {
+    case State::IDLE:
+        if (checkPlayerVisibility(playerPos)) {
+            startTracking(playerPos);
+        }
+        else {
+            startPatrol();
+        }
+        break;
+
+    case State::TRACKING:
+        updateTracking(deltaTime, playerPos);
+        break;
+
+    case State::PATROLLING:
+        updatePatrol(deltaTime, playerPos);
+        break;
+
+    case State::RETURNING:
+        updateReturning(deltaTime, playerPos);
+        break;
+    }
+
+    sprite->setPosition(glm::vec2(
+        float(tileMapDispl.x + posEnemy.x),
+        float(tileMapDispl.y + posEnemy.y)
+    ));
+}
+
+void MeleeEnemy::initializeAnimations()
+{
+    const float FRAME_WIDTH = 1.0f / 4.0f;
+	const float FRAME_HEIGHT = 1.0f / 4.0f;
+	sprite->setNumberAnimations(9);
+	// STANDING ANIMATIONS
+	sprite->setAnimationSpeed(STAND_DOWN, 8);
+	sprite->addKeyframe(STAND_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+	sprite->setAnimationSpeed(STAND_UP, 8);
+	sprite->addKeyframe(STAND_UP, glm::vec2(1.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+	sprite->setAnimationSpeed(STAND_LEFT, 8);
+	sprite->addKeyframe(STAND_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+
+	sprite->setAnimationSpeed(STAND_RIGHT, 8);
+	sprite->addKeyframe(STAND_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+
+	//MOVING ANIMATIONS
+	sprite->setAnimationSpeed(MOVE_DOWN, 8);
+	sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
+
+	sprite->setAnimationSpeed(MOVE_UP, 8);
+	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
+
+
+	sprite->setAnimationSpeed(MOVE_LEFT, 8);
+	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
+
+
+
+	sprite->setAnimationSpeed(MOVE_RIGHT, 8);
+	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
+
+	// DANCE
+	sprite->setAnimationSpeed(DANCE, 6);
+	sprite->addKeyframe(DANCE, glm::vec2(0.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(DANCE, glm::vec2(1.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(DANCE, glm::vec2(2.0f * FRAME_WIDTH, 5.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(DANCE, glm::vec2(2.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(DANCE, glm::vec2(3.0f * FRAME_WIDTH, 5.0f * FRAME_HEIGHT));
+	sprite->addKeyframe(DANCE, glm::vec2(3.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
+
+	sprite->changeAnimation(STAND_DOWN); 
+	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
+}
+
+// Tracking logic
+void MeleeEnemy::startTracking(const glm::vec2& playerPos)
+{
+    originalPatrolPosition = movingToEnd ? patrolEndTile : patrolStartTile; 
+    currentState = State::TRACKING;
+    trackingTimer = 0;
+    pathUpdateTimer = 0;
+    recalculatePathToPlayer(playerPos);
+}
+
+void MeleeEnemy::updateTracking(int deltaTime, const glm::vec2& playerPos)
+{
+    trackingTimer += deltaTime;
+    pathUpdateTimer += deltaTime;
+
+    const float MAX_TRACKING_DISTANCE = 160.0f; 
+    if ((glm::length(playerPos - posEnemy) > MAX_TRACKING_DISTANCE) || trackingTimer >= MAX_TRACKING_TIME) {
+        stopTracking();
+        return;
+    }
+
+    if (pathUpdateTimer >= PATH_UPDATE_INTERVAL) {
+        if (getPlayerTile(playerPos) != lastTargetTile)  recalculatePathToPlayer(playerPos);
+        pathUpdateTimer = 0;
+    }
+
+    if (!currentPath.empty()) followPath(deltaTime);
+}
+
+void MeleeEnemy::stopTracking()
+{
+    currentState = State::RETURNING;
+    if (!patrolInitialized) initializePatrol();
+
+    glm::ivec2 startTile = getEnemyTile();
+    currentPath = Pathfinder::instance().findPath(startTile, originalPatrolPosition, map);
+    currentPathIndex = findClosestNodeInPath(currentPath, glm::vec2(posEnemy));
+
+    movingToEnd = (originalPatrolPosition == patrolEndTile);
+}
+
+void MeleeEnemy::recalculatePathToPlayer(const glm::vec2& playerPos)
+{
+    currentPath = Pathfinder::instance().findPath(getEnemyTile(), getPlayerTile(playerPos), map);
+    currentPathIndex = findClosestPathIndex(currentPath, glm::vec2(posEnemy));
+    lastTargetTile = getPlayerTile(playerPos);
+
+}
+
+// Patrolling logic
+void MeleeEnemy::initializePatrol()
+{
+    glm::ivec2 currentTile = getEnemyTile();
+
+    patrolStartTile = glm::ivec2(
+        currentTile.x,
+        std::max(0, currentTile.y - 5)
+    );
+
+    patrolEndTile = glm::ivec2(
+        currentTile.x,
+        std::min(map->height() - 1, currentTile.y + 5)
+    );
+
+    patrolInitialized = true;
+}
+
+void MeleeEnemy::startPatrol()
+{
+    if (!patrolInitialized) initializePatrol();
+
+    currentState = State::PATROLLING;
+    originalPatrolPosition = movingToEnd ? patrolEndTile : patrolStartTile;
+    calculatePatrolPath(originalPatrolPosition);
+}
+
+void MeleeEnemy::calculatePatrolPath(const glm::ivec2& targetTile)
+{
+    glm::ivec2 startTile = getEnemyTile();
+    currentPath = Pathfinder::instance().findPath(startTile, targetTile, map);
+    currentPathIndex = findClosestNodeInPath(currentPath, glm::vec2(posEnemy));
+
+}
+
+void MeleeEnemy::updatePatrol(int deltaTime, const glm::vec2& playerPos)
+{
+    if (checkPlayerVisibility(playerPos)) {
+        startTracking(playerPos);
+        return;
+    }
+
+    glm::ivec2 currentTarget = movingToEnd ? patrolEndTile : patrolStartTile;
+
+    if (!followPathToTarget(deltaTime, currentTarget)) return; 
+
+    movingToEnd = !movingToEnd;
+    sprite->changeAnimation(movingToEnd ? MOVE_DOWN : MOVE_UP);
+    calculatePatrolPath(movingToEnd ? patrolEndTile : patrolStartTile);
+}
+
+// Returning logic
+void MeleeEnemy::updateReturning(int deltaTime, const glm::vec2& playerPos)
+{
+    if (checkPlayerVisibility(playerPos)) {
+        startTracking(playerPos);
+        return;
+    }
+
+    glm::ivec2 returnTarget = movingToEnd ? patrolEndTile : patrolStartTile;
+
+    if (!followPathToTarget(deltaTime, returnTarget)) {
+        return;
+    }
+
+    currentState = State::PATROLLING;
+    calculatePatrolPath(movingToEnd ? patrolEndTile : patrolStartTile);
+}
+
+void MeleeEnemy::changeAnimationsForDirection(glm::vec2 direction)
+{
+    Direction newDirection;
+    MeleeEnemyAnims newAnimation;
+
+    if (std::abs(direction.x) > std::abs(direction.y)) {
+        newAnimation = direction.x > 0 ? MOVE_RIGHT : MOVE_LEFT;
+        newDirection = direction.x > 0 ? RIGHT : LEFT;
+    }
+    else {
+        newAnimation = direction.y > 0 ? MOVE_DOWN : MOVE_UP;
+        newDirection = direction.y > 0 ? DOWN : UP;
+    }
+
+    if (sprite->animation() != newAnimation) {
+        sprite->changeAnimation(newAnimation);
+        this->currentDirection = newDirection;
+    }
+}

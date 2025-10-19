@@ -15,12 +15,14 @@ Level::Level()
 	this->initPlayerY = 0;
 }
 
-Level::Level(const vector<string>& tileMapFiles, Player* player, int initPlayerX, int initPlayerY)
+Level::Level(const vector<string>& tileMapFiles, Player* player, 
+	int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs)
 	: Scene(tileMapFiles)
 {
 	this->player = player;
 	this->initPlayerX = initPlayerX;
 	this->initPlayerY = initPlayerY;
+	this->enemyConfigs = enemyConfigs;
 
 	//Initialize camera sector tracking variables
 	currentSectorI = 0;
@@ -36,6 +38,16 @@ Level::Level(const vector<string>& tileMapFiles, Player* player, int initPlayerX
 Level::~Level()
 {
 	Scene::~Scene();
+	for (unsigned int i = 0; i < enemies.size(); i++)
+	{
+		if (enemies[i] != nullptr)
+		{
+			delete enemies[i];
+			enemies[i] = nullptr;
+		}
+	}
+	enemies.clear();
+	this->player = nullptr;
 }
 
 void Level::init() 
@@ -44,9 +56,13 @@ void Level::init()
 	//Projection matrix override
 	projection = glm::ortho(0.f, float(CAMERA_WIDTH), float(CAMERA_HEIGHT), 0.f);
 	
+	// Initialize player
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
 	player->setTileMaps(maps);
+
+	//Initialize enemies
+	initializeEnemies();
 
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeight = maps[0]->mapSize.y * maps[0]->getTileSize();
@@ -74,6 +90,7 @@ void Level::update(int deltaTime)
 {
 	Scene::update(deltaTime);
 	player->update(deltaTime);
+	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->update(deltaTime);
 	updateCameraSector();
 }
 
@@ -109,6 +126,8 @@ void Level::render()
 {
 	glm::mat4 modelview;
 	texProgram.use();
+	setupViewport(0.9f, 0.1f);
+
 	texProgram.setUniformMatrix4f("projection", projection);
 	texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -123,6 +142,26 @@ void Level::render()
 	for (unsigned int i = 0; i < maps.size(); i++)
 		maps[i]->render();
 
+	// Render all enemies
+	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->render(view);
 	// Player render - pass the view matrix
 	player->render(view);
+}
+
+// Helper method to add enemies
+void Level::addEnemy(const string& spriteSheet, int initX, int initY)
+{
+    Enemy* enemy = new Enemy();
+    enemy->setSpriteSheet(spriteSheet);
+    enemies.push_back(enemy);
+}
+
+void Level::initializeEnemies() {
+	for (const auto& config : enemyConfigs) {
+		Enemy* enemy = config.enemyInstance;
+		enemy->setSpriteSheet(config.spriteSheet);
+		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0]);
+		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
+		enemies.push_back(enemy);
+	}
 }
