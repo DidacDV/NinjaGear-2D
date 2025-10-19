@@ -4,7 +4,7 @@
 #define SCREEN_X 0
 #define SCREEN_Y 0
 
-#define CAMERA_WIDTH 480  
+#define CAMERA_WIDTH 320  
 #define CAMERA_HEIGHT 320
 
 Level::Level()
@@ -59,7 +59,7 @@ void Level::init()
 	// Initialize player
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
-	player->setTileMap(maps[0]);
+	player->setTileMaps(maps);
 
 	//Initialize enemies
 	initializeEnemies();

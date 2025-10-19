@@ -20,8 +20,8 @@ void Game::init(int screenWidth, int screenHeight)
 
 	// Jungle level layers
 	vector<string> jungle_layers = { 
-		"levels/Jungle_background.txt",
-		"levels/Jungle_vegetation.txt"
+		"levels/Outside_background.txt",
+		"levels/Outside_decoration.txt"
 	};
 	// Enemy configurations for the jungle level
 	// Usamos push_back con cast explícito para asegurarnos que MeleeEnemy* sea tratado como Enemy*

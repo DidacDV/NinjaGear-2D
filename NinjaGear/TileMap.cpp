@@ -59,9 +59,11 @@ bool TileMap::loadLevel(const string &levelFile)
 	getline(fin, line);
 	sstream.str(line);
 	sstream >> mapSize.x >> mapSize.y;
+	sstream.clear();
 	getline(fin, line);
 	sstream.str(line);
 	sstream >> tileSize >> blockSize;
+	sstream.clear();
 	getline(fin, line);
 	sstream.str(line);
 	sstream >> tilesheetFile;
@@ -70,6 +72,7 @@ bool TileMap::loadLevel(const string &levelFile)
 	tilesheet.setWrapT(GL_CLAMP_TO_EDGE);
 	tilesheet.setMinFilter(GL_NEAREST);
 	tilesheet.setMagFilter(GL_NEAREST);
+	sstream.clear();
 	getline(fin, line);
 	sstream.str(line);
 	sstream >> tilesheetSize.x >> tilesheetSize.y;
@@ -96,9 +99,6 @@ void TileMap::prepareArrays(const glm::vec2& minCoords, ShaderProgram& program)
 
 	nTiles = 0;
 
-	//padding to prevent texture bleeding
-	float padding = 0.001f;
-
 	for (int j = 0; j < mapSize.y; j++)
 	{
 		for (int i = 0; i < mapSize.x; i++)
@@ -113,10 +113,10 @@ void TileMap::prepareArrays(const glm::vec2& minCoords, ShaderProgram& program)
 
 			//0 based with padding to delete green lines
 			texCoordTile[0] = glm::vec2(
-				float(tile % tilesheetSize.x) / tilesheetSize.x + padding,
-				float(tile / tilesheetSize.x) / tilesheetSize.y + padding
+				float(tile % tilesheetSize.x) / tilesheetSize.x,
+				float(tile / tilesheetSize.x) / tilesheetSize.y
 			);
-			texCoordTile[1] = texCoordTile[0] + tileTexSize - glm::vec2(padding * 2.0f, padding * 2.0f);
+			texCoordTile[1] = texCoordTile[0] + tileTexSize;
 
 			//first tri
 			vertices.insert(vertices.end(), {

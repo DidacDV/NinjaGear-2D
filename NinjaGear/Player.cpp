@@ -110,23 +110,23 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 void Player::update(int deltaTime)
 {
 	sprite->update(deltaTime);
-	if(Game::instance().getKey(GLFW_KEY_LEFT))
+	if (Game::instance().getKey(GLFW_KEY_LEFT))
 	{
-		if(sprite->animation() != MOVE_LEFT)
+		if (sprite->animation() != MOVE_LEFT)
 			sprite->changeAnimation(MOVE_LEFT);
 		posPlayer.x -= 2;
-		if(map->collisionMoveLeft(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
+		if (collisionMoveLeft(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
 			posPlayer.x += 2;
 			sprite->changeAnimation(STAND_LEFT);
 		}
 	}
-	else if(Game::instance().getKey(GLFW_KEY_RIGHT))
+	else if (Game::instance().getKey(GLFW_KEY_RIGHT))
 	{
-		if(sprite->animation() != MOVE_RIGHT)
+		if (sprite->animation() != MOVE_RIGHT)
 			sprite->changeAnimation(MOVE_RIGHT);
 		posPlayer.x += 2;
-		if(map->collisionMoveRight(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
+		if (collisionMoveRight(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
 			posPlayer.x -= 2;
 			sprite->changeAnimation(STAND_RIGHT);
@@ -136,10 +136,10 @@ void Player::update(int deltaTime)
 	{
 		if (sprite->animation() != MOVE_DOWN)
 			sprite->changeAnimation(MOVE_DOWN);
-		posPlayer.y += 2;  // Move down (increase Y)
-		if (map->collisionMoveDown(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
+		posPlayer.y += 2;
+		if (collisionMoveDown(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.y -= 2;  // Cancel movement
+			posPlayer.y -= 2;
 			sprite->changeAnimation(STAND_DOWN);
 		}
 	}
@@ -147,10 +147,10 @@ void Player::update(int deltaTime)
 	{
 		if (sprite->animation() != MOVE_UP)
 			sprite->changeAnimation(MOVE_UP);
-		posPlayer.y -= 2;  // Move down (increase Y)
-		if (map->collisionMoveUp(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
+		posPlayer.y -= 2;
+		if (collisionMoveUp(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.y += 2;  // Cancel movement
+			posPlayer.y += 2;
 			sprite->changeAnimation(STAND_DOWN);
 		}
 	}
@@ -191,9 +191,9 @@ void Player::render(const glm::mat4& view)
 	sprite->render(view);
 }
 
-void Player::setTileMap(TileMap *tileMap)
+void Player::setTileMaps(const vector<TileMap*>& tileMaps)
 {
-	map = tileMap;
+	maps = tileMaps;
 }
 
 void Player::setPosition(const glm::vec2 &pos)
@@ -208,15 +208,38 @@ void Player::setSpriteSheet(const string& spriteSheet)
 	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
 }
 
+bool Player::collisionMoveLeft(const glm::ivec2& pos, const glm::ivec2& size) const
+{
+	for (TileMap* map : maps) {
+		if (map->collisionMoveLeft(pos, size))
+			return true;
+	}
+	return false;
+}
 
+bool Player::collisionMoveRight(const glm::ivec2& pos, const glm::ivec2& size) const
+{
+	for (TileMap* map : maps) {
+		if (map->collisionMoveRight(pos, size))
+			return true;
+	}
+	return false;
+}
 
+bool Player::collisionMoveDown(const glm::ivec2& pos, const glm::ivec2& size) const
+{
+	for (TileMap* map : maps) {
+		if (map->collisionMoveDown(pos, size))
+			return true;
+	}
+	return false;
+}
 
-
-
-
-
-
-
-
-
-
+bool Player::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) const
+{
+	for (TileMap* map : maps) {
+		if (map->collisionMoveUp(pos, size))
+			return true;
+	}
+	return false;
+}
