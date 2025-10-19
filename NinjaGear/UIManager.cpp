@@ -1,16 +1,17 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "UIManager.h"
-#include "Globals.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include "UIManager.h"
+#include "Globals.h"
+#include "UIManagerUtils.h"
 
 UIManager::UIManager()
 {
     health = 3.5f;
     maxHealth = 5.f;
     currentWeapon = 0;
-    rank = 0;
+    rank = 2;
     currentObject = 0;
     vao = 0;
     vbo = 0;
@@ -65,6 +66,14 @@ void UIManager::init()
         std::cout << "ERROR: Could not load star_empty.png" << std::endl;
     }
 
+    rankTextures = vector<Texture>(maxRank);
+
+    for (int i = 0; i < maxRank; i++) {
+        string path = "images/ui/Rank" + std::to_string(i + 1) + ".png";
+        if (!rankTextures[i].loadFromFile(path, TEXTURE_PIXEL_FORMAT_RGBA)) {
+            std::cout << "ERROR: Could not load " << path << std::endl;
+        }
+    }
 
     textRenderer = new Text("resources/NormalFont.ttf", 24, screenWidth, screenHeight * 0.15);
     calculateLayout();
@@ -106,33 +115,48 @@ void UIManager::calculateLayout() {
     uiPositions.life_value_pos = glm::vec2(MARGIN_LEFT + 70, MARGIN_TOP);  // After "LIFE" text
 
     uiPositions.rank_text_pos = glm::vec2(MARGIN_LEFT, MARGIN_TOP + LINE_HEIGHT);
-    uiPositions.rank_value_pos = glm::vec2(MARGIN_LEFT + 70, MARGIN_TOP + LINE_HEIGHT);
+    uiPositions.rank_value_pos = glm::vec2(MARGIN_LEFT + 150, MARGIN_TOP + LINE_HEIGHT);
 
     uiPositions.weapon_text_pos = glm::vec2(rightColumnX, MARGIN_TOP);
-    uiPositions.weapon_value_pos = glm::vec2(rightColumnX + 110, MARGIN_TOP - 5);  // After text
+    uiPositions.weapon_value_pos = glm::vec2(rightColumnX + 95, MARGIN_TOP - 5);  // After text
 
     uiPositions.object_text_pos= glm::vec2(rightColumnX, MARGIN_TOP + LINE_HEIGHT);
-    uiPositions.object_value_pos = glm::vec2(rightColumnX + 110, MARGIN_TOP + LINE_HEIGHT - 5);
+    uiPositions.object_value_pos = glm::vec2(rightColumnX + 95, MARGIN_TOP + LINE_HEIGHT - 5);
 }
 
+//TODO: use player getter functions
 void UIManager::update(int deltaTime, Player* player)
 {
-    //if (player != nullptr) {
-    //    health = player->getHealth();
-    //    maxHealth = player->getMaxHealth();
-    //}
+    static float timeSinceLastChange = 0.f;
+    const float debounceDelay = 3000.f; //3sec
+
+    timeSinceLastChange += deltaTime;
+
+    if (timeSinceLastChange >= debounceDelay) {
+        int random = rand() % 6; 
+		int rankrandom = rand() % maxRank;
+        if (player != nullptr) {
+            health = random;
+			rank = rankrandom;
+        }
+        timeSinceLastChange = 0.f; 
+    }
 }
 
 void UIManager::renderFixedText() {
-    textRenderer->RenderText("LIFE", uiPositions.life_text_pos.x, uiPositions.life_text_pos.y, 0.8, glm::vec3(1.0f));
-    textRenderer->RenderText("NINJA  RANK", uiPositions.rank_text_pos.x, uiPositions.rank_text_pos.y, 0.8, glm::vec3(1.0f));
+    textRenderer->RenderText("LIFE", uiPositions.life_text_pos.x, uiPositions.life_text_pos.y, 0.8, glm::vec3(1.f));
+    textRenderer->RenderText("NINJA  RANK", uiPositions.rank_text_pos.x, uiPositions.rank_text_pos.y, 0.8, glm::vec3(1.f));
 
-    textRenderer->RenderText("WEAPON", uiPositions.weapon_text_pos.x, uiPositions.weapon_text_pos.y, 0.8, glm::vec3(1.0f));
-    textRenderer->RenderText("OBJECT", uiPositions.object_text_pos.x, uiPositions.object_text_pos.y, 0.8, glm::vec3(1.0f));
+    textRenderer->RenderText("WEAPON", uiPositions.weapon_text_pos.x, uiPositions.weapon_text_pos.y, 0.8, glm::vec3(1.f));
+    textRenderer->RenderText("OBJECT", uiPositions.object_text_pos.x, uiPositions.object_text_pos.y, 0.8, glm::vec3(1.f));
 }
 
 void UIManager::render()
 {
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glm::mat4 modelview;
 
     texProgram.use();
@@ -145,7 +169,7 @@ void UIManager::render()
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // Full background panel
-    texProgram.setUniform4f("color", 0.0f, 0.0f, 0.0f, 1.0f);
+    texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
     modelview = glm::mat4(1.0f);
     modelview = glm::scale(modelview, glm::vec3(screenWidth, screenHeight * 0.15f, 1.0f));
     texProgram.setUniformMatrix4f("modelview", modelview);
@@ -159,7 +183,14 @@ void UIManager::render()
     texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
 
     renderHealth(uiPositions.life_value_pos, health, maxHealth);
+    renderRank(uiPositions.rank_value_pos, rank);
+    glBindVertexArray(vao);
+    texProgram.use();
+    texProgram.setUniformMatrix4f("projection", projection);
+    texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
 
+    renderItem(uiPositions.weapon_value_pos, "images/weapons/", "axe1");
+    renderItem(uiPositions.object_value_pos, "images/weapons/", "axe1");
     glBindVertexArray(0);
 }
 
@@ -175,6 +206,7 @@ void UIManager::setupViewport(float heightPercent, float yOffsetPercent)
 
 void UIManager::renderPanel(const glm::vec2& position, const glm::vec2& size, Texture* texture, const glm::vec4& color)
 {
+    glBindVertexArray(vao);
     if (texture)
         texture->use();
     else
@@ -188,6 +220,7 @@ void UIManager::renderPanel(const glm::vec2& position, const glm::vec2& size, Te
     texProgram.setUniformMatrix4f("modelview", modelview);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void UIManager::renderHealth(const glm::vec2& position, float currentHealth, float maxHealth)
@@ -212,4 +245,37 @@ void UIManager::renderHealth(const glm::vec2& position, float currentHealth, flo
         glm::vec2 heartPos = position + glm::vec2(i * heartSpacing, -3); //-5 to center hearts with life 
         renderPanel(heartPos, glm::vec2(heartSize, heartSize), tex);
     }
+}
+
+void UIManager::renderRank(const glm::vec2& position, int currentRank) {
+    if (currentRank < 0) currentRank = 0;
+    if (currentRank >= maxRank) currentRank = maxRank - 1;
+
+
+    renderPanel(glm::vec2(position.x, position.y - 10), glm::vec2(ICON_SIZE), &rankTextures[rank]);
+
+    bool pulseEffect = true;
+    UIManagerUtils::renderStyledText(textRenderer, ranks[currentRank].name, glm::vec2(position.x + ICON_TEXT_MARGIN, position.y - 5), 1.f, ranks[currentRank].baseColor, pulseEffect, ranks[currentRank].colorA, ranks[currentRank].colorB);
+    glBindVertexArray(vao);
+    texProgram.use();
+}
+
+void UIManager::renderItem(const glm::vec2& position, const string& basePath, const string& itemName)
+{
+    bool isWeapon = basePath.find("weapons") != std::string::npos;
+    Texture* tex = UIManagerUtils::findOrLoadItemTexture(basePath, itemName, isWeapon, weaponTextures, objectTextures);
+
+    if (!tex) {
+        std::cout << "Failed to load texture for item: " << itemName << std::endl;
+        return;
+	}
+
+    //icon
+    renderPanel(glm::vec2(position.x, position.y - 3), glm::vec2(ICON_SIZE, ICON_SIZE), tex); // - 3 --> center with label, TODO try with different weapons etc
+    //label
+    std::string itemNameUpper = UIManagerUtils::toUppercase(itemName);
+    textRenderer->RenderText(itemNameUpper, position.x + ICON_TEXT_MARGIN, position.y + 5, 0.8f, glm::vec3(1.f));
+
+    glBindVertexArray(vao);
+    texProgram.use();
 }
