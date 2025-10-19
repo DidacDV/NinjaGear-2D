@@ -12,8 +12,12 @@
 // it builds a single VBO that contains all tiles. As a result the render
 // method draws the whole map independently of what is visible.
 
+//right now, only SCREEN 1 tiles have been added (which can appear on other screens ofc) 
 const int BLOCKED_TILES[] = { 
-							  0, 1, 22, 44, 45,       // DESERT
+							  711,712,811,911,912, 713, 813, 102, 100, 2233, 2234, 2235, 2335, 2435, 2434, 2433, 2333, 200, 201,
+							  5588, 5589, 5688, 5689, 51, 52, 151, 152, 5387, 5083, 5585, 5685,5786, 5787, 5686, 5687, 5586, 5587,
+							  5785, 5595, 5596, 5597, 5598, 5495, 5496, 5497, 5498, 5495, 5396, 5397, 5398, 5295, 5296, 5297, 5298, 5196, 5197, 5683, 5684, 5583, 5584, 937, 938,
+							  5283, 5284, 5384, 5384, 5686
 							  //199, 198, 176, 155, 154, 178, 182, 198, 200 //JUNGLE
 							};
 
