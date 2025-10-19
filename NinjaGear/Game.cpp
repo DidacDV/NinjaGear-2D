@@ -10,6 +10,9 @@ void Game::init(int screenWidth, int screenHeight)
 {
 	bPlay = true;
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	/*UI MANAGER*/
+	this->uiManager = new UIManager();
+	this->uiManager->init();
 	/* PLAYER */
 	this->player = new Player();
 	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
@@ -43,6 +46,9 @@ bool Game::update(int deltaTime)
 	if (currentScene != NULL)
 		currentScene->update(deltaTime);
 
+	if (uiManager != NULL)
+		uiManager->update(deltaTime, player);
+
 	return bPlay;
 }
 
@@ -54,14 +60,17 @@ void Game::render()
 	if (currentScene != NULL)
 		currentScene->render();
 
-	// Render the menu UI (bottom 10%)
-	auto it = levels.find("menu");
-	if (it != levels.end()) {
-		Scene* menuScene = it->second;
-		if (menuScene != nullptr) {
-			menuScene->render();
-		}
-	}
+	if (uiManager != NULL)
+		uiManager->render();
+
+	//// Render the menu UI (bottom 10%)
+	//auto it = levels.find("menu");
+	//if (it != levels.end()) {
+	//	Scene* menuScene = it->second;
+	//	if (menuScene != nullptr) {
+	//		menuScene->render();
+	//	}
+	//}
 }
 
 void Game::keyPressed(int key)

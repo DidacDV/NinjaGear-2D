@@ -126,7 +126,7 @@ void Level::render()
 {
 	glm::mat4 modelview;
 	texProgram.use();
-	setupViewport(0.9f, 0.1f);
+	setupViewport(0.85f, 0.15f);
 
 	texProgram.setUniformMatrix4f("projection", projection);
 	texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
