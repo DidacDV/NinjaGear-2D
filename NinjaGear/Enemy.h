@@ -23,7 +23,14 @@ public:
 	void setSpriteSheet(const string& spriteSheet);
 	glm::vec2 getPosition() { return posEnemy; }
 
+	virtual void takeDamage(int damage);
+	virtual int getHealth() const { return health; }
+	virtual bool isAlive() const { return health > 0; }
+	virtual int getDamage() const { return contactDamage; }
+
 protected:
+	int health = 60;
+	int contactDamage = 10;
 	virtual void initializeAnimations();
 	bool bJumping;
 	glm::ivec2 tileMapDispl;

@@ -91,6 +91,7 @@ void Level::update(int deltaTime)
 	Scene::update(deltaTime);
 	player->update(deltaTime);
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->update(deltaTime);
+	checkCombat(deltaTime);
 	updateCameraSector();
 }
 
@@ -165,3 +166,62 @@ void Level::initializeEnemies() {
 		enemies.push_back(enemy);
 	}
 }
+
+void Level::checkCombat(int deltaTime)
+{
+	if (!player->isAlive()) return;
+
+	// Check enemy collision with player (contact damage)
+	/*for (auto& enemy : enemies) {
+		glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
+		glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
+
+		if (isColliding(player->getPositionFloat(), playerSize,
+			enemy->getPosition(), enemySize)) {
+			player->takeDamage(ENEMY_CONTACT_DAMAGE);
+		}
+	}*/
+
+	handlePlayerAttack();
+}
+
+bool Level::isColliding(const glm::vec2& pos1, const glm::vec2& size1,
+	const glm::vec2& pos2, const glm::vec2& size2)
+{
+	// AABB (Axis-Aligned Bounding Box) collision detection
+	return (pos1.x < pos2.x + size2.x &&
+		pos1.x + size1.x > pos2.x &&
+		pos1.y < pos2.y + size2.y &&
+		pos1.y + size1.y > pos2.y);
+}
+
+void Level::handlePlayerAttack()
+{
+	if (!player->justStartedPunching()) return;
+
+	const float PUNCH_REACH = 20.0f;
+	const int PUNCH_DAMAGE = 25;
+
+	glm::vec2 punchPos = player->getPunchHitbox();
+
+	glm::vec2 punchSize(PLAYER_SIZE + PUNCH_REACH, PLAYER_SIZE + PUNCH_REACH);
+	glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
+
+
+	for (auto it = enemies.begin(); it != enemies.end(); ) {
+		Enemy* enemy = *it;
+
+		if (isColliding(punchPos, punchSize,
+			enemy->getPosition(), enemySize)) {
+			enemy->takeDamage(PUNCH_DAMAGE);
+
+			if (!enemy->isAlive()) {
+				delete enemy;
+				it = enemies.erase(it);
+				continue;
+			}
+		}
+		++it;
+	}
+}
+

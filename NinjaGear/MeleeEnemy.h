@@ -2,10 +2,23 @@
 #include "Enemy.h"
 #include "Game.h"
 
+enum MeleeEnemyAnims
+{
+    STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
+    MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
+    DANCE
+};
+
+
 class MeleeEnemy :
     public Enemy
 {
 public:
+    enum Anims {
+        STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
+        MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
+        DANCE
+    };
     void update(int deltaTime) override;
 
 protected:

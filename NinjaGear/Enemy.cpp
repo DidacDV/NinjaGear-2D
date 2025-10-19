@@ -305,3 +305,17 @@ int Enemy::findClosestNodeInPath(const std::vector<glm::ivec2>& path, const glm:
 
 	return bestIdx;
 }
+
+// Combat management
+
+void Enemy::takeDamage(int damage)
+{
+	
+	health -= damage;
+	cout << "ENEMY HIT!!!" << health << endl;
+	if (health < 0) {
+		health = 0;
+	}
+
+	//TODO visuals
+}

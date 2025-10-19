@@ -10,15 +10,6 @@
 #define FALL_STEP 4
 #define SPRITE_SIZE 16
 
-enum PlayerAnims
-{
-	STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
-	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
-	PUNCH_LEFT, PUNCH_RIGHT, PUNCH_UP, PUNCH_DOWN,
-	DANCE
-};
-
-
 void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 {
 	const float FRAME_WIDTH = 1.0f / 4.0f;
@@ -109,7 +100,17 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 
 void Player::update(int deltaTime)
 {
+	lastFrameAnimation = sprite->animation();
 	sprite->update(deltaTime);
+
+	if (invulnerable) {
+		invulnerabilityTimer -= deltaTime;
+		if (invulnerabilityTimer <= 0) {
+			invulnerable = false;
+			invulnerabilityTimer = 0;
+		}
+	}
+	
 	if (Game::instance().getKey(GLFW_KEY_LEFT))
 	{
 		if (sprite->animation() != MOVE_LEFT)
@@ -161,14 +162,30 @@ void Player::update(int deltaTime)
 	}
 	else if (Game::instance().getKey(GLFW_KEY_G))  // PUNCH
 	{
-		if (sprite->animation() == MOVE_LEFT || sprite->animation() == STAND_LEFT)
-			sprite->changeAnimation(PUNCH_LEFT);
-		else if (sprite->animation() == MOVE_RIGHT || sprite->animation() == STAND_RIGHT)
-			sprite->changeAnimation(PUNCH_RIGHT);
-		else if (sprite->animation() == MOVE_UP || sprite->animation() == STAND_UP)
-			sprite->changeAnimation(PUNCH_UP);
-		else if (sprite->animation() == MOVE_DOWN || sprite->animation() == STAND_DOWN)
-			sprite->changeAnimation(PUNCH_DOWN);
+		if (sprite->animation() == MOVE_LEFT || sprite->animation() == STAND_LEFT) {
+			if (sprite->animation() != PUNCH_LEFT) { 
+				sprite->changeAnimation(PUNCH_LEFT);
+			}
+			currentFacingDirection = STAND_LEFT;
+		}
+		else if (sprite->animation() == MOVE_RIGHT || sprite->animation() == STAND_RIGHT) {
+			if (sprite->animation() != PUNCH_RIGHT) {
+				sprite->changeAnimation(PUNCH_RIGHT);
+			}
+			currentFacingDirection = STAND_RIGHT;
+		}
+		else if (sprite->animation() == MOVE_UP || sprite->animation() == STAND_UP) {
+			if (sprite->animation() != PUNCH_UP) {
+				sprite->changeAnimation(PUNCH_UP);
+			}
+			currentFacingDirection = STAND_UP;
+		}
+		else if (sprite->animation() == MOVE_DOWN || sprite->animation() == STAND_DOWN) {
+			if (sprite->animation() != PUNCH_DOWN) {
+				sprite->changeAnimation(PUNCH_DOWN);
+			}
+			currentFacingDirection = STAND_DOWN;
+		}
 	}
 	else
 	{
@@ -242,4 +259,88 @@ bool Player::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) cons
 			return true;
 	}
 	return false;
+}
+
+// Health management
+
+void Player::takeDamage(int damage)
+{
+	if (invulnerable || health <= 0) {
+		return;
+	}
+
+	health -= damage;
+
+	if (health < 0) {
+		health = 0;
+	}
+
+	invulnerable = true;
+	invulnerabilityTimer = 1000; 
+
+	//TODO visuals
+
+}
+
+void Player::heal(int amount)
+{
+	// Can't heal if dead
+	if (health <= 0) {
+		return;
+	}
+
+	health += amount;
+
+	// Clamp to max health
+	if (health > maxHealth) {
+		health = maxHealth;
+	}
+
+	// Optional: Visual/audio feedback
+	// - Play heal sound
+	// - Show heal particle effect
+}
+
+// Punching
+
+bool Player::isPunching() const
+{
+	int anim = sprite->animation();
+	return (anim >= PUNCH_LEFT && anim <= PUNCH_DOWN);
+}
+
+bool Player::justStartedPunching() const
+{
+	int currentAnim = sprite->animation();
+	bool isPunchAnim = (currentAnim >= PUNCH_LEFT && currentAnim <= PUNCH_DOWN);
+	bool wasPunchAnim = (lastFrameAnimation >= PUNCH_LEFT && lastFrameAnimation <= PUNCH_DOWN);
+
+	return isPunchAnim && !wasPunchAnim;
+}
+
+int Player::getFacingDirection() const
+{
+	return currentFacingDirection;
+}
+
+glm::vec2 Player::getPunchHitbox() const
+{
+	const float PUNCH_REACH = 20.0f;
+	glm::vec2 hitbox = glm::vec2(posPlayer);
+
+
+	switch (currentFacingDirection) {
+	case STAND_LEFT:
+		hitbox.x -= PUNCH_REACH; 
+		break;
+	case STAND_RIGHT:
+		break;
+	case STAND_UP:
+		hitbox.y -= PUNCH_REACH; 
+		break;
+	case STAND_DOWN:
+		break;
+	}
+
+	return hitbox;
 }

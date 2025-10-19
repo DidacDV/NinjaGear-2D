@@ -1,13 +1,6 @@
 #include "MeleeEnemy.h"
 #include <iostream>
 
-enum MeleeEnemyAnims
-{
-	STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
-	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
-	DANCE
-};
-
 void MeleeEnemy::update(int deltaTime)
 {
 	sprite->update(deltaTime);
@@ -225,7 +218,7 @@ void MeleeEnemy::updateReturning(int deltaTime, const glm::vec2& playerPos)
 void MeleeEnemy::changeAnimationsForDirection(glm::vec2 direction)
 {
     Direction newDirection;
-    MeleeEnemyAnims newAnimation;
+    Anims newAnimation;
 
     if (std::abs(direction.x) > std::abs(direction.y)) {
         newAnimation = direction.x > 0 ? MOVE_RIGHT : MOVE_LEFT;

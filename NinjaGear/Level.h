@@ -41,6 +41,18 @@ class Level :
         int sectorWidth;     
         int sectorHeight;
 
+        // Combat manager
+        static constexpr float PLAYER_SIZE = 16.0f;
+        static constexpr float ENEMY_SIZE = 16.0f;
+        static constexpr int ENEMY_CONTACT_DAMAGE = 10;
+        void checkCombat(int deltaTime);
+        void handlePlayerAttack();
+        //TODO enemy attacking void handleEnemyAttacks();
+
+        // Helper for collision detection
+        bool isColliding(const glm::vec2& pos1, const glm::vec2& size1,
+            const glm::vec2& pos2, const glm::vec2& size2);
+
         float cameraOffsetX;
         float cameraOffsetY;
 
