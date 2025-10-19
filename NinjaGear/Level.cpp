@@ -46,7 +46,7 @@ void Level::init()
 	
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
-	player->setTileMap(maps[0]);
+	player->setTileMaps(maps);
 
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeight = maps[0]->mapSize.y * maps[0]->getTileSize();

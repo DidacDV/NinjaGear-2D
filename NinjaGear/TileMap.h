@@ -15,7 +15,6 @@
 const int BLOCKED_TILES[] = { 
 							  0, 1, 22, 44, 45,       // DESERT
 							  //199, 198, 176, 155, 154, 178, 182, 198, 200 //JUNGLE
-							  - 1
 							};
 
 class TileMap
