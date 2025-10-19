@@ -115,5 +115,13 @@ void Scene::loadTileMaps()
 	}
 }
 
+void Scene::setupViewport(float heightPercent, float yOffsetPercent) {
+	int actualWindowWidth = globalScreenWidth / 2;
+	int actualWindowHeight = globalScreenHeight / 2;
+	int sectionHeight = static_cast<int>(actualWindowHeight * heightPercent);
+	int sectionY = static_cast<int>(actualWindowHeight * yOffsetPercent);
+	glViewport(0, sectionY, actualWindowWidth, sectionHeight);
+}
+
 
 

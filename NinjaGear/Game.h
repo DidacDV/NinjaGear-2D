@@ -49,6 +49,7 @@ public:
 	Scene* getCurrentScene() const;
 	//Player management
 	Player* getPlayer() const;
+	glm::vec2 getPlayerPosition() const;
 	Player* player;
 
 private:

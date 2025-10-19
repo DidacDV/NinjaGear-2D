@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include "ShaderProgram.h"
 #include "TileMap.h"
-#include "Player.h"
+#include "Globals.h"
 
 
 // Scene contains all the entities of our game.
@@ -27,6 +27,7 @@ public:
 protected:
 	void initShaders();
 	void loadTileMaps();
+	void setupViewport(float heightPercent, float yOffsetPercent);
 	vector<string> mapFiles;
 	vector<TileMap*> maps;
 	ShaderProgram texProgram;

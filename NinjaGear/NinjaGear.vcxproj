@@ -12,11 +12,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimKeyframes.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GeometryUtils.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Level.h" />
+    <ClInclude Include="MeleeEnemy.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="Pathfinder.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="RangedEnemy.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderProgram.h" />
@@ -26,12 +31,16 @@
     <ClInclude Include="TileMap.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeleeEnemy.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Pathfinder.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="RangedEnemy.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
