@@ -10,6 +10,10 @@ void Game::init(int screenWidth, int screenHeight)
 {
 	bPlay = true;
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+
+	mouseX = 0;
+	mouseY = 0;
+
 	/*UI MANAGER*/
 	this->uiManager = new UIManager();
 	this->uiManager->init();
@@ -17,12 +21,14 @@ void Game::init(int screenWidth, int screenHeight)
 	this->player = new Player();
 	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
 	
-	vector<string> titlesScreenMaps = { "levels/base_menu.txt" };
-	Scene* baseMenu = new Menu(titlesScreenMaps);
-	/* LEVELS */
+	Menu* startMenu = new Menu(MenuType::START);
+	startMenu->setMenuImage("images/StartMenu.png");
+	Menu* settingsMenu = new Menu(MenuType::SETTINGS);
+	settingsMenu->setMenuImage("images/SettingsMenu.png");
 
-	// Jungle level layers
-	vector<string> jungle_layers = { 
+	/* LEVELS */
+	// Outside layers
+	vector<string> outside_layers = { 
 		"levels/Outside_background.txt",
 		"levels/Outside_decoration.txt"
 	};
@@ -34,11 +40,12 @@ void Game::init(int screenWidth, int screenHeight)
 	jungleEnemies.push_back(EnemyConfig{10, 5,  "images/enemies/cyclope.png", static_cast<Enemy*>(new MeleeEnemy())});
 	jungleEnemies.push_back(EnemyConfig{5,  5,  "images/enemies/cyclope.png", static_cast<Enemy*>(new Enemy())});
 
-	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies);
+	Level* outside = new Level(outside_layers, player, 10, 10, jungleEnemies);
 
-	addScene("Jungle1", Jungle1);
-	addScene("menu", baseMenu);
-	setCurrentScene("Jungle1");
+	addScene("outside", outside);
+	addScene("startMenu", startMenu);
+	addScene("settings", settingsMenu);
+	setCurrentScene("startMenu");
 }
 
 bool Game::update(int deltaTime)
@@ -60,25 +67,30 @@ void Game::render()
 	if (currentScene != NULL)
 		currentScene->render();
 
-	if (uiManager != NULL)
+	//only render UI if we're not in a menu
+	Menu* menu = dynamic_cast<Menu*>(currentScene);
+	if (menu == NULL && uiManager != NULL) {
 		uiManager->render();
-
-	//// Render the menu UI (bottom 10%)
-	//auto it = levels.find("menu");
-	//if (it != levels.end()) {
-	//	Scene* menuScene = it->second;
-	//	if (menuScene != nullptr) {
-	//		menuScene->render();
-	//	}
-	//}
+	}
 }
 
 void Game::keyPressed(int key)
 {
-	if (key == GLFW_KEY_ESCAPE) // Escape code
-		bPlay = false;
-	else if (key == GLFW_KEY_Z) // Change menu
-		setCurrentScene("menu");
+	if (key == GLFW_KEY_ESCAPE) {
+		// If in game, go back to menu
+		Menu* menu = dynamic_cast<Menu*>(currentScene);
+		if (menu == NULL) {
+			setCurrentScene("startMenu");
+		}
+		else {
+			if (menu->getType() == MenuType::SETTINGS) {
+				setCurrentScene("startMenu");
+			}
+			else if (menu->getType() == MenuType::START) {
+				bPlay = false; //exit if in menu
+			}
+		}
+	}
 	else if (key == GLFW_KEY_X) // Change sprite
 		player->setSpriteSheet("images/characters/ninja_blue/SpriteSheet.png");
 	keys[key] = true;
@@ -91,10 +103,20 @@ void Game::keyReleased(int key)
 
 void Game::mouseMove(int x, int y)
 {
+	mouseX = x;
+	mouseY = y;
 }
 
 void Game::mousePress(int button)
 {
+	cout << mouseX << " " << mouseY << endl;
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		// Check if we're in a menu and handle the click
+		Menu* menu = dynamic_cast<Menu*>(currentScene);
+		if (menu != NULL) {
+			menu->handleClick(mouseX, mouseY);
+		}
+	}
 }
 
 void Game::mouseRelease(int button)
@@ -118,11 +140,6 @@ void Game::setCurrentScene(const string& name)
 		currentScene = it->second;
 		currentScene->init();
 	}
-
-	auto it2 = levels.find("menu");
-	if (it2 != levels.end()) {
-		it2->second->init();
-	}
 }
 
 Scene* Game::getCurrentScene() const
@@ -138,6 +155,4 @@ Player* Game::getPlayer() const
 glm::vec2 Game::getPlayerPosition() const {
 	return player->getPosition();
 }
-
-
 
