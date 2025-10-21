@@ -159,12 +159,12 @@ void RangedEnemy::updateAttacking(int deltaTime, const glm::vec2& playerPos)
 {
 	attackingTimer += deltaTime;
 	shootCooldownTimer += deltaTime;
-
-
-
-
 	float distanceToPlayer = glm::length(playerPos - posEnemy);
-	if (distanceToPlayer > MAX_ATTACKING_DISTANCE || attackingTimer >= MAX_ATTACKING_TIME) {
+
+	if (distanceToPlayer > MAX_ATTACKING_DISTANCE || 
+		attackingTimer >= MAX_ATTACKING_TIME 
+		)
+	{
 		stopAttacking();
 		return;
 	}
@@ -213,6 +213,6 @@ void RangedEnemy::shootAtPlayer(const glm::vec2& playerPos)
 		direction,
 		speed,
 		damage,
-		"images/projectile.png"
+		"images/projectiles/Arrow.png"
 	);
 }

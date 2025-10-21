@@ -30,6 +30,7 @@ Sprite::Sprite(const glm::vec2 &quadSize, const glm::vec2 &sizeInSpritesheet, Te
 	texCoordLocation = program->bindVertexAttribute("texCoord", 2, 4*sizeof(float), (void *)(2*sizeof(float)));
 	texture = spritesheet;
 	shaderProgram = program;
+	this->quadSize = quadSize;
 	currentAnimation = -1;
 	position = glm::vec2(0.f);
 }
@@ -50,7 +51,13 @@ void Sprite::update(int deltaTime)
 
 void Sprite::render(const glm::mat4& view) const
 {
+	glm::vec2 centerOffset = quadSize / 2.0f;
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(position.x, position.y, 0.f));
+
+	model = glm::translate(model, glm::vec3(centerOffset.x, centerOffset.y, 0.0f));
+	model = glm::rotate(model, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::translate(model, glm::vec3(-centerOffset.x, -centerOffset.y, 0.0f));
+
 	glm::mat4 modelview = view * model;
 
 	shaderProgram->setUniformMatrix4f("modelview", modelview);
@@ -106,6 +113,11 @@ int Sprite::animation() const
 void Sprite::setPosition(const glm::vec2 &pos)
 {
 	position = pos;
+}
+
+void Sprite::setRotation(float angleInRadians)
+{
+	rotationAngle = angleInRadians;
 }
 
 

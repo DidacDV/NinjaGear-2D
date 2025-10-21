@@ -34,6 +34,7 @@ public:
 	int animation() const;
 	
 	void setPosition(const glm::vec2 &pos);
+	void setRotation(float angleInRadians);
 
 private:
 	Texture *texture;
@@ -46,7 +47,8 @@ private:
 	float timeAnimation;
 	glm::vec2 texCoordDispl;
 	vector<AnimKeyframes> animations;
-
+	glm::vec2 quadSize;
+	float rotationAngle = 0.0f;
 };
 
 

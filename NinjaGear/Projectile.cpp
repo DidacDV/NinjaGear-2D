@@ -9,6 +9,9 @@ void Projectile::init(const glm::vec2& startPos, const glm::vec2& direction,
     this->direction = glm::normalize(direction);
     this->speed = speed;
     this->map = map;
+    float rotationAngle = atan2(this->direction.y, this->direction.x);
+    const float BASE_OFFSET_RADIANS = 0.785398f;
+    rotationAngle += BASE_OFFSET_RADIANS;
 
     // Load sprite
     spritesheet.loadFromFile(spritePath, TEXTURE_PIXEL_FORMAT_RGBA);
@@ -18,6 +21,7 @@ void Projectile::init(const glm::vec2& startPos, const glm::vec2& direction,
     sprite->setAnimationSpeed(0, 8);
     sprite->addKeyframe(0, glm::vec2(0.0f, 0.0f));
     sprite->changeAnimation(0);
+    sprite->setRotation(rotationAngle);
 }
 
 void Projectile::update(int deltaTime)
