@@ -21,6 +21,8 @@
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Pathfinder.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Projectile.h" />
+    <ClInclude Include="ProjectileManager.h" />
     <ClInclude Include="RangedEnemy.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
@@ -42,6 +44,8 @@
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Pathfinder.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Projectile.cpp" />
+    <ClCompile Include="ProjectileManager.cpp" />
     <ClCompile Include="RangedEnemy.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />

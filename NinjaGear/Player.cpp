@@ -15,10 +15,7 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 	const float FRAME_WIDTH = 1.0f / 4.0f;
 	const float FRAME_HEIGHT = 1.0f / 7.0f;
 	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
-	const glm::vec2 FRAME_NORMALIZED_SIZE = glm::vec2(0.25, 0.1428);
 
-
-	bJumping = false;
 	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
 	sprite = Sprite::createSprite(QUAD_SIZE, glm::vec2(0.25f, 0.142857f), &spritesheet, &shaderProgram);
 	sprite->setNumberAnimations(13);
@@ -163,27 +160,19 @@ void Player::update(int deltaTime)
 	else if (Game::instance().getKey(GLFW_KEY_G))  // PUNCH
 	{
 		if (sprite->animation() == MOVE_LEFT || sprite->animation() == STAND_LEFT) {
-			if (sprite->animation() != PUNCH_LEFT) { 
-				sprite->changeAnimation(PUNCH_LEFT);
-			}
+			sprite->changeAnimation(PUNCH_LEFT);
 			currentFacingDirection = STAND_LEFT;
 		}
 		else if (sprite->animation() == MOVE_RIGHT || sprite->animation() == STAND_RIGHT) {
-			if (sprite->animation() != PUNCH_RIGHT) {
-				sprite->changeAnimation(PUNCH_RIGHT);
-			}
+			sprite->changeAnimation(PUNCH_RIGHT);
 			currentFacingDirection = STAND_RIGHT;
 		}
 		else if (sprite->animation() == MOVE_UP || sprite->animation() == STAND_UP) {
-			if (sprite->animation() != PUNCH_UP) {
-				sprite->changeAnimation(PUNCH_UP);
-			}
+			sprite->changeAnimation(PUNCH_UP);
 			currentFacingDirection = STAND_UP;
 		}
 		else if (sprite->animation() == MOVE_DOWN || sprite->animation() == STAND_DOWN) {
-			if (sprite->animation() != PUNCH_DOWN) {
-				sprite->changeAnimation(PUNCH_DOWN);
-			}
+			sprite->changeAnimation(PUNCH_DOWN);
 			currentFacingDirection = STAND_DOWN;
 		}
 	}
@@ -270,7 +259,7 @@ void Player::takeDamage(int damage)
 	}
 
 	health -= damage;
-
+	cout << "took damage!!" << health << endl;
 	if (health < 0) {
 		health = 0;
 	}
@@ -343,4 +332,9 @@ glm::vec2 Player::getPunchHitbox() const
 	}
 
 	return hitbox;
+}
+
+void Player::increaseRank(const int& increase) {
+	cout << "increased rank by" << increase << endl;
+	rank += increase;
 }

@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "ProjectileManager.h"
 
 class Enemy;
 
@@ -23,8 +24,8 @@ class Level :
     void init() override;
     void update(int deltaTime) override;
 	void render() override;
-	// Enemy management
-    void addEnemy(const string& spriteSheet, int initX, int initY);
+    ProjectileManager* getProjectileManager() { return &projectileManager; }
+
 
     private:
         //Player
@@ -33,19 +34,24 @@ class Level :
         // Enemies
         vector<Enemy*> enemies;
         vector<EnemyConfig> enemyConfigs;
+		// Projectiles
+        ProjectileManager projectileManager;
+
         // Camera sector traking
-        int currentSectorI;  
-        int currentSectorJ;  
-        int numSectorsI;     
-        int numSectorsJ;     
-        int sectorWidth;     
-        int sectorHeight;
+        int currentSectorI = 0;  
+        int currentSectorJ = 0;  
+        int numSectorsI = 0;     
+        int numSectorsJ = 0;     
+        int sectorWidth = 0;     
+        int sectorHeight = 0;
+        float cameraOffsetX = 0.0f;
+        float cameraOffsetY = 0.0f;
 
         // Combat manager
         static constexpr float PLAYER_SIZE = 16.0f;
         static constexpr float ENEMY_SIZE = 16.0f;
         static constexpr int ENEMY_CONTACT_DAMAGE = 10;
-        void checkCombat(int deltaTime);
+        void checkCombat();
         void handlePlayerAttack();
         //TODO enemy attacking void handleEnemyAttacks();
 
@@ -53,8 +59,7 @@ class Level :
         bool isColliding(const glm::vec2& pos1, const glm::vec2& size1,
             const glm::vec2& pos2, const glm::vec2& size2);
 
-        float cameraOffsetX;
-        float cameraOffsetY;
+      
 
         void updateCameraSector();
         void calculateCameraOffset();

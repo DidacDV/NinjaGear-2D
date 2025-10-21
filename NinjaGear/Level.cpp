@@ -1,5 +1,6 @@
 #include "Level.h"
 #include <iostream>
+#include "Projectile.h"
 
 #define SCREEN_X 0
 #define SCREEN_Y 0
@@ -23,21 +24,10 @@ Level::Level(const vector<string>& tileMapFiles, Player* player,
 	this->initPlayerX = initPlayerX;
 	this->initPlayerY = initPlayerY;
 	this->enemyConfigs = enemyConfigs;
-
-	//Initialize camera sector tracking variables
-	currentSectorI = 0;
-    currentSectorJ = 0;
-    numSectorsI = 0;
-    numSectorsJ = 0;
-    sectorWidth = 0;
-    sectorHeight = 0;
-    cameraOffsetX = 0.0f;
-    cameraOffsetY = 0.0f;
 }
 
 Level::~Level()
 {
-	Scene::~Scene();
 	for (unsigned int i = 0; i < enemies.size(); i++)
 	{
 		if (enemies[i] != nullptr)
@@ -47,12 +37,14 @@ Level::~Level()
 		}
 	}
 	enemies.clear();
-	this->player = nullptr;
 }
 
 void Level::init() 
 {
 	Scene::init();
+	// Initialize projectile manager
+	projectileManager.init(&texProgram, maps[0]);
+
 	//Projection matrix override
 	projection = glm::ortho(0.f, float(CAMERA_WIDTH), float(CAMERA_HEIGHT), 0.f);
 	
@@ -91,7 +83,8 @@ void Level::update(int deltaTime)
 	Scene::update(deltaTime);
 	player->update(deltaTime);
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->update(deltaTime);
-	checkCombat(deltaTime);
+	projectileManager.update(deltaTime);
+	checkCombat();
 	updateCameraSector();
 }
 
@@ -125,7 +118,6 @@ void Level::calculateCameraOffset()
 
 void Level::render()
 {
-	glm::mat4 modelview;
 	texProgram.use();
 	setupViewport(0.85f, 0.15f);
 
@@ -145,42 +137,51 @@ void Level::render()
 
 	// Render all enemies
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->render(view);
+	projectileManager.render(view);
 	// Player render - pass the view matrix
 	player->render(view);
-}
-
-// Helper method to add enemies
-void Level::addEnemy(const string& spriteSheet, int initX, int initY)
-{
-    Enemy* enemy = new Enemy();
-    enemy->setSpriteSheet(spriteSheet);
-    enemies.push_back(enemy);
 }
 
 void Level::initializeEnemies() {
 	for (const auto& config : enemyConfigs) {
 		Enemy* enemy = config.enemyInstance;
-		enemy->setSpriteSheet(config.spriteSheet);
-		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0]);
+		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0], config.spriteSheet);
 		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
+		enemy->setProjectileManager(&projectileManager);
 		enemies.push_back(enemy);
 	}
 }
 
-void Level::checkCombat(int deltaTime)
+void Level::checkCombat()
 {
 	if (!player->isAlive()) return;
 
 	// Check enemy collision with player (contact damage)
-	/*for (auto& enemy : enemies) {
+	for (auto& enemy : enemies) {
 		glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
 		glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
 
 		if (isColliding(player->getPositionFloat(), playerSize,
 			enemy->getPosition(), enemySize)) {
-			player->takeDamage(ENEMY_CONTACT_DAMAGE);
+
+			// Only deal damage if enemy is ready to attack
+			if (enemy->canDealDamage()) {
+				player->takeDamage(enemy->getDamage());
+				enemy->onDamageDealt(); // Reset cooldown
+			}
 		}
-	}*/
+	}
+
+	//Check projectile collisions
+	for (Projectile* projectile : projectileManager.getActiveProjectiles()) {
+		glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
+
+		if (isColliding(player->getPositionFloat(), playerSize,
+			projectile->getPosition(), projectile->getSize())) {
+			player->takeDamage(projectile->getDamage());
+			projectile->deactivate();
+		}
+	}
 
 	handlePlayerAttack();
 }
@@ -217,6 +218,7 @@ void Level::handlePlayerAttack()
 
 			if (!enemy->isAlive()) {
 				delete enemy;
+				player->increaseRank(1);
 				it = enemies.erase(it);
 				continue;
 			}

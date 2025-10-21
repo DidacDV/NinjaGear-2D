@@ -29,8 +29,8 @@ public:
 	void setTileMaps(const vector<TileMap*>& tileMaps);
 	void setPosition(const glm::vec2 &pos);
 	void setSpriteSheet(const string& spriteSheet);
-	glm::ivec2 getPosition() { return posPlayer; }
-	glm::vec2 getPositionFloat() { return glm::vec2(posPlayer); }
+	glm::ivec2 getPosition() const { return posPlayer; }
+	glm::vec2 getPositionFloat() const { return glm::vec2(posPlayer); }
 
 	int getHealth() const { return health; }
 	int getMaxHealth() const { return maxHealth; }
@@ -38,6 +38,8 @@ public:
 	void takeDamage(int damage);
 	void heal(int amount);
 	bool isAlive() const { return health > 0; }
+	int getRank() const { return rank; }
+	void increaseRank(const int& increase);
 
 	// Punching
 	bool isPunching() const;
@@ -46,18 +48,16 @@ public:
 	glm::vec2 getPunchHitbox() const;
 
 private:
-	static const int INVULNERABILITY_DURATION = 1000;
-	static const int DEFAULT_MAX_HEALTH = 100;
 
 	int currentFacingDirection = STAND_DOWN; // Track last direction
 	int lastFrameAnimation = -1;
 
-
-	// Health management
-	int health = 100;
-	int maxHealth = 100;
+	// Attributes
+	int health = 50;
+	int maxHealth = 50;
 	bool invulnerable = false;
 	int invulnerabilityTimer = 0;
+	int rank = 0;
 
 	// Collision detectors
 	bool collisionMoveLeft(const glm::ivec2& pos, const glm::ivec2& size) const;
@@ -65,9 +65,7 @@ private:
 	bool collisionMoveDown(const glm::ivec2& pos, const glm::ivec2& size) const;
 	bool collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) const;
 
-	bool bJumping;
 	glm::ivec2 tileMapDispl, posPlayer;
-	int jumpAngle, startY;
 	Texture spritesheet;
 	Sprite *sprite;
 	vector<TileMap*> maps;

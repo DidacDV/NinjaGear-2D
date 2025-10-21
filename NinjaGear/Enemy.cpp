@@ -15,13 +15,12 @@ enum EnemyAnims
 	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
 };
 
-void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap)
+void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet)
 {
 	//Template that every enemy will follow. 
-	initializeSprite(shaderProgram);
+	initializeSprite(shaderProgram, spritesheet);
 	map = tileMap;
 	cachedTileSize = static_cast<float>(map->getTileSize());
-	bJumping = false;
 	tileMapDispl = tileMapPos;
 	currentDirection = DOWN;
 	initializeAnimations();
@@ -30,71 +29,8 @@ void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, Til
 void Enemy::update(int deltaTime)
 {
 	sprite->update(deltaTime);
-	if (Game::instance().getKey(GLFW_KEY_J))
-	{
-		currentDirection = LEFT;
-		if (sprite->animation() != MOVE_LEFT)
-			sprite->changeAnimation(MOVE_LEFT);
-		posEnemy.x -= 2;
-		if (map->collisionMoveLeft(posEnemy, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
-		{
-			posEnemy.x += 2;
-			sprite->changeAnimation(STAND_LEFT);
-		}
-	}
-	else if (Game::instance().getKey(GLFW_KEY_L))
-	{
-		currentDirection = RIGHT;
-		if (sprite->animation() != MOVE_RIGHT)
-			sprite->changeAnimation(MOVE_RIGHT);
-		posEnemy.x += 2;
-		if (map->collisionMoveRight(posEnemy, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
-		{
-			posEnemy.x -= 2;
-			sprite->changeAnimation(STAND_RIGHT);
-		}
-	}
-	else if (Game::instance().getKey(GLFW_KEY_K))
-	{
-		currentDirection = DOWN;
-		if (sprite->animation() != MOVE_DOWN)
-			sprite->changeAnimation(MOVE_DOWN);
-		posEnemy.y += 2;  // Move down (increase Y)
-		if (map->collisionMoveDown(posEnemy, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
-		{
-			posEnemy.y -= 2;  // Cancel movement
-			sprite->changeAnimation(STAND_DOWN);
-		}
-	}
-	else if (Game::instance().getKey(GLFW_KEY_I))
-	{
-		currentDirection = UP;
-		if (sprite->animation() != MOVE_UP)
-			sprite->changeAnimation(MOVE_UP);
-		posEnemy.y -= 2;  // Move down (increase Y)
-		if (map->collisionMoveUp(posEnemy, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
-		{
-			posEnemy.y += 2;  // Cancel movement
-			sprite->changeAnimation(STAND_DOWN);
-		}
-	}
-	else
-	{
-		switch (currentDirection) {
-			case LEFT:
-				sprite->changeAnimation(STAND_LEFT);
-				break;
-			case RIGHT:
-				sprite->changeAnimation(STAND_RIGHT);
-				break;
-			case DOWN:
-				sprite->changeAnimation(STAND_DOWN);
-				break;
-			case UP:
-				sprite->changeAnimation(STAND_UP);
-				break;
-		}
-	}
+	if (attackCooldownTimer > 0) attackCooldownTimer -= deltaTime;
+	updateStateMachine(deltaTime);
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
 }
 
@@ -116,66 +52,12 @@ void Enemy::setPosition(const glm::vec2& pos)
 
 void Enemy::setSpriteSheet(const string& spriteSheet)
 {
-	this->spriteSheet = spriteSheet;
-	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
+	spritesheet.loadFromFile(spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
 }
 
-void Enemy::initializeAnimations() 
-{
-	//DEFAULT ANIMATIONS. TO BE OVERRIDEN BY CHILD CLASSES
-	const float FRAME_WIDTH = 1.0f / 4.0f;
-	const float FRAME_HEIGHT = 1.0f / 4.0f;
-	sprite->setNumberAnimations(9);
-	// STANDING ANIMATIONS
-	sprite->setAnimationSpeed(STAND_DOWN, 8);
-	sprite->addKeyframe(STAND_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-
-	sprite->setAnimationSpeed(STAND_UP, 8);
-	sprite->addKeyframe(STAND_UP, glm::vec2(1.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-
-	sprite->setAnimationSpeed(STAND_LEFT, 8);
-	sprite->addKeyframe(STAND_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-
-
-	sprite->setAnimationSpeed(STAND_RIGHT, 8);
-	sprite->addKeyframe(STAND_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-
-
-	//MOVING ANIMATIONS
-	sprite->setAnimationSpeed(MOVE_DOWN, 8);
-	sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
-
-	sprite->setAnimationSpeed(MOVE_UP, 8);
-	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
-
-
-	sprite->setAnimationSpeed(MOVE_LEFT, 8);
-	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
-
-
-
-	sprite->setAnimationSpeed(MOVE_RIGHT, 8);
-	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
-	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
-
-	sprite->changeAnimation(STAND_DOWN);
-	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
-}
-
-void Enemy::initializeSprite(ShaderProgram& shaderProgram) {
+void Enemy::initializeSprite(ShaderProgram& shaderProgram, const string& spritesheetPath) {
 	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
-	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
+	spritesheet.loadFromFile(spritesheetPath, TEXTURE_PIXEL_FORMAT_RGBA);
 	sprite = Sprite::createSprite(QUAD_SIZE, glm::vec2(0.25f, 0.25f), &spritesheet, &shaderProgram);
 }
 
@@ -234,11 +116,6 @@ void Enemy::followPath(int deltaTime)
 			changeAnimationsForDirection(direction);
 		}
 	}
-}
-
-void Enemy::changeAnimationsForDirection(glm::vec2 direction)
-{
-	cout << "Base Enemy changeAnimationsForDirection called. This should be overridden." << endl;
 }
 
 // Common helpers
@@ -318,4 +195,10 @@ void Enemy::takeDamage(int damage)
 	}
 
 	//TODO visuals
+}
+
+// Common attacking behaviour
+void Enemy::onDamageDealt()
+{
+	attackCooldownTimer = attackCooldown;
 }

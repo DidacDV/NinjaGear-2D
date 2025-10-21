@@ -32,7 +32,7 @@ void Game::init(int screenWidth, int screenHeight)
 	jungleEnemies.reserve(3);
 	jungleEnemies.push_back(EnemyConfig{35, 10, "images/enemies/cyclope.png", static_cast<Enemy*>(new RangedEnemy())});
 	jungleEnemies.push_back(EnemyConfig{10, 5,  "images/enemies/cyclope.png", static_cast<Enemy*>(new MeleeEnemy())});
-	jungleEnemies.push_back(EnemyConfig{5,  5,  "images/enemies/cyclope.png", static_cast<Enemy*>(new Enemy())});
+	//jungleEnemies.push_back(EnemyConfig{5,  5,  "images/enemies/cyclope.png", static_cast<Enemy*>(new Enemy())});
 
 	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies);
 

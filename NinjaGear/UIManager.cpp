@@ -127,20 +127,8 @@ void UIManager::calculateLayout() {
 //TODO: use player getter functions
 void UIManager::update(int deltaTime, Player* player)
 {
-    static float timeSinceLastChange = 0.f;
-    const float debounceDelay = 3000.f; //3sec
-
-    timeSinceLastChange += deltaTime;
-
-    if (timeSinceLastChange >= debounceDelay) {
-        int random = rand() % 6; 
-		int rankrandom = rand() % maxRank;
-        if (player != nullptr) {
-            health = random;
-			rank = rankrandom;
-        }
-        timeSinceLastChange = 0.f; 
-    }
+    if (player != nullptr && health != player->getHealth() / 10.0f) health = player->getHealth()/10.0f;
+    if (player != nullptr && rank != player->getRank()) rank = player->getRank();
 }
 
 void UIManager::renderFixedText() {
