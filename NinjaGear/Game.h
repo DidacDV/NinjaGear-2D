@@ -60,6 +60,7 @@ private:
 	map<string, Scene*> levels;
 	Scene* currentScene;
 	UIManager* uiManager;
+	int mouseX, mouseY;
 };
 
 

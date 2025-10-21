@@ -23,6 +23,7 @@ public:
 	virtual void init();
 	virtual void update(int deltaTime);
 	virtual void render();
+	virtual void resetViewportFullScreen();
 
 protected:
 	void initShaders();
