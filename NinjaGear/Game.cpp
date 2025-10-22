@@ -38,7 +38,7 @@ void Game::init(int screenWidth, int screenHeight)
 	jungleEnemies.reserve(3);
 	jungleEnemies.push_back(EnemyConfig{35, 10, "images/enemies/cyclope.png", EnemyType::RANGED });
 	jungleEnemies.push_back(EnemyConfig{10, 5,  "images/enemies/cyclope.png", EnemyType::MELEE });
-	jungleEnemies.push_back(EnemyConfig{5,  5,  "images/enemies/cyclope.png", EnemyType::RANGED });
+	jungleEnemies.push_back(EnemyConfig{5,  5,  "images/enemies/cyclope.png", EnemyType::BASE });
 
 	Level* outside = new Level(outside_layers, player, 10, 10, jungleEnemies);
 
