@@ -5,11 +5,17 @@
 
 class Enemy;
 
+enum class EnemyType {
+    BASE,
+    MELEE,
+    RANGED
+};
+
 struct EnemyConfig {
     int xTile;
     int yTile;
     string spriteSheet;
-    Enemy* enemyInstance;
+    EnemyType type;
 };
 
 class Level :
@@ -47,5 +53,6 @@ class Level :
         void updateCameraSector();
         void calculateCameraOffset();
         void initializeEnemies();
+        void clearEnemies();
 };
 

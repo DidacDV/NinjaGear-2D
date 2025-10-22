@@ -36,9 +36,9 @@ void Game::init(int screenWidth, int screenHeight)
 	// Usamos push_back con cast explícito para asegurarnos que MeleeEnemy* sea tratado como Enemy*
 	vector<EnemyConfig> jungleEnemies;
 	jungleEnemies.reserve(3);
-	jungleEnemies.push_back(EnemyConfig{35, 10, "images/enemies/cyclope.png", static_cast<Enemy*>(new RangedEnemy())});
-	jungleEnemies.push_back(EnemyConfig{10, 5,  "images/enemies/cyclope.png", static_cast<Enemy*>(new MeleeEnemy())});
-	jungleEnemies.push_back(EnemyConfig{5,  5,  "images/enemies/cyclope.png", static_cast<Enemy*>(new Enemy())});
+	jungleEnemies.push_back(EnemyConfig{35, 10, "images/enemies/cyclope.png", EnemyType::RANGED });
+	jungleEnemies.push_back(EnemyConfig{10, 5,  "images/enemies/cyclope.png", EnemyType::MELEE });
+	jungleEnemies.push_back(EnemyConfig{5,  5,  "images/enemies/cyclope.png", EnemyType::RANGED });
 
 	Level* outside = new Level(outside_layers, player, 10, 10, jungleEnemies);
 
