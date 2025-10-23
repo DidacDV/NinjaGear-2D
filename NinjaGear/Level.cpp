@@ -1,4 +1,6 @@
 #include "Level.h"
+#include "RangedEnemy.h"
+#include "MeleeEnemy.h"
 #include <iostream>
 
 #define SCREEN_X 0
@@ -38,15 +40,7 @@ Level::Level(const vector<string>& tileMapFiles, Player* player,
 Level::~Level()
 {
 	Scene::~Scene();
-	for (unsigned int i = 0; i < enemies.size(); i++)
-	{
-		if (enemies[i] != nullptr)
-		{
-			delete enemies[i];
-			enemies[i] = nullptr;
-		}
-	}
-	enemies.clear();
+	clearEnemies();
 	this->player = nullptr;
 }
 
@@ -61,7 +55,8 @@ void Level::init()
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
 	player->setTileMaps(maps);
 
-	//Initialize enemies
+	//need to clear on each init to not duplicate enemies frames
+	clearEnemies();
 	initializeEnemies();
 
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
@@ -158,10 +153,36 @@ void Level::addEnemy(const string& spriteSheet, int initX, int initY)
 
 void Level::initializeEnemies() {
 	for (const auto& config : enemyConfigs) {
-		Enemy* enemy = config.enemyInstance;
+		Enemy* enemy = nullptr;
+		switch (config.type) {
+			case EnemyType::BASE:
+				enemy = new Enemy();
+				break;
+			case EnemyType::MELEE:
+				enemy = new MeleeEnemy();
+				break;
+			case EnemyType::RANGED:
+				enemy = new RangedEnemy();
+				break;
+			default:
+				enemy = new Enemy();
+				break;
+		}
 		enemy->setSpriteSheet(config.spriteSheet);
 		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0]);
 		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
 		enemies.push_back(enemy);
 	}
+}
+
+void Level::clearEnemies() {
+	for (unsigned int i = 0; i < enemies.size(); i++)
+	{
+		if (enemies[i] != nullptr)
+		{
+			delete enemies[i];
+			enemies[i] = nullptr;
+		}
+	}
+	enemies.clear();
 }
