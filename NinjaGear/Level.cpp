@@ -41,6 +41,7 @@ Level::~Level()
 {
 	Scene::~Scene();
 	clearEnemies();
+	clearItems();
 	this->player = nullptr;
 }
 
@@ -58,6 +59,9 @@ void Level::init()
 	//need to clear on each init to not duplicate enemies frames
 	clearEnemies();
 	initializeEnemies();
+
+	clearItems();
+	initializeItems();
 
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeight = maps[0]->mapSize.y * maps[0]->getTileSize();
@@ -85,6 +89,7 @@ void Level::update(int deltaTime)
 {
 	Scene::update(deltaTime);
 	player->update(deltaTime);
+	//TODO check for items pickup
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->update(deltaTime);
 	updateCameraSector();
 }
@@ -137,6 +142,9 @@ void Level::render()
 	for (unsigned int i = 0; i < maps.size(); i++)
 		maps[i]->render();
 
+	for (unsigned int i = 0; i < items.size(); i++)
+		items[i]->render(view);
+
 	// Render all enemies
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->render(view);
 	// Player render - pass the view matrix
@@ -175,6 +183,25 @@ void Level::initializeEnemies() {
 	}
 }
 
+void Level::initializeItems() {
+	int tileSize = maps[0]->getTileSize();
+
+	// Example: Create a medipack at tile position (5, 5)
+	Texture* medpackTexture = new Texture();
+	medpackTexture->loadFromFile("images/items/Medipack.png", TEXTURE_PIXEL_FORMAT_RGBA);
+
+	Item* medipack = new Item(
+		glm::vec2(tileSize, tileSize),       // Item size (same as tile)
+		glm::vec2(1.0f, 1.0f),                // Full texture (1.0 = 100% of texture)
+		medpackTexture,                       // Texture pointer
+		&this->texProgram                     // Shader program
+	);
+
+	medipack->setPosition(glm::vec2(15,10));
+
+	items.push_back(medipack);
+}
+
 void Level::clearEnemies() {
 	for (unsigned int i = 0; i < enemies.size(); i++)
 	{
@@ -185,4 +212,16 @@ void Level::clearEnemies() {
 		}
 	}
 	enemies.clear();
+}
+
+void Level::clearItems() {
+	for (unsigned int i = 0; i < items.size(); i++)
+	{
+		if (items[i] != nullptr)
+		{
+			delete items[i];
+			items[i] = nullptr;
+		}
+	}
+	items.clear();
 }

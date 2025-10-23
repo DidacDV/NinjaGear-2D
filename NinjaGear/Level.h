@@ -2,7 +2,7 @@
 #include "Scene.h"
 #include "Player.h"
 #include "Enemy.h"
-
+#include "Item.h"
 class Enemy;
 
 enum class EnemyType {
@@ -39,6 +39,7 @@ class Level :
         // Enemies
         vector<Enemy*> enemies;
         vector<EnemyConfig> enemyConfigs;
+		vector<Item*> items;
         // Camera sector traking
         int currentSectorI;  
         int currentSectorJ;  
@@ -54,5 +55,7 @@ class Level :
         void calculateCameraOffset();
         void initializeEnemies();
         void clearEnemies();
+        void initializeItems();
+        void clearItems();
 };
 
