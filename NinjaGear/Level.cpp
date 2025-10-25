@@ -195,33 +195,48 @@ void Level::initializeEnemies() {
 void Level::initializeItems() {
 	int tileSize = maps[0]->getTileSize();
 
-	// Example: Create a medipack at tile position (5, 5)
+	initializeObjects(tileSize);
+	initializeWeapons(tileSize);
+}
+
+void Level::initializeObjects(int tileSize) {
 	Texture* medpackTexture = new Texture();
 	medpackTexture->loadFromFile("images/items/Medipack.png", TEXTURE_PIXEL_FORMAT_RGBA);
 
 	Item* medipack = new Item(
-		glm::vec2(tileSize, tileSize),       
-		glm::vec2(1.0f, 1.0f),           
-		medpackTexture,                      
+		glm::vec2(tileSize, tileSize),
+		glm::vec2(1.0f, 1.0f),
+		medpackTexture,
 		&this->texProgram,
 		glm::ivec2(SCREEN_X, SCREEN_Y)
 	);
 	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(25, 10), false, tileSize);
 
+	Item* medipack2 = new Item(
+		glm::vec2(tileSize, tileSize),
+		glm::vec2(1.0f, 1.0f),
+		medpackTexture,  // Share same texture                     
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	medipack2->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(30, 15), false, tileSize);
+
+	items.push_back(medipack);
+	items.push_back(medipack2);
+}
+
+void Level::initializeWeapons(int tileSize) {
 	Texture* rapierTexture = new Texture();
 	rapierTexture->loadFromFile("images/items/Rapier.png", TEXTURE_PIXEL_FORMAT_RGBA);
 
 	Item* rapier = new Item(
-		glm::vec2(10, 15),       
-		glm::vec2(1.0f, 1.0f),                
+		glm::vec2(10, 15),
+		glm::vec2(1.0f, 1.0f),
 		rapierTexture,
-		&this->texProgram,                    
+		&this->texProgram,
 		glm::ivec2(SCREEN_X, SCREEN_Y)
 	);
 	rapier->setItem("RAPIER", 1, "Medium range weapon.", glm::vec2(15, 10), true, tileSize);
-
-
-	items.push_back(medipack);
 	items.push_back(rapier);
 }
 
@@ -267,16 +282,22 @@ void Level::checkItemPickUp() {
 void Level::itemPickUpEvent(int indexInVector) {
 	Item* itemPicked = items[indexInVector];
 
+	bool isFirstOfKind = (player->getItemQuantity(itemPicked->getName()) == 0);
+
 	player->addItem(itemPicked);
 
 	if (uiManager != nullptr) {
 		std::string pickupText = "PICKED UP " + itemPicked->getName() + "!";
 		glm::vec2 messagePos(320, 160);
-		glm::vec3 messageColor(0.f, .0f, 0.f);  
-		uiManager->showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000); // 2 seconds
+		glm::vec3 messageColor(0.f, 0.f, 0.f);
+		uiManager->showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
 	}
 
-	//TODO -> player pick up X
+	//only delete if itss not the first (Player keeps first instance)
+	if (!isFirstOfKind && !itemPicked->getIsWeapon()) {
+		delete itemPicked;
+	}
+
 	items.erase(items.begin() + indexInVector);
 }
 

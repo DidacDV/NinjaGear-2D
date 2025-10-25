@@ -17,7 +17,7 @@ public:
 	virtual void render(const glm::mat4& view);
 
 	string getName();
-	int getQuantity() const;
+	int getQuantity() const { return quantity; }
 	string getDescription();
 	glm::vec2 getPosition();
 	bool getIsWeapon() const { return isWeapon; }

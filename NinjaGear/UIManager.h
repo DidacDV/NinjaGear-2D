@@ -44,7 +44,7 @@ private:
     void initTextures();
 	void renderHealth(const glm::vec2& position, float currentHealth, float maxHealth);
     void renderRank(const glm::vec2& position, int currentRank);
-	void renderItem(const glm::vec2& position, const string& weaponName, const string& basepath); //used for both objects and weapons
+	void renderItem(const glm::vec2& position, const string& weaponName, const string& basepath, int quantity); //used for both objects and weapons
 
     void renderTemporaryMessages();
     void updateTemporaryMessages(int deltaTime);
@@ -59,6 +59,7 @@ private:
     float health;
     float maxHealth;
     string currentItemName;
+	int currentItemQuantity;
     string currentWeaponName;
     int rank; //goes from 0 (worst) to 6 (best)
     int maxRank = 6;

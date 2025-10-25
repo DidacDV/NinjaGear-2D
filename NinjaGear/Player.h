@@ -5,6 +5,7 @@
 #include "Sprite.h"
 #include "TileMap.h"
 #include "Item.h"
+#include <unordered_map>
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
 
@@ -44,6 +45,7 @@ public:
 
 	bool hasItems() const { return !itemInventory.empty(); }
 	bool hasWeapons() const { return !weaponInventory.empty(); }
+	int getItemQuantity(const std::string& itemName) const;
 
 private:
 	bool collisionMoveLeft(const glm::ivec2& pos, const glm::ivec2& size) const;
@@ -63,6 +65,8 @@ private:
 	vector<Item*> itemInventory;
 	//weapons only
 	vector<Item*> weaponInventory;
+
+	std::unordered_map<std::string, int> itemQuantities;
 	int currentItemIndex;
 	int currentWeaponIndex;
 	float health;

@@ -23,6 +23,11 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 {
 	health = 3.0f;
 	maxHealth = 5.0f;
+
+	itemQuantities.clear();
+	itemInventory.clear();
+	weaponInventory.clear();
+
 	initDefaultWeapon();
 	const float FRAME_WIDTH = 1.0f / 4.0f;
 	const float FRAME_HEIGHT = 1.0f / 7.0f;
@@ -310,15 +315,21 @@ void Player::addItem(Item* item) {
 		cout << "Switched to: " << equippedWeapon << endl;
 	}
 	else {
-		itemInventory.push_back(item);
-		//if this is first item, select it
-		if (itemInventory.size() == 1) {
-			currentItemIndex = 0;
+		string name = item->getName();
+		itemQuantities[name]++;
+		if (itemQuantities[name] == 1) {
+			itemInventory.push_back(item);
+			if (itemInventory.size() == 1) {
+				currentItemIndex = 0;
+			}
 		}
-
-		cout << "Added ITEM " << item->getName() << " to item inventory" << endl;
-		cout << "Item inventory size: " << itemInventory.size() << endl;
 	}
+}
+
+int Player::getItemQuantity(const std::string& itemName) const {
+	auto it = itemQuantities.find(itemName);
+	if (it != itemQuantities.end()) return it->second;
+	return 0;
 }
 
 void Player::cycleItem() {
@@ -359,17 +370,21 @@ void Player::useCurrentItem() {
 	string itemName = item->getName();
 
 	if (itemName == "MEDIPACK") {
+		if (health == maxHealth)
+			return;
 		heal(1.f);
 		cout << "Used MEDIPACK! Health: " << health << "/" << maxHealth << endl;
-		delete itemInventory[currentItemIndex];
-		itemInventory.erase(itemInventory.begin() + currentItemIndex);
+		itemQuantities[itemName]--;
+
+		if (itemQuantities[itemName] <= 0) {
+			itemQuantities.erase(itemName);
+			delete item;
+			itemInventory.erase(itemInventory.begin() + currentItemIndex);
+		}
 
 		if (currentItemIndex >= itemInventory.size() && !itemInventory.empty()) {
 			currentItemIndex = 0;
 		}
-	}
-	else if (itemName == "KEY") {
-		cout << "You have a KEY. Find a door to unlock!" << endl;
 	}
 	else {
 		cout << "Cannot use item: " << itemName << endl;

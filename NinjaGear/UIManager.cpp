@@ -141,6 +141,7 @@ void UIManager::update(int deltaTime, Player* player) {
         Item* currentItem = player->getCurrentItem();
         if (currentItem != nullptr) {
             currentItemName = currentItem->getName();
+            currentItemQuantity = player->getItemQuantity(currentItemName);
         }
         else {
             currentItemName = "";
@@ -206,14 +207,14 @@ void UIManager::render()
     if (!currentWeaponName.empty()) {
         string weaponLower = currentWeaponName;
         transform(weaponLower.begin(), weaponLower.end(), weaponLower.begin(), ::tolower);
-        renderItem(uiPositions.weapon_value_pos, "images/weapons/", weaponLower);
+        renderItem(uiPositions.weapon_value_pos, "images/weapons/", weaponLower, 1);
     }
 
     // Render current inventory item
     if (!currentItemName.empty()) {
         string itemLower = currentItemName;
         transform(itemLower.begin(), itemLower.end(), itemLower.begin(), ::tolower);
-        renderItem(uiPositions.object_value_pos, "images/items/", itemLower);
+        renderItem(uiPositions.object_value_pos, "images/items/", itemLower, currentItemQuantity);
     }
 
     glBindVertexArray(0);
@@ -312,7 +313,7 @@ void UIManager::renderRank(const glm::vec2& position, int currentRank) {
     texProgram.use();
 }
 
-void UIManager::renderItem(const glm::vec2& position, const string& basePath, const string& itemName)
+void UIManager::renderItem(const glm::vec2& position, const string& basePath, const string& itemName, int quantity)
 {
     bool isWeapon = basePath.find("weapons") != std::string::npos;
     Texture* tex = UIManagerUtils::findOrLoadItemTexture(basePath, itemName, isWeapon, weaponTextures, objectTextures);
@@ -326,6 +327,9 @@ void UIManager::renderItem(const glm::vec2& position, const string& basePath, co
     renderPanel(glm::vec2(position.x, position.y - 3), glm::vec2(ICON_SIZE, ICON_SIZE), tex); // - 3 --> center with label, TODO try with different weapons etc
     //label
     std::string itemNameUpper = UIManagerUtils::toUppercase(itemName);
+    if (quantity > 1) {
+        itemNameUpper += " X" + std::to_string(quantity);
+    }
     textRenderer->RenderText(itemNameUpper, position.x + ICON_TEXT_MARGIN, position.y + 5, 0.8f, glm::vec3(1.f));
 
     glBindVertexArray(vao);

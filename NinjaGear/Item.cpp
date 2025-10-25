@@ -34,11 +34,6 @@ string Item::getName()
 	return name;
 }
 
-int Item::getQuantity() const
-{
-	return quantity;
-}
-
 string Item::getDescription()
 {
 	return description;

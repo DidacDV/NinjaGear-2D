@@ -61,6 +61,8 @@ class Level :
         void initializeEnemies();
         void clearEnemies();
         void initializeItems();
+		void initializeObjects(int tileSize);
+		void initializeWeapons(int tileSize);
         void clearItems();
         void checkItemPickUp();
         bool checkColission(glm::vec2& pos1, glm::vec2& pos2, int size1, int size2);
