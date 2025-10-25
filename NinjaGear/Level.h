@@ -2,7 +2,8 @@
 #include "Scene.h"
 #include "Player.h"
 #include "Enemy.h"
-
+#include "Item.h"
+#include "UIManager.h"
 class Enemy;
 
 enum class EnemyType {
@@ -32,6 +33,8 @@ class Level :
 	// Enemy management
     void addEnemy(const string& spriteSheet, int initX, int initY);
 
+    void setUIManager(UIManager* uiManager);
+
     private:
         //Player
         Player* player;
@@ -39,6 +42,9 @@ class Level :
         // Enemies
         vector<Enemy*> enemies;
         vector<EnemyConfig> enemyConfigs;
+		vector<Item*> items;
+        //UIManager
+        UIManager* uiManager;
         // Camera sector traking
         int currentSectorI;  
         int currentSectorJ;  
@@ -54,5 +60,10 @@ class Level :
         void calculateCameraOffset();
         void initializeEnemies();
         void clearEnemies();
+        void initializeItems();
+        void clearItems();
+        void checkItemPickUp();
+        bool checkColission(glm::vec2& pos1, glm::vec2& pos2, int size1, int size2);
+        void itemPickUpEvent(int indexInVector);
 };
 

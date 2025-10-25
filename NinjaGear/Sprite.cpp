@@ -4,6 +4,20 @@
 #include "Sprite.h"
 
 
+Sprite::Sprite() {
+	vao = 0;
+	vbo = 0;
+	texture = nullptr;
+	shaderProgram = nullptr;
+	posLocation = 0;
+	texCoordLocation = 0;
+	position = glm::vec2(0.f);
+	currentAnimation = -1;
+	currentKeyframe = 0;
+	timeAnimation = 0.0f;
+	texCoordDispl = glm::vec2(0.f);
+}
+
 Sprite *Sprite::createSprite(const glm::vec2 &quadSize, const glm::vec2 &sizeInSpritesheet, Texture *spritesheet, ShaderProgram *program)
 {
 	Sprite *quad = new Sprite(quadSize, sizeInSpritesheet, spritesheet, program);

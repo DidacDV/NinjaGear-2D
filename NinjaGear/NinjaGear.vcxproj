@@ -16,6 +16,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GeometryUtils.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="MeleeEnemy.h" />
     <ClInclude Include="Menu.h" />
@@ -37,6 +38,7 @@
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Globals.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeleeEnemy.cpp" />

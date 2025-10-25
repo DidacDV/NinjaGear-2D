@@ -56,6 +56,15 @@ void UIManager::init()
     vShader.free();
     fShader.free();
 
+    initTextures();
+
+    textRenderer = new Text("resources/NormalFont.ttf", FONT_SIZE, screenWidth, screenHeight * 0.15);
+    calculateLayout();
+    
+    initQuad();
+}
+
+void UIManager::initTextures() {
     if (!fullHeartTexture.loadFromFile("images/ui/FullHeart.png", TEXTURE_PIXEL_FORMAT_RGBA)) {
         std::cout << "ERROR: Could not load star_filled.png" << std::endl;
     }
@@ -75,10 +84,9 @@ void UIManager::init()
         }
     }
 
-    textRenderer = new Text("resources/NormalFont.ttf", 24, screenWidth, screenHeight * 0.15);
-    calculateLayout();
-    
-    initQuad();
+    if (!dialogBoxTexture.loadFromFile("images/ui/DialogBox.png", TEXTURE_PIXEL_FORMAT_RGBA)) {
+        std::cout << "ERROR: Could not load DialogBox.png" << std::endl;
+    }
 }
 
 void UIManager::initQuad()
@@ -141,6 +149,8 @@ void UIManager::update(int deltaTime, Player* player)
         }
         timeSinceLastChange = 0.f; 
     }
+
+    updateTemporaryMessages(deltaTime);
 }
 
 void UIManager::renderFixedText() {
@@ -191,7 +201,35 @@ void UIManager::render()
 
     renderItem(uiPositions.weapon_value_pos, "images/weapons/", "axe1");
     renderItem(uiPositions.object_value_pos, "images/weapons/", "axe1");
+
     glBindVertexArray(0);
+}
+
+//curently used for text when picking up items. maybe dialog too?
+void UIManager::renderGameOverlay()
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+
+    // Setup viewport for game area (85% of screen, top portion)
+    int gameHeight = static_cast<int>(screenHeight * 0.85f);
+    int gameY = static_cast<int>(screenHeight * 0.15f);  // Start above UI panel
+
+    glViewport(0, gameY, screenWidth, gameHeight);
+
+    // Create projection for game viewport
+    glm::mat4 gameProjection = glm::ortho(0.f, static_cast<float>(screenWidth),
+        static_cast<float>(gameHeight), 0.f);
+
+    // Update text renderer projection temporarily
+    textRenderer->UpdateScreenSize(screenWidth, gameHeight);
+
+    // Render temporary messages
+    renderTemporaryMessages();
+
+    // Restore text renderer to UI dimensions
+    textRenderer->UpdateScreenSize(screenWidth, screenHeight * 0.15f);
 }
 
 void UIManager::setupViewport(float heightPercent, float yOffsetPercent)
@@ -278,4 +316,68 @@ void UIManager::renderItem(const glm::vec2& position, const string& basePath, co
 
     glBindVertexArray(vao);
     texProgram.use();
+}
+
+void UIManager::renderTemporaryMessages()
+{
+    int gameHeight = static_cast<int>(screenHeight * 0.85f);
+    glm::mat4 gameProjection = glm::ortho(0.f, static_cast<float>(screenWidth),
+        static_cast<float>(gameHeight), 0.f);
+
+    texProgram.use();
+    texProgram.setUniformMatrix4f("projection", gameProjection);
+
+    for (const auto& msg : temporaryMessages)
+    {
+        glm::vec3 color = msg.color;
+        float alpha = msg.remainingTime / 500.0f;
+        if (msg.remainingTime < 500) {
+            color *= alpha;
+        }
+
+        showMessageAndDialog(msg, alpha, color);
+    }
+}
+
+void UIManager::showMessageAndDialog(TemporaryMessage msg, float alpha, glm::vec3 color) {
+    float paddingX = 8.0f;
+    float paddingY = 4.0f;
+
+    float estimatedWidth = msg.text.size() * FONT_SIZE * msg.scale * 0.9f;
+    float estimatedHeight = FONT_SIZE * msg.scale * 1.4f;
+
+    glm::vec2 boxPos = glm::vec2(msg.position.x - paddingX, msg.position.y - paddingY - 10);
+    glm::vec2 boxSize = glm::vec2(estimatedWidth + paddingX * 1.1, estimatedHeight + paddingY * 2);
+
+    glBindVertexArray(vao);
+    renderPanel(boxPos, boxSize, &dialogBoxTexture, glm::vec4(1.0f, 1.0f, 1.0f, alpha));
+
+    textRenderer->RenderText(msg.text, msg.position.x, msg.position.y, msg.scale, color);
+}
+
+void UIManager::showTemporaryMessage(const std::string& text, const glm::vec2& position,
+    float scale, const glm::vec3& color, int durationMs)
+{
+    TemporaryMessage msg;
+    msg.text = text;
+    msg.position = position;
+    msg.scale = scale;
+    msg.color = color;
+    msg.remainingTime = durationMs;
+    msg.totalDuration = durationMs;
+
+    temporaryMessages.push_back(msg);
+}
+
+//just to delete those who are expired
+void UIManager::updateTemporaryMessages(int deltaTime) {
+    for (int i = temporaryMessages.size() - 1; i >= 0; i--)
+    {
+        temporaryMessages[i].remainingTime -= deltaTime;
+        //remove expired messages
+        if (temporaryMessages[i].remainingTime <= 0)
+        {
+            temporaryMessages.erase(temporaryMessages.begin() + i);
+        }
+    }
 }

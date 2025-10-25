@@ -14,9 +14,10 @@ void Game::init(int screenWidth, int screenHeight)
 	mouseX = 0;
 	mouseY = 0;
 
-	/*UI MANAGER*/
-	this->uiManager = new UIManager();
-	this->uiManager->init();
+	/*UI MANAGER, same instance used in multiple classes*/ //todo singleton?
+	UIManager* GLOBAL_UI_MANAGER = new UIManager();
+	GLOBAL_UI_MANAGER->init();
+	this->uiManager = GLOBAL_UI_MANAGER;
 	/* PLAYER */
 	this->player = new Player();
 	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
@@ -41,7 +42,7 @@ void Game::init(int screenWidth, int screenHeight)
 	jungleEnemies.push_back(EnemyConfig{5,  5,  "images/enemies/cyclope.png", EnemyType::BASE });
 
 	Level* outside = new Level(outside_layers, player, 10, 10, jungleEnemies);
-
+	outside->setUIManager(GLOBAL_UI_MANAGER);
 	addScene("outside", outside);
 	addScene("startMenu", startMenu);
 	addScene("settings", settingsMenu);
@@ -71,6 +72,7 @@ void Game::render()
 	Menu* menu = dynamic_cast<Menu*>(currentScene);
 	if (menu == NULL && uiManager != NULL) {
 		uiManager->render();
+		uiManager->renderGameOverlay();
 	}
 }
 
