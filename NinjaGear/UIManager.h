@@ -58,10 +58,10 @@ private:
     //UI data
     float health;
     float maxHealth;
-    int currentWeapon;
+    string currentItemName;
+    string currentWeaponName;
     int rank; //goes from 0 (worst) to 6 (best)
     int maxRank = 6;
-    int currentObject;
 
     //Rendering
     GLuint vao;

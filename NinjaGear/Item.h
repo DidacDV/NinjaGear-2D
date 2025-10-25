@@ -20,8 +20,9 @@ public:
 	int getQuantity() const;
 	string getDescription();
 	glm::vec2 getPosition();
+	bool getIsWeapon() const { return isWeapon; }
 
-	void setItem(string name, int quantity, string description, glm::vec2 position, int tileSize);
+	void setItem(string name, int quantity, string description, glm::vec2 position, bool isWeapon, int tileSize);
 	void setName(const string& name);
 	void setQuantity(int quantity);
 	void setDescription(const string& description);
@@ -31,6 +32,7 @@ private:
 	int quantity;
 	string description;
 	glm::vec2 position;
+	bool isWeapon;
 };
 
 #endif

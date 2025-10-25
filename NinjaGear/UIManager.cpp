@@ -10,9 +10,9 @@ UIManager::UIManager()
 {
     health = 3.5f;
     maxHealth = 5.f;
-    currentWeapon = 0;
+	currentItemName = "";
+    currentWeaponName = "";
     rank = 2;
-    currentObject = 0;
     vao = 0;
     vbo = 0;
 }
@@ -133,23 +133,27 @@ void UIManager::calculateLayout() {
 }
 
 //TODO: use player getter functions
-void UIManager::update(int deltaTime, Player* player)
-{
-    static float timeSinceLastChange = 0.f;
-    const float debounceDelay = 3000.f; //3sec
+void UIManager::update(int deltaTime, Player* player) {
+    if (player != nullptr) {
+        health = player->getHealth();
+        rank = 1;
 
-    timeSinceLastChange += deltaTime;
-
-    if (timeSinceLastChange >= debounceDelay) {
-        int random = rand() % 6; 
-		int rankrandom = rand() % maxRank;
-        if (player != nullptr) {
-            health = random;
-			rank = rankrandom;
+        Item* currentItem = player->getCurrentItem();
+        if (currentItem != nullptr) {
+            currentItemName = currentItem->getName();
         }
-        timeSinceLastChange = 0.f; 
-    }
+        else {
+            currentItemName = "";
+        }
 
+        Item* currentWeapon = player->getCurrentWeapon();
+        if (currentWeapon != nullptr) {
+            currentWeaponName = currentWeapon->getName();
+        }
+        else {
+            currentWeaponName = "Punch"; 
+        }
+    }
     updateTemporaryMessages(deltaTime);
 }
 
@@ -199,8 +203,18 @@ void UIManager::render()
     texProgram.setUniformMatrix4f("projection", projection);
     texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
 
-    renderItem(uiPositions.weapon_value_pos, "images/weapons/", "axe1");
-    renderItem(uiPositions.object_value_pos, "images/weapons/", "axe1");
+    if (!currentWeaponName.empty()) {
+        string weaponLower = currentWeaponName;
+        transform(weaponLower.begin(), weaponLower.end(), weaponLower.begin(), ::tolower);
+        renderItem(uiPositions.weapon_value_pos, "images/weapons/", weaponLower);
+    }
+
+    // Render current inventory item
+    if (!currentItemName.empty()) {
+        string itemLower = currentItemName;
+        transform(itemLower.begin(), itemLower.end(), itemLower.begin(), ::tolower);
+        renderItem(uiPositions.object_value_pos, "images/items/", itemLower);
+    }
 
     glBindVertexArray(0);
 }

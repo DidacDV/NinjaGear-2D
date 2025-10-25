@@ -4,6 +4,7 @@
 
 #include "Sprite.h"
 #include "TileMap.h"
+#include "Item.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
 
@@ -18,12 +19,31 @@ public:
 	virtual void init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram);
 	virtual void update(int deltaTime);
 	virtual void render(const glm::mat4& view = glm::mat4(1.0f));
-	
+
 	void setTileMaps(const vector<TileMap*>& tileMaps);
 	void setPosition(const glm::vec2 &pos);
 	void setSpriteSheet(const string& spriteSheet);
 	glm::ivec2 getPosition() { return posPlayer; }
 	glm::vec2 getPositionFloat() { return glm::vec2(posPlayer); }
+
+	//both items and weapons
+	void addItem(Item* item);
+	void initDefaultWeapon();
+
+	void cycleItem();
+	void useCurrentItem();
+	void cycleWeapon();
+	Item* getCurrentItem() const;
+
+	Item* getCurrentWeapon() const;
+
+	float getHealth() const { return health; }
+	float getMaxHealth() const { return maxHealth; }
+	void setHealth(float h) { health = h; }
+	void heal(float amount);
+
+	bool hasItems() const { return !itemInventory.empty(); }
+	bool hasWeapons() const { return !weaponInventory.empty(); }
 
 private:
 	bool collisionMoveLeft(const glm::ivec2& pos, const glm::ivec2& size) const;
@@ -38,7 +58,25 @@ private:
 	Sprite *sprite;
 	vector<TileMap*> maps;
 	string spriteSheet;
+
+	//items
+	vector<Item*> itemInventory;
+	//weapons only
+	vector<Item*> weaponInventory;
+	int currentItemIndex;
+	int currentWeaponIndex;
+	float health;
+	float maxHealth;
+	string equippedWeapon;
+public:
+	~Player() {
+		for (Item* item : itemInventory) delete item;
+		for (Item* weapon : weaponInventory) delete weapon;
+		itemInventory.clear();
+		weaponInventory.clear();
+	}
 };
+
 
 
 #endif // _PLAYER_INCLUDE

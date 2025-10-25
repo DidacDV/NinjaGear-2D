@@ -21,11 +21,13 @@ enum PlayerAnims
 
 void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 {
+	health = 3.0f;
+	maxHealth = 5.0f;
+	initDefaultWeapon();
 	const float FRAME_WIDTH = 1.0f / 4.0f;
 	const float FRAME_HEIGHT = 1.0f / 7.0f;
 	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
 	const glm::vec2 FRAME_NORMALIZED_SIZE = glm::vec2(0.25, 0.1428);
-
 
 	bJumping = false;
 	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
@@ -110,6 +112,38 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 void Player::update(int deltaTime)
 {
 	sprite->update(deltaTime);
+	//for debounce
+	static bool cKeyPressed = false;
+	static bool xKeyPressed = false;
+	static bool vKeyPressed = false;
+
+	if (Game::instance().getKey(GLFW_KEY_C)) {
+		if (!cKeyPressed) {
+			cycleItem();
+			cKeyPressed = true;
+		}
+	}
+	else {
+		cKeyPressed = false;
+	}
+	if (Game::instance().getKey(GLFW_KEY_X)) {
+		if (!xKeyPressed) {
+			useCurrentItem();
+			xKeyPressed = true;
+		}
+	}
+	else {
+		xKeyPressed = false;
+	}
+	if (Game::instance().getKey(GLFW_KEY_V)) {
+		if (!vKeyPressed) {
+			cycleWeapon();
+			vKeyPressed = true;
+		}
+	}
+	else {
+		vKeyPressed = false;
+	}
 	if (Game::instance().getKey(GLFW_KEY_LEFT))
 	{
 		if (sprite->animation() != MOVE_LEFT)
@@ -242,4 +276,102 @@ bool Player::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) cons
 			return true;
 	}
 	return false;
+}
+
+void Player::heal(float amount) {
+	health += amount;
+	if (health > maxHealth) health = maxHealth;
+}
+
+//ITEMS & WEAPONS MANAGEMENT
+void Player::initDefaultWeapon() {
+	//doesn't need a texture since it's never rendered in the map
+	Item* punchWeapon = new Item();
+	punchWeapon->setItem("PUNCH", 1, "Your fists", glm::vec2(0, 0), true, 16);
+
+	weaponInventory.push_back(punchWeapon);
+	currentWeaponIndex = 0;
+	equippedWeapon = "PUNCH";
+
+	cout << "Initialized default weapon: PUNCH" << endl;
+}
+
+
+void Player::addItem(Item* item) {
+	if (item == nullptr) return;
+	if (item->getIsWeapon()) {
+		weaponInventory.push_back(item);
+		//auto-switch to newly picked weapon
+		currentWeaponIndex = weaponInventory.size() - 1;
+		equippedWeapon = item->getName();
+
+		cout << "Added WEAPON " << item->getName() << " to weapon inventory" << endl;
+		cout << "Weapon inventory size: " << weaponInventory.size() << endl;
+		cout << "Switched to: " << equippedWeapon << endl;
+	}
+	else {
+		itemInventory.push_back(item);
+		//if this is first item, select it
+		if (itemInventory.size() == 1) {
+			currentItemIndex = 0;
+		}
+
+		cout << "Added ITEM " << item->getName() << " to item inventory" << endl;
+		cout << "Item inventory size: " << itemInventory.size() << endl;
+	}
+}
+
+void Player::cycleItem() {
+	if (itemInventory.empty()) return;
+
+	currentItemIndex++;
+	if (currentItemIndex >= itemInventory.size()) {
+		currentItemIndex = 0;  //loop back to first item
+	}
+}
+
+void Player::cycleWeapon() {
+	if (weaponInventory.empty()) return;
+
+	currentWeaponIndex++;
+	if (currentWeaponIndex >= weaponInventory.size()) {
+		currentWeaponIndex = 0;  //loop back to first item
+	}
+}
+
+Item* Player::getCurrentWeapon() const {
+	if (weaponInventory.empty()) return nullptr;
+	return weaponInventory[currentWeaponIndex];
+}
+
+Item* Player::getCurrentItem() const {
+	if (itemInventory.empty()) return nullptr;
+	return itemInventory[currentItemIndex];
+}
+
+void Player::useCurrentItem() {
+	if (itemInventory.empty()) {
+		cout << "No items to use!" << endl;
+		return;
+	}
+
+	Item* item = itemInventory[currentItemIndex];
+	string itemName = item->getName();
+
+	if (itemName == "MEDIPACK") {
+		heal(1.f);
+		cout << "Used MEDIPACK! Health: " << health << "/" << maxHealth << endl;
+		delete itemInventory[currentItemIndex];
+		itemInventory.erase(itemInventory.begin() + currentItemIndex);
+
+		if (currentItemIndex >= itemInventory.size() && !itemInventory.empty()) {
+			currentItemIndex = 0;
+		}
+	}
+	else if (itemName == "KEY") {
+		cout << "You have a KEY. Find a door to unlock!" << endl;
+	}
+	else {
+		cout << "Cannot use item: " << itemName << endl;
+	}
 }

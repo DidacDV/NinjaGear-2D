@@ -201,12 +201,12 @@ void Level::initializeItems() {
 
 	Item* medipack = new Item(
 		glm::vec2(tileSize, tileSize),       
-		glm::vec2(1.0f, 1.0f),                
+		glm::vec2(1.0f, 1.0f),           
 		medpackTexture,                      
-		&this->texProgram,                    
+		&this->texProgram,
 		glm::ivec2(SCREEN_X, SCREEN_Y)
 	);
-	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(25, 10), tileSize);
+	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(25, 10), false, tileSize);
 
 	Texture* rapierTexture = new Texture();
 	rapierTexture->loadFromFile("images/items/Rapier.png", TEXTURE_PIXEL_FORMAT_RGBA);
@@ -218,7 +218,7 @@ void Level::initializeItems() {
 		&this->texProgram,                    
 		glm::ivec2(SCREEN_X, SCREEN_Y)
 	);
-	rapier->setItem("RAPIER", 1, "Medium range weapon.", glm::vec2(15, 10), tileSize);
+	rapier->setItem("RAPIER", 1, "Medium range weapon.", glm::vec2(15, 10), true, tileSize);
 
 
 	items.push_back(medipack);
@@ -259,9 +259,6 @@ void Level::checkItemPickUp() {
 		{
 			std::cout << "Item picked up at position: (" << itemPos.x << ", " << itemPos.y << ")\n";
 			itemPickUpEvent(i);
-			//remove item from the level
-
-			//TODO -> UPDATE PLAYER TO GIVE HIM THIS ITEM (and so the UI will be updated too)
 			break;
 		}
 	}
@@ -269,6 +266,8 @@ void Level::checkItemPickUp() {
 
 void Level::itemPickUpEvent(int indexInVector) {
 	Item* itemPicked = items[indexInVector];
+
+	player->addItem(itemPicked);
 
 	if (uiManager != nullptr) {
 		std::string pickupText = "PICKED UP " + itemPicked->getName() + "!";
@@ -278,7 +277,6 @@ void Level::itemPickUpEvent(int indexInVector) {
 	}
 
 	//TODO -> player pick up X
-	delete items[indexInVector];
 	items.erase(items.begin() + indexInVector);
 }
 
