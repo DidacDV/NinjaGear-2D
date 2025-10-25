@@ -8,7 +8,7 @@ Item::Item() : Sprite()
 }	
 
 Item::Item(const glm::vec2& itemSize, const glm::vec2& sizeInSpritesheet,
-	Texture* spriteTexture, ShaderProgram* program)
+	Texture* spriteTexture, ShaderProgram* program, glm::vec2 tileMapDispl)
 	: Sprite(itemSize, sizeInSpritesheet, spriteTexture, program)
 {
 	name = "set item";
@@ -17,6 +17,15 @@ Item::Item(const glm::vec2& itemSize, const glm::vec2& sizeInSpritesheet,
 }
 Item::~Item()
 {
+}
+
+void Item::setItem(string name, int quantity, string description, glm::vec2 position, int tileSize) {
+	this->name = name;
+	this->quantity = quantity;
+	this->description = description;
+
+	this->position = glm::vec2(position.x * tileSize, position.y * tileSize);
+	this->setPosition(glm::vec2(position.x * tileSize, position.y * tileSize));
 }
 
 string Item::getName()
@@ -32,6 +41,11 @@ int Item::getQuantity() const
 string Item::getDescription()
 {
 	return description;
+}
+
+glm::vec2 Item::getPosition()
+{
+	return position;
 }
 
 void Item::setName(const string& itemName)
@@ -53,3 +67,9 @@ void Item::render(const glm::mat4& view)
 {
 	Sprite::render(view);
 }
+
+
+//void Item::setPosition(const glm::vec2& pos)
+//{
+//	sprite->setPosition(glm::vec2(float(tileMapDispl.x + pos.x), float(tileMapDispl.y + pos.y)));
+//}

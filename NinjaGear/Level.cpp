@@ -15,9 +15,10 @@ Level::Level()
 	this->player = nullptr;
 	this->initPlayerX = 0;
 	this->initPlayerY = 0;
+	this->uiManager = nullptr;
 }
 
-Level::Level(const vector<string>& tileMapFiles, Player* player, 
+Level::Level(const vector<string>& tileMapFiles, Player* player,
 	int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs)
 	: Scene(tileMapFiles)
 {
@@ -25,6 +26,7 @@ Level::Level(const vector<string>& tileMapFiles, Player* player,
 	this->initPlayerX = initPlayerX;
 	this->initPlayerY = initPlayerY;
 	this->enemyConfigs = enemyConfigs;
+	this->uiManager = nullptr;
 
 	//Initialize camera sector tracking variables
 	currentSectorI = 0;
@@ -89,9 +91,16 @@ void Level::update(int deltaTime)
 {
 	Scene::update(deltaTime);
 	player->update(deltaTime);
-	//TODO check for items pickup
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->update(deltaTime);
+
+	checkItemPickUp();
+
 	updateCameraSector();
+}
+
+void Level::setUIManager(UIManager* uiManager)
+{
+	this->uiManager = uiManager;
 }
 
 void Level::updateCameraSector()
@@ -191,15 +200,29 @@ void Level::initializeItems() {
 	medpackTexture->loadFromFile("images/items/Medipack.png", TEXTURE_PIXEL_FORMAT_RGBA);
 
 	Item* medipack = new Item(
-		glm::vec2(tileSize, tileSize),       // Item size (same as tile)
-		glm::vec2(1.0f, 1.0f),                // Full texture (1.0 = 100% of texture)
-		medpackTexture,                       // Texture pointer
-		&this->texProgram                     // Shader program
+		glm::vec2(tileSize, tileSize),       
+		glm::vec2(1.0f, 1.0f),                
+		medpackTexture,                      
+		&this->texProgram,                    
+		glm::ivec2(SCREEN_X, SCREEN_Y)
 	);
+	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(25, 10), tileSize);
 
-	medipack->setPosition(glm::vec2(15,10));
+	Texture* rapierTexture = new Texture();
+	rapierTexture->loadFromFile("images/items/Rapier.png", TEXTURE_PIXEL_FORMAT_RGBA);
+
+	Item* rapier = new Item(
+		glm::vec2(10, 15),       
+		glm::vec2(1.0f, 1.0f),                
+		rapierTexture,
+		&this->texProgram,                    
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	rapier->setItem("RAPIER", 1, "Medium range weapon.", glm::vec2(15, 10), tileSize);
+
 
 	items.push_back(medipack);
+	items.push_back(rapier);
 }
 
 void Level::clearEnemies() {
@@ -224,4 +247,47 @@ void Level::clearItems() {
 		}
 	}
 	items.clear();
+}
+
+
+void Level::checkItemPickUp() {
+	glm::vec2 playerPos = player->getPositionFloat();
+	for (int i = 0; i < items.size(); i++)
+	{
+		glm::vec2 itemPos = items[i]->getPosition();
+		if (checkColission(playerPos, itemPos, 16, 16)) 
+		{
+			std::cout << "Item picked up at position: (" << itemPos.x << ", " << itemPos.y << ")\n";
+			itemPickUpEvent(i);
+			//remove item from the level
+
+			//TODO -> UPDATE PLAYER TO GIVE HIM THIS ITEM (and so the UI will be updated too)
+			break;
+		}
+	}
+}
+
+void Level::itemPickUpEvent(int indexInVector) {
+	Item* itemPicked = items[indexInVector];
+
+	if (uiManager != nullptr) {
+		std::string pickupText = "PICKED UP " + itemPicked->getName() + "!";
+		glm::vec2 messagePos(320, 160);
+		glm::vec3 messageColor(0.f, .0f, 0.f);  
+		uiManager->showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000); // 2 seconds
+	}
+
+	//TODO -> player pick up X
+	delete items[indexInVector];
+	items.erase(items.begin() + indexInVector);
+}
+
+bool Level::checkColission(glm::vec2& pos1, glm::vec2& pos2, int size1, int size2) {
+	bool collisionX = pos1.x + size1 > pos2.x &&
+		pos2.x + size2 > pos1.x;
+
+	bool collisionY = pos1.y + size1 > pos2.y &&
+		pos2.y + size2 > pos1.y;
+
+	return collisionX && collisionY;
 }
