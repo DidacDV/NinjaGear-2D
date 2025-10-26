@@ -99,6 +99,7 @@ private:
 	void setUpAuraSprites(ShaderProgram& shaderProgram);
 
 	//bow
+	void setUpBowSprite(ShaderProgram& shaderProgram);
 	Texture bowSpritesheet;
 	Sprite* bowSprite = nullptr;
 	bool isBowEquipped = false;

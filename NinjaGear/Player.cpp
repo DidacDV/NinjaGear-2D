@@ -114,6 +114,17 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 		
 	sprite->changeAnimation(STAND_DOWN); // Cambia a una animación que tenga keyframes válidos
 	
+	setUpBowSprite(shaderProgram);
+
+	setUpAuraSprites(shaderProgram);
+	
+	
+	tileMapDispl = tileMapPos;
+	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
+	
+}
+
+void Player::setUpBowSprite(ShaderProgram& shaderProgram) {
 	bowSpritesheet.loadFromFile("images/characters/ninja_dark/PlayerBowSpritesheet.png", TEXTURE_PIXEL_FORMAT_RGBA);
 	bowSprite = Sprite::createSprite(glm::vec2(16.f, 22.f), glm::vec2(0.25f, 1.0f), &bowSpritesheet, &shaderProgram);
 	bowSprite->setNumberAnimations(4);  // Only 4 attack directions
@@ -131,13 +142,6 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 	bowSprite->addKeyframe(3, glm::vec2(3.0f * 0.25f, 0.0f));
 
 	bowSprite->changeAnimation(0);
-
-	setUpAuraSprites(shaderProgram);
-	
-	
-	tileMapDispl = tileMapPos;
-	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
-	
 }
 
 void Player::setUpAuraSprites(ShaderProgram& shaderProgram) {
@@ -304,10 +308,12 @@ void Player::render(const glm::mat4& view)
 
 	Item* weapon = getCurrentWeapon();
 	bool isAttackingWithBow = (weapon != nullptr && weapon->getName() == "BOW" &&
-		Game::instance().getKey(GLFW_KEY_G));
+		Game::instance().getKey(GLFW_KEY_G) && !Game::instance().getKey(GLFW_KEY_DOWN) && !Game::instance().getKey(GLFW_KEY_UP)
+		&& !Game::instance().getKey(GLFW_KEY_RIGHT) && !Game::instance().getKey(GLFW_KEY_LEFT));
 
 	if (isAttackingWithBow) {
 		bowSprite->render(view);
+		cout << "attackin" << endl;
 	}
 	else {
 		sprite->render(view);

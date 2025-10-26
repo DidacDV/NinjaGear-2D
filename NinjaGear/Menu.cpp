@@ -46,8 +46,8 @@ void Menu::setMenuImage(const string& imagePath)
 
 void Menu::setUpButtons() {
     if (type == MenuType::START) {
-        addButton(glm::vec2(285, 367), glm::vec2(390, 60), "start");
-		addButton(glm::vec2(305, 445), glm::vec2(350, 60), "settings");
+        addButton(glm::vec2(365, 360), glm::vec2(280, 65), "start");
+		addButton(glm::vec2(365, 450), glm::vec2(280, 65), "settings");
     }
 }
 
