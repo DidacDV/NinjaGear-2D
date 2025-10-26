@@ -19,10 +19,11 @@ Item::~Item()
 {
 }
 
-void Item::setItem(string name, int quantity, string description, glm::vec2 position, int tileSize) {
+void Item::setItem(string name, int quantity, string description, glm::vec2 position, bool isWeapon, int tileSize) {
 	this->name = name;
 	this->quantity = quantity;
 	this->description = description;
+	this->isWeapon = isWeapon;
 
 	this->position = glm::vec2(position.x * tileSize, position.y * tileSize);
 	this->setPosition(glm::vec2(position.x * tileSize, position.y * tileSize));
@@ -31,11 +32,6 @@ void Item::setItem(string name, int quantity, string description, glm::vec2 posi
 string Item::getName()
 {
 	return name;
-}
-
-int Item::getQuantity() const
-{
-	return quantity;
 }
 
 string Item::getDescription()

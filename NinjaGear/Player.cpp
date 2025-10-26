@@ -21,11 +21,20 @@ enum PlayerAnims
 
 void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 {
+	health = 3.0f;
+	maxHealth = 5.0f;
+
+	activeBuffs.clear();
+	showAura = false;
+	itemQuantities.clear();
+	itemInventory.clear();
+	weaponInventory.clear();
+
+	initDefaultWeapon();
 	const float FRAME_WIDTH = 1.0f / 4.0f;
 	const float FRAME_HEIGHT = 1.0f / 7.0f;
 	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
 	const glm::vec2 FRAME_NORMALIZED_SIZE = glm::vec2(0.25, 0.1428);
-
 
 	bJumping = false;
 	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
@@ -102,22 +111,82 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 
 		
 	sprite->changeAnimation(STAND_DOWN); // Cambia a una animación que tenga keyframes válidos
+	
+	setUpAuraSprites(shaderProgram);
+	
+	
 	tileMapDispl = tileMapPos;
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
 	
 }
 
+void Player::setUpAuraSprites(ShaderProgram& shaderProgram) {
+	if (!auraTexture.loadFromFile("images/aura/LightingAura.png", TEXTURE_PIXEL_FORMAT_RGBA)) {
+		std::cout << "Failed to load aura texture!" << std::endl;
+	}
+
+	auraSprite = Sprite::createSprite(glm::ivec2(20, 28), glm::vec2(1.0f / 8.0f, 1.0f), &auraTexture, &shaderProgram);
+	auraSprite->setNumberAnimations(1);
+	auraSprite->setAnimationSpeed(0, 12);
+	for (int i = 0; i < 8; ++i)
+		auraSprite->addKeyframe(0, glm::vec2(i / 8.0f, 0.f));
+
+	auraSprite->changeAnimation(0);
+	auraSprite->setPosition(glm::vec2(posPlayer.x - 3, posPlayer.y - 5));
+}
+
 void Player::update(int deltaTime)
 {
 	sprite->update(deltaTime);
+	float moveSpeed = baseSpeed;
+
+	checkBuffsState(deltaTime);
+
+	auto it = activeBuffs.find(BuffType::SPEED);
+	if (it != activeBuffs.end()) {
+		moveSpeed *= it->second.multiplier;
+	}
+
+	//for debounce
+	static bool cKeyPressed = false;
+	static bool xKeyPressed = false;
+	static bool vKeyPressed = false;
+
+	if (Game::instance().getKey(GLFW_KEY_C)) {
+		if (!cKeyPressed) {
+			cycleItem();
+			cKeyPressed = true;
+		}
+	}
+	else {
+		cKeyPressed = false;
+	}
+	if (Game::instance().getKey(GLFW_KEY_X)) {
+		if (!xKeyPressed) {
+			useCurrentItem();
+			xKeyPressed = true;
+		}
+	}
+	else {
+		xKeyPressed = false;
+	}
+	if (Game::instance().getKey(GLFW_KEY_V)) {
+		if (!vKeyPressed) {
+			cycleWeapon();
+			vKeyPressed = true;
+		}
+	}
+	else {
+		vKeyPressed = false;
+	}
 	if (Game::instance().getKey(GLFW_KEY_LEFT))
 	{
 		if (sprite->animation() != MOVE_LEFT)
 			sprite->changeAnimation(MOVE_LEFT);
-		posPlayer.x -= 2;
+		posPlayer.x -= moveSpeed;
 		if (collisionMoveLeft(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.x += 2;
+			posPlayer.x += moveSpeed;
 			sprite->changeAnimation(STAND_LEFT);
 		}
 	}
@@ -125,10 +194,10 @@ void Player::update(int deltaTime)
 	{
 		if (sprite->animation() != MOVE_RIGHT)
 			sprite->changeAnimation(MOVE_RIGHT);
-		posPlayer.x += 2;
+		posPlayer.x += moveSpeed;
 		if (collisionMoveRight(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.x -= 2;
+			posPlayer.x -= moveSpeed;
 			sprite->changeAnimation(STAND_RIGHT);
 		}
 	}
@@ -136,10 +205,10 @@ void Player::update(int deltaTime)
 	{
 		if (sprite->animation() != MOVE_DOWN)
 			sprite->changeAnimation(MOVE_DOWN);
-		posPlayer.y += 2;
+		posPlayer.y += moveSpeed;
 		if (collisionMoveDown(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.y -= 2;
+			posPlayer.y -= moveSpeed;
 			sprite->changeAnimation(STAND_DOWN);
 		}
 	}
@@ -147,10 +216,10 @@ void Player::update(int deltaTime)
 	{
 		if (sprite->animation() != MOVE_UP)
 			sprite->changeAnimation(MOVE_UP);
-		posPlayer.y -= 2;
+		posPlayer.y -= moveSpeed;
 		if (collisionMoveUp(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.y += 2;
+			posPlayer.y += moveSpeed;
 			sprite->changeAnimation(STAND_DOWN);
 		}
 	}
@@ -184,10 +253,17 @@ void Player::update(int deltaTime)
 			sprite->changeAnimation(STAND_DOWN);
 	}
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
+
+
 }
 
 void Player::render(const glm::mat4& view)
 {
+
+	if (showAura) {
+		auraSprite->render(view);
+	}
+
 	sprite->render(view);
 }
 
@@ -242,4 +318,153 @@ bool Player::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) cons
 			return true;
 	}
 	return false;
+}
+
+void Player::heal(float amount) {
+	health += amount;
+	if (health > maxHealth) health = maxHealth;
+}
+
+//ITEMS & WEAPONS MANAGEMENT
+void Player::initDefaultWeapon() {
+	//doesn't need a texture since it's never rendered in the map
+	Item* punchWeapon = new Item();
+	punchWeapon->setItem("PUNCH", 1, "Your fists", glm::vec2(0, 0), true, 16);
+
+	weaponInventory.push_back(punchWeapon);
+	currentWeaponIndex = 0;
+	equippedWeapon = "PUNCH";
+
+	cout << "Initialized default weapon: PUNCH" << endl;
+}
+
+
+void Player::addItem(Item* item) {
+	if (item == nullptr) return;
+	if (item->getIsWeapon()) {
+		weaponInventory.push_back(item);
+		//auto-switch to newly picked weapon
+		currentWeaponIndex = weaponInventory.size() - 1;
+		equippedWeapon = item->getName();
+
+		cout << "Added WEAPON " << item->getName() << " to weapon inventory" << endl;
+		cout << "Weapon inventory size: " << weaponInventory.size() << endl;
+		cout << "Switched to: " << equippedWeapon << endl;
+	}
+	else {
+		string name = item->getName();
+		itemQuantities[name]++;
+		if (itemQuantities[name] == 1) {
+			itemInventory.push_back(item);
+			if (itemInventory.size() == 1) {
+				currentItemIndex = 0;
+			}
+		}
+	}
+}
+
+int Player::getItemQuantity(const std::string& itemName) const {
+	auto it = itemQuantities.find(itemName);
+	if (it != itemQuantities.end()) return it->second;
+	return 0;
+}
+
+void Player::cycleItem() {
+	if (itemInventory.empty()) return;
+
+	currentItemIndex++;
+	if (currentItemIndex >= itemInventory.size()) {
+		currentItemIndex = 0;  //loop back to first item
+	}
+}
+
+void Player::cycleWeapon() {
+	if (weaponInventory.empty()) return;
+
+	currentWeaponIndex++;
+	if (currentWeaponIndex >= weaponInventory.size()) {
+		currentWeaponIndex = 0;  //loop back to first item
+	}
+}
+
+Item* Player::getCurrentWeapon() const {
+	if (weaponInventory.empty()) return nullptr;
+	return weaponInventory[currentWeaponIndex];
+}
+
+Item* Player::getCurrentItem() const {
+	if (itemInventory.empty()) return nullptr;
+	return itemInventory[currentItemIndex];
+}
+
+void Player::useCurrentItem() {
+	if (itemInventory.empty()) {
+		cout << "No items to use!" << endl;
+		return;
+	}
+
+	Item* item = itemInventory[currentItemIndex];
+	string itemName = item->getName();
+
+	if (itemName == "MEDIPACK") {
+		if (health == maxHealth)
+			return;
+		heal(1.f);
+		cout << "Used MEDIPACK! Health: " << health << "/" << maxHealth << endl;
+		consumeItem(item, itemName);
+	}
+
+	if (itemName == "SPEED POTION") {
+		applyBuff(BuffType::SPEED, 5, 1.3f);
+		consumeItem(item, itemName);
+	}
+
+	else {
+		cout << "Cannot use item: " << itemName << endl;
+	}
+}
+
+void Player::consumeItem(Item* item, string& itemName) {
+	itemQuantities[itemName]--;
+
+	if (itemQuantities[itemName] <= 0) {
+		itemQuantities.erase(itemName);
+		delete item;
+		itemInventory.erase(itemInventory.begin() + currentItemIndex);
+	}
+
+	if (currentItemIndex >= itemInventory.size() && !itemInventory.empty()) {
+		currentItemIndex = 0;
+	}
+}
+
+//buffs
+void Player::applyBuff(BuffType type, float duration, float multiplier)
+{
+	activeBuffs[type] = { type, duration, duration, multiplier };
+	std::cout << "Applied buff: " << (int)type << " for " << duration << "s" << std::endl;
+}
+
+void Player::checkBuffsState(int deltaTime) {
+	float deltaSec = deltaTime / 1000.0f;
+
+	for (auto it = activeBuffs.begin(); it != activeBuffs.end(); )
+	{
+		it->second.remainingTime -= deltaSec;
+		if (it->second.remainingTime <= 0.0f)
+		{
+			std::cout << "Buff expired: " << (int)it->second.type << std::endl;
+			it = activeBuffs.erase(it); //remove expired buff
+		}
+		else ++it;
+	}
+
+	if (activeBuffs.count(BuffType::SPEED)) {
+		showAura = true;
+		auraSprite->update(deltaTime);
+		auraSprite->setPosition(glm::vec2(posPlayer.x - 3, posPlayer.y - 5));
+	}
+	else {
+		showAura = false;
+	}
 }
