@@ -26,7 +26,7 @@ enum class MenuType {
 class Menu : public MenuScene
 {
 public:
-    Menu(MenuType type = MenuType::START);
+    Menu(MenuType type = MenuType::START, const string& musicFile = "");
     ~Menu();
 
     void init();
@@ -50,6 +50,7 @@ private:
     vector<Button> buttons;
     string menuImagePath;
     bool imageLoaded;
+    string music;
     MenuType type;
 };
 

@@ -87,6 +87,7 @@ void Level::init()
 
 	calculateCameraOffset();
 	initializeMusic();
+	initializeItems();
 }
 
 void Level::update(int deltaTime)
@@ -190,7 +191,7 @@ void Level::initializeEnemies() {
 		Enemy* enemy = nullptr;
 		switch (config.type) {
 			case EnemyType::BASE:
-				enemy = new Enemy();
+				enemy = nullptr;
 				break;
 			case EnemyType::MELEE:
 				enemy = new MeleeEnemy();
@@ -199,11 +200,10 @@ void Level::initializeEnemies() {
 				enemy = new RangedEnemy();
 				break;
 			default:
-				enemy = new Enemy();
+				enemy = nullptr;
 				break;
 		}
-		enemy->setSpriteSheet(config.spriteSheet);
-		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0]);
+		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0], config.spriteSheet);
 		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
 		enemy->setProjectileManager(&projectileManager);
 		enemies.push_back(enemy);

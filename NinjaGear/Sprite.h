@@ -47,6 +47,7 @@ protected:
 	glm::vec2 texCoordDispl;
 	vector<AnimKeyframes> animations;
 	float rotationAngle = 0.0f;
+	glm::vec2 quadSize;
 };
 
 

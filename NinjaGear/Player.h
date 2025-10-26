@@ -45,11 +45,8 @@ public:
 	glm::ivec2 getPosition() const { return posPlayer; }
 	glm::vec2 getPositionFloat() const { return glm::vec2(posPlayer); }
 
-	int getHealth() const { return health; }
-	int getMaxHealth() const { return maxHealth; }
 	bool isInvulnerable() const { return invulnerable; }
 	void takeDamage(int damage);
-	void heal(int amount);
 	bool isAlive() const { return health > 0; }
 	int getRank() const { return rank; }
 	void increaseRank(const int& increase);
@@ -87,8 +84,6 @@ private:
 	int lastFrameAnimation = -1;
 
 	// Attributes
-	int health = 50;
-	int maxHealth = 50;
 	bool invulnerable = false;
 	int invulnerabilityTimer = 0;
 	int rank = 0;

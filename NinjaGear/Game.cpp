@@ -27,6 +27,9 @@ void Game::init(int screenWidth, int screenHeight)
 	startMenu->setMenuImage("images/StartMenu.png");
 	Menu* settingsMenu = new Menu(MenuType::SETTINGS);
 	settingsMenu->setMenuImage("images/SettingsMenu.png");
+	addScene("menu", startMenu);
+	addScene("settings",settingsMenu);
+
 
 	/* ------------- */
 	/*  JUNGLE LEVEL */
@@ -37,8 +40,8 @@ void Game::init(int screenWidth, int screenHeight)
 	};
 
 	vector<EnemyConfig> jungleEnemies;
-	jungleEnemies.push_back(EnemyConfig{35, 10, "images/enemies/cyclope.png", static_cast<Enemy*>(new RangedEnemy())});
-	jungleEnemies.push_back(EnemyConfig{10, 5,  "images/enemies/cyclope.png", static_cast<Enemy*>(new MeleeEnemy())});
+	jungleEnemies.push_back(EnemyConfig{35, 10, "images/enemies/cyclope.png", EnemyType ::MELEE});
+	jungleEnemies.push_back(EnemyConfig{ 10, 5,  "images/enemies/cyclope.png", EnemyType::RANGED });
 
 	vector<MovingObjectConfig> jungleObjects;
 
@@ -48,7 +51,7 @@ void Game::init(int screenWidth, int screenHeight)
 	//jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
 	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic);
 
-	addScene("Jungle1", Jungle1);
+	addScene("outside", Jungle1);
 
 	/* ------------- */
 	/* DUNGEON LEVEL */
@@ -94,7 +97,7 @@ void Game::init(int screenWidth, int screenHeight)
 	addScene("dungeon", Dungeon);
 
 
-	setCurrentScene("Jungle1");
+	setCurrentScene("menu");
 }
 
 bool Game::update(int deltaTime)
@@ -130,11 +133,11 @@ void Game::keyPressed(int key)
 		// If in game, go back to menu
 		Menu* menu = dynamic_cast<Menu*>(currentScene);
 		if (menu == NULL) {
-			setCurrentScene("startMenu");
+			setCurrentScene("menu");
 		}
 		else {
 			if (menu->getType() == MenuType::SETTINGS) {
-				setCurrentScene("startMenu");
+				setCurrentScene("menu");
 			}
 			else if (menu->getType() == MenuType::START) {
 				bPlay = false; //exit if in menu

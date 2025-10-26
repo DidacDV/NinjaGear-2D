@@ -3,12 +3,14 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include "ServiceLocator.h"
 
-Menu::Menu(MenuType menuType) : MenuScene()
+Menu::Menu(MenuType menuType, const string& musicFile) : MenuScene()
 {
     menuSprite = NULL;
     imageLoaded = false;
     type = menuType;
+    music = musicFile;
 }
 
 Menu::~Menu()
@@ -20,6 +22,8 @@ Menu::~Menu()
 void Menu::init()
 {
     MenuScene::menuImagePath = this->menuImagePath;
+    // Start music
+    if (music != "") ServiceLocator::getAudio().playMusic(music.c_str());
     setUpButtons();
     MenuScene::init();
 }
