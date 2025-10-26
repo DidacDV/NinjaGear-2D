@@ -139,29 +139,8 @@ void Player::update(int deltaTime)
 {
 	sprite->update(deltaTime);
 	float moveSpeed = baseSpeed;
-	float deltaSec = deltaTime / 1000.0f;
 
-	//buff
-	for (auto it = activeBuffs.begin(); it != activeBuffs.end(); )
-	{
-		it->second.remainingTime -= deltaSec;
-		if (it->second.remainingTime <= 0.0f)
-		{
-			std::cout << "Buff expired: " << (int)it->second.type << std::endl;
-			it = activeBuffs.erase(it); //remove expired buff
-		}
-		else ++it;
-	}
-
-	if (activeBuffs.count(BuffType::SPEED)) {
-		showAura = true;
-		auraSprite->update(deltaTime);
-		cout << posPlayer.x << posPlayer.y << endl;
-		auraSprite->setPosition(glm::vec2(posPlayer.x - 3, posPlayer.y - 5));
-	}
-	else {
-		showAura = false;
-	}
+	checkBuffsState(deltaTime);
 
 	auto it = activeBuffs.find(BuffType::SPEED);
 	if (it != activeBuffs.end()) {
@@ -436,7 +415,7 @@ void Player::useCurrentItem() {
 	}
 
 	if (itemName == "SPEED POTION") {
-		applyBuff(BuffType::SPEED, 5, 1.6f);
+		applyBuff(BuffType::SPEED, 5, 1.3f);
 		consumeItem(item, itemName);
 	}
 
@@ -466,3 +445,26 @@ void Player::applyBuff(BuffType type, float duration, float multiplier)
 	std::cout << "Applied buff: " << (int)type << " for " << duration << "s" << std::endl;
 }
 
+void Player::checkBuffsState(int deltaTime) {
+	float deltaSec = deltaTime / 1000.0f;
+
+	for (auto it = activeBuffs.begin(); it != activeBuffs.end(); )
+	{
+		it->second.remainingTime -= deltaSec;
+		if (it->second.remainingTime <= 0.0f)
+		{
+			std::cout << "Buff expired: " << (int)it->second.type << std::endl;
+			it = activeBuffs.erase(it); //remove expired buff
+		}
+		else ++it;
+	}
+
+	if (activeBuffs.count(BuffType::SPEED)) {
+		showAura = true;
+		auraSprite->update(deltaTime);
+		auraSprite->setPosition(glm::vec2(posPlayer.x - 3, posPlayer.y - 5));
+	}
+	else {
+		showAura = false;
+	}
+}

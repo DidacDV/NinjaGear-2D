@@ -90,7 +90,7 @@ private:
 	//buffs
 	std::unordered_map<BuffType, ActiveBuff> activeBuffs;
 	void applyBuff(BuffType type, float duration, float multiplier);
-
+	void checkBuffsState(int deltaTime);
 	//aura
 	Sprite* auraSprite = nullptr;
 	Texture auraTexture;
