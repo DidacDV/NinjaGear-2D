@@ -3,8 +3,12 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "ProjectileManager.h"
+#include <map>
+#include <utility>
 
 class Enemy;
+class MovingStatue;
+class MovingObject;
 
 struct EnemyConfig {
     int xTile;
@@ -13,21 +17,50 @@ struct EnemyConfig {
     Enemy* enemyInstance;
 };
 
+
+enum class MovingObjectType {
+    MOVING_STATUE,
+    // MOVING_PLATFORM, // Add other types here
+};
+
+struct MovingObjectConfig {
+    glm::vec2 startPos;
+    glm::vec2 endPos;
+    float speed;
+    MovingObjectType type;
+    string spriteSheet;
+    glm::vec2 spriteSize;
+    glm::vec2 texCoordSize;
+};
+
+struct MusicConfig {
+    int sectorI;           // Sector column
+    int sectorJ;           // Sector row
+    string musicFile;      // Path to music file
+};
+
 class Level :
     public Scene
 {
     public:
     Level();
-    Level(const vector<string>& tileMapFiles, Player* player, int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs);
+    Level(const vector<string>& tileMapFiles, Player* player, int initPlayerX, 
+        int initPlayerY, const vector<EnemyConfig>& enemyConfigs, 
+        const vector<MovingObjectConfig>& objectConfigs, const vector<MusicConfig>& musicConfigs);
     ~Level();
 
     void init() override;
     void update(int deltaTime) override;
 	void render() override;
-    ProjectileManager* getProjectileManager() { return &projectileManager; }
+    ProjectileManager* getProjectileManager() { return &projectileManager; };
 
 
     private:
+        // Moving objects
+        vector<MovingObject*> movingObjects;
+        vector<MovingObjectConfig> movingObjectConfigs;
+        vector<Texture> movingObjectTextures;
+
         //Player
         Player* player;
         int initPlayerX, initPlayerY;
@@ -36,13 +69,17 @@ class Level :
         vector<EnemyConfig> enemyConfigs;
 		// Projectiles
         ProjectileManager projectileManager;
+        //Music
+        vector<MusicConfig> musicConfigs;
+        map<pair<int, int>, MusicConfig> sectorMusicMap;  
+        string currentMusicFile;
 
         // Camera sector traking
         int currentSectorI = 0;  
         int currentSectorJ = 0;  
         int numSectorsI = 0;     
         int numSectorsJ = 0;     
-        int sectorWidth = 0;     
+        int sectorWidth = 0;      
         int sectorHeight = 0;
         float cameraOffsetX = 0.0f;
         float cameraOffsetY = 0.0f;
@@ -60,9 +97,12 @@ class Level :
             const glm::vec2& pos2, const glm::vec2& size2);
 
       
-
+        
         void updateCameraSector();
         void calculateCameraOffset();
         void initializeEnemies();
+        void initializeMovingObjects();
+        void initializeMusic();       
+        void updateMusic();
 };
 

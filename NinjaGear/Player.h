@@ -46,6 +46,7 @@ public:
 	bool justStartedPunching() const;
 	int getFacingDirection() const; 
 	glm::vec2 getPunchHitbox() const;
+	void onPunchKeyPressed();
 
 private:
 
@@ -58,6 +59,7 @@ private:
 	bool invulnerable = false;
 	int invulnerabilityTimer = 0;
 	int rank = 0;
+	bool isPunchKeyHeld = false;
 
 	// Collision detectors
 	bool collisionMoveLeft(const glm::ivec2& pos, const glm::ivec2& size) const;

@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include "Player.h"
 #include "Game.h"
-
+#include "ServiceLocator.h"
 
 #define JUMP_ANGLE_STEP 4
 #define JUMP_HEIGHT 96
@@ -259,7 +259,6 @@ void Player::takeDamage(int damage)
 	}
 
 	health -= damage;
-	cout << "took damage!!" << health << endl;
 	if (health < 0) {
 		health = 0;
 	}
@@ -337,4 +336,9 @@ glm::vec2 Player::getPunchHitbox() const
 void Player::increaseRank(const int& increase) {
 	cout << "increased rank by" << increase << endl;
 	rank += increase;
+}
+
+void Player::onPunchKeyPressed()
+{
+	ServiceLocator::getAudio().playSound("sounds/punch.wav");
 }

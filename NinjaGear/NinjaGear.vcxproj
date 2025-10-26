@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimKeyframes.h" />
+    <ClInclude Include="AudioService.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GeometryUtils.h" />
@@ -19,12 +20,18 @@
     <ClInclude Include="Level.h" />
     <ClInclude Include="MeleeEnemy.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="miniaudio.h" />
+    <ClInclude Include="MiniAudioService.h" />
+    <ClInclude Include="MovingObject.h" />
+    <ClInclude Include="MovingStatue.h" />
+    <ClInclude Include="NullAudioService.h" />
     <ClInclude Include="Pathfinder.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="ProjectileManager.h" />
     <ClInclude Include="RangedEnemy.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="Sprite.h" />
@@ -42,12 +49,17 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeleeEnemy.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="miniaudio.cpp" />
+    <ClCompile Include="MiniAudioService.cpp" />
+    <ClCompile Include="MovingObject.cpp" />
+    <ClCompile Include="MovingStatue.cpp" />
     <ClCompile Include="Pathfinder.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="ProjectileManager.cpp" />
     <ClCompile Include="RangedEnemy.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -99,12 +111,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)libs\Simple OpenGL Image Library\src;$(SolutionDir)libs\glew-1.13.0\include;$(SolutionDir)libs\glm;$(SolutionDir)libs\glfw-3.3.8\include;%(AdditionalIncludeDirectories);$(SolutionDir)libs\freetype-2.3.5-1-bin\include;$(SolutionDir)libs\freetype-2.3.5-1-bin\include\freetype2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\irrKlang\include;$(SolutionDir)libs\Simple OpenGL Image Library\src;$(SolutionDir)libs\glew-1.13.0\include;$(SolutionDir)libs\glm;$(SolutionDir)libs\glfw-3.3.8\include;%(AdditionalIncludeDirectories);$(SolutionDir)libs\freetype-2.3.5-1-bin\include;$(SolutionDir)libs\freetype-2.3.5-1-bin\include\freetype2</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)libs\Simple OpenGL Image Library\projects\VC9\Debug;$(SolutionDir)libs\glew-1.13.0\lib\Release\Win32;$(SolutionDir)libs\glfw-3.3.8\lib-vc2015;%(AdditionalLibraryDirectories);$(SolutionDir)libs\freetype-2.3.5-1-bin\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\irrKlang\lib\Win32-visualStudio;$(SolutionDir)libs\Simple OpenGL Image Library\projects\VC9\Debug;$(SolutionDir)libs\glew-1.13.0\lib\Release\Win32;$(SolutionDir)libs\glfw-3.3.8\lib-vc2015;%(AdditionalLibraryDirectories);$(SolutionDir)libs\freetype-2.3.5-1-bin\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>freetype.lib;glew32.lib;SOIL.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

@@ -1,6 +1,8 @@
 #include "Level.h"
+#include "MovingStatue.h" 
 #include <iostream>
 #include "Projectile.h"
+#include "ServiceLocator.h"
 
 #define SCREEN_X 0
 #define SCREEN_Y 0
@@ -17,13 +19,20 @@ Level::Level()
 }
 
 Level::Level(const vector<string>& tileMapFiles, Player* player, 
-	int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs)
+	int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs, const vector<MovingObjectConfig>& objectConfigs, const vector<MusicConfig>& musicConfigs)
 	: Scene(tileMapFiles)
 {
 	this->player = player;
 	this->initPlayerX = initPlayerX;
 	this->initPlayerY = initPlayerY;
 	this->enemyConfigs = enemyConfigs;
+	this->movingObjectConfigs = objectConfigs;
+	this->musicConfigs = musicConfigs;
+	this->init();
+	//Initialize enemies
+	initializeEnemies();
+	//Initialize moving objects
+	initializeMovingObjects();
 }
 
 Level::~Level()
@@ -37,10 +46,16 @@ Level::~Level()
 		}
 	}
 	enemies.clear();
+	for (MovingObject* obj : movingObjects) {
+		if (obj != nullptr) {
+			delete obj;
+		}
+	}
+	movingObjects.clear();
 }
 
 void Level::init() 
-{
+{	
 	Scene::init();
 	// Initialize projectile manager
 	projectileManager.init(&texProgram, maps[0]);
@@ -52,9 +67,6 @@ void Level::init()
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
 	player->setTileMaps(maps);
-
-	//Initialize enemies
-	initializeEnemies();
 
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeight = maps[0]->mapSize.y * maps[0]->getTileSize();
@@ -76,6 +88,7 @@ void Level::init()
 	currentSectorJ = glm::clamp(currentSectorJ, 0, numSectorsJ - 1);
 
 	calculateCameraOffset();
+	initializeMusic();
 }
 
 void Level::update(int deltaTime)
@@ -85,6 +98,12 @@ void Level::update(int deltaTime)
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->update(deltaTime);
 	projectileManager.update(deltaTime);
 	checkCombat();
+	for (MovingObject* obj : movingObjects) {
+		if (obj != nullptr) {
+			obj->setCameraOffset(glm::vec2(cameraOffsetX, cameraOffsetY));
+			obj->update(deltaTime);
+		}
+	}
 	updateCameraSector();
 }
 
@@ -103,9 +122,24 @@ void Level::updateCameraSector()
 	// Check if sector changed
 	if (newSectorI != currentSectorI || newSectorJ != currentSectorJ)
 	{
+
 		currentSectorI = newSectorI;
 		currentSectorJ = newSectorJ;
 		calculateCameraOffset();
+		updateMusic();
+	}
+}
+
+void Level::updateMusic()
+{
+	auto it = sectorMusicMap.find({ currentSectorI, currentSectorJ });
+
+	if (it != sectorMusicMap.end()) {
+		const MusicConfig& config = it->second;
+		if (config.musicFile != currentMusicFile) {
+			currentMusicFile = config.musicFile;
+			ServiceLocator::getAudio().playMusic(config.musicFile.c_str());
+		}
 	}
 }
 
@@ -139,6 +173,11 @@ void Level::render()
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->render(view);
 	projectileManager.render(view);
 	// Player render - pass the view matrix
+	for (MovingObject* obj : movingObjects) {
+		if (obj != nullptr) {
+			obj->render(view);
+		}
+	}
 	player->render(view);
 }
 
@@ -150,6 +189,63 @@ void Level::initializeEnemies() {
 		enemy->setProjectileManager(&projectileManager);
 		enemies.push_back(enemy);
 	}
+}
+
+void Level::initializeMovingObjects()
+{
+	movingObjectTextures.resize(movingObjectConfigs.size());
+
+	for (size_t i = 0; i < movingObjectConfigs.size(); i++) {
+		const MovingObjectConfig& config = movingObjectConfigs[i];
+		MovingObject* obj = nullptr; // Initialize the pointer
+
+		// Load texture first, as it's needed for the constructor
+		bool loaded = movingObjectTextures[i].loadFromFile(config.spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
+		if (!loaded) {
+			std::cout << "ERROR: Failed to load moving object texture: " << config.spriteSheet << std::endl;
+			continue;
+		}
+
+		movingObjectTextures[i].setMinFilter(GL_NEAREST);
+		movingObjectTextures[i].setMagFilter(GL_NEAREST);
+
+		switch (config.type) {
+		case MovingObjectType::MOVING_STATUE:
+			obj = new MovingStatue(config.spriteSize, config.texCoordSize,
+				&movingObjectTextures[i], &texProgram);
+			break;
+			
+		default:
+			std::cout << "ERROR: Unknown MovingObject type in config." << std::endl;
+			continue; 
+		}
+
+		if (obj == nullptr) continue;
+
+		obj->setMovementPath(config.startPos, config.endPos, config.speed);
+
+		obj->setNumberAnimations(1);
+		obj->setAnimationSpeed(0, 8);
+		obj->addKeyframe(0, glm::vec2(0.0f, 0.0f));
+		obj->changeAnimation(0);
+
+		obj->setTileMapPosition(glm::ivec2(config.startPos.x, config.startPos.y),
+			glm::ivec2(SCREEN_X, SCREEN_Y));
+		obj->setTileMaps(maps);
+
+		movingObjects.push_back(obj);
+	}
+}
+
+void Level::initializeMusic()
+{
+	// Build a map for quick sector -> music lookup
+	for (const MusicConfig& config : musicConfigs) {
+		sectorMusicMap[{config.sectorI, config.sectorJ}] = config;
+	}
+
+	// Play initial music for starting sector
+	updateMusic();
 }
 
 void Level::checkCombat()

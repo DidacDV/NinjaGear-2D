@@ -13,9 +13,7 @@
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 320
 
-
 // Game is a singleton (a class with a single instance) that represents our whole application
-
 
 class Game
 {
@@ -30,7 +28,6 @@ public:
 	
 		return G;
 	}
-	
 	void init(int screenHeight, int screenWidth);
 	bool update(int deltaTime);
 	void render();

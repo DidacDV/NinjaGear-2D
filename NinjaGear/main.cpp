@@ -2,10 +2,14 @@
 #include <GLFW/glfw3.h>
 #include "Game.h"
 #include "Globals.h"
-
+#include <stdio.h>
+#include "ServiceLocator.h"
+#include "MiniaudioService.h"
 
 #define TARGET_FRAMERATE 60.0f
 
+#pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "ole32.lib")
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -31,6 +35,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 int main(void)
 {
+	ServiceLocator::initialize();
+	MiniaudioService* audioService = new MiniaudioService();
+	ServiceLocator::provide(audioService);
+
 	GLFWwindow* window;
 	double timePerFrame = 1.f / TARGET_FRAMERATE, timePreviousFrame, currentTime;
 
@@ -73,6 +81,7 @@ int main(void)
 		currentTime = glfwGetTime();
 		if (currentTime - timePreviousFrame >= timePerFrame)
 		{
+			ServiceLocator::getAudio().update();
 			/* Update & render steps of the game loop */
 			if(!Game::instance().update(int(1000.0f * (currentTime - timePreviousFrame))))
 				glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -86,7 +95,7 @@ int main(void)
 		/* Poll for and process events */
 		glfwPollEvents();
 	}
-
+	delete audioService;
 	glfwTerminate();
 	return 0;
 }
