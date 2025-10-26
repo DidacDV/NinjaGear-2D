@@ -24,6 +24,8 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 	health = 3.0f;
 	maxHealth = 5.0f;
 
+	activeBuffs.clear();
+	showAura = false;
 	itemQuantities.clear();
 	itemInventory.clear();
 	weaponInventory.clear();
@@ -109,14 +111,63 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 
 		
 	sprite->changeAnimation(STAND_DOWN); // Cambia a una animación que tenga keyframes válidos
+	
+	setUpAuraSprites(shaderProgram);
+	
+	
 	tileMapDispl = tileMapPos;
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
 	
 }
 
+void Player::setUpAuraSprites(ShaderProgram& shaderProgram) {
+	if (!auraTexture.loadFromFile("images/aura/LightingAura.png", TEXTURE_PIXEL_FORMAT_RGBA)) {
+		std::cout << "Failed to load aura texture!" << std::endl;
+	}
+
+	auraSprite = Sprite::createSprite(glm::ivec2(20, 28), glm::vec2(1.0f / 8.0f, 1.0f), &auraTexture, &shaderProgram);
+	auraSprite->setNumberAnimations(1);
+	auraSprite->setAnimationSpeed(0, 12);
+	for (int i = 0; i < 8; ++i)
+		auraSprite->addKeyframe(0, glm::vec2(i / 8.0f, 0.f));
+
+	auraSprite->changeAnimation(0);
+	auraSprite->setPosition(glm::vec2(posPlayer.x - 3, posPlayer.y - 5));
+}
+
 void Player::update(int deltaTime)
 {
 	sprite->update(deltaTime);
+	float moveSpeed = baseSpeed;
+	float deltaSec = deltaTime / 1000.0f;
+
+	//buff
+	for (auto it = activeBuffs.begin(); it != activeBuffs.end(); )
+	{
+		it->second.remainingTime -= deltaSec;
+		if (it->second.remainingTime <= 0.0f)
+		{
+			std::cout << "Buff expired: " << (int)it->second.type << std::endl;
+			it = activeBuffs.erase(it); //remove expired buff
+		}
+		else ++it;
+	}
+
+	if (activeBuffs.count(BuffType::SPEED)) {
+		showAura = true;
+		auraSprite->update(deltaTime);
+		cout << posPlayer.x << posPlayer.y << endl;
+		auraSprite->setPosition(glm::vec2(posPlayer.x - 3, posPlayer.y - 5));
+	}
+	else {
+		showAura = false;
+	}
+
+	auto it = activeBuffs.find(BuffType::SPEED);
+	if (it != activeBuffs.end()) {
+		moveSpeed *= it->second.multiplier;
+	}
+
 	//for debounce
 	static bool cKeyPressed = false;
 	static bool xKeyPressed = false;
@@ -153,10 +204,10 @@ void Player::update(int deltaTime)
 	{
 		if (sprite->animation() != MOVE_LEFT)
 			sprite->changeAnimation(MOVE_LEFT);
-		posPlayer.x -= 2;
+		posPlayer.x -= moveSpeed;
 		if (collisionMoveLeft(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.x += 2;
+			posPlayer.x += moveSpeed;
 			sprite->changeAnimation(STAND_LEFT);
 		}
 	}
@@ -164,10 +215,10 @@ void Player::update(int deltaTime)
 	{
 		if (sprite->animation() != MOVE_RIGHT)
 			sprite->changeAnimation(MOVE_RIGHT);
-		posPlayer.x += 2;
+		posPlayer.x += moveSpeed;
 		if (collisionMoveRight(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.x -= 2;
+			posPlayer.x -= moveSpeed;
 			sprite->changeAnimation(STAND_RIGHT);
 		}
 	}
@@ -175,10 +226,10 @@ void Player::update(int deltaTime)
 	{
 		if (sprite->animation() != MOVE_DOWN)
 			sprite->changeAnimation(MOVE_DOWN);
-		posPlayer.y += 2;
+		posPlayer.y += moveSpeed;
 		if (collisionMoveDown(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.y -= 2;
+			posPlayer.y -= moveSpeed;
 			sprite->changeAnimation(STAND_DOWN);
 		}
 	}
@@ -186,10 +237,10 @@ void Player::update(int deltaTime)
 	{
 		if (sprite->animation() != MOVE_UP)
 			sprite->changeAnimation(MOVE_UP);
-		posPlayer.y -= 2;
+		posPlayer.y -= moveSpeed;
 		if (collisionMoveUp(posPlayer, glm::ivec2(SPRITE_SIZE, SPRITE_SIZE)))
 		{
-			posPlayer.y += 2;
+			posPlayer.y += moveSpeed;
 			sprite->changeAnimation(STAND_DOWN);
 		}
 	}
@@ -223,10 +274,17 @@ void Player::update(int deltaTime)
 			sprite->changeAnimation(STAND_DOWN);
 	}
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
+
+
 }
 
 void Player::render(const glm::mat4& view)
 {
+
+	if (showAura) {
+		auraSprite->render(view);
+	}
+
 	sprite->render(view);
 }
 
@@ -374,19 +432,37 @@ void Player::useCurrentItem() {
 			return;
 		heal(1.f);
 		cout << "Used MEDIPACK! Health: " << health << "/" << maxHealth << endl;
-		itemQuantities[itemName]--;
-
-		if (itemQuantities[itemName] <= 0) {
-			itemQuantities.erase(itemName);
-			delete item;
-			itemInventory.erase(itemInventory.begin() + currentItemIndex);
-		}
-
-		if (currentItemIndex >= itemInventory.size() && !itemInventory.empty()) {
-			currentItemIndex = 0;
-		}
+		consumeItem(item, itemName);
 	}
+
+	if (itemName == "SPEED POTION") {
+		applyBuff(BuffType::SPEED, 5, 1.6f);
+		consumeItem(item, itemName);
+	}
+
 	else {
 		cout << "Cannot use item: " << itemName << endl;
 	}
 }
+
+void Player::consumeItem(Item* item, string& itemName) {
+	itemQuantities[itemName]--;
+
+	if (itemQuantities[itemName] <= 0) {
+		itemQuantities.erase(itemName);
+		delete item;
+		itemInventory.erase(itemInventory.begin() + currentItemIndex);
+	}
+
+	if (currentItemIndex >= itemInventory.size() && !itemInventory.empty()) {
+		currentItemIndex = 0;
+	}
+}
+
+//buffs
+void Player::applyBuff(BuffType type, float duration, float multiplier)
+{
+	activeBuffs[type] = { type, duration, duration, multiplier };
+	std::cout << "Applied buff: " << (int)type << " for " << duration << "s" << std::endl;
+}
+

@@ -12,6 +12,17 @@
 // Player is basically a Sprite that represents the player. As such it has
 // all properties it needs to track its movement, jumping, and collisions.
 
+enum BuffType {
+	SPEED,
+	STRENGTH
+};
+
+struct ActiveBuff {
+	BuffType type;
+	float duration;      // total duration in seconds
+	float remainingTime; // remaining time in seconds
+	float multiplier;    
+};
 
 class Player
 {
@@ -53,6 +64,7 @@ private:
 	bool collisionMoveDown(const glm::ivec2& pos, const glm::ivec2& size) const;
 	bool collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) const;
 
+	float baseSpeed = 2.0f;
 	bool bJumping;
 	glm::ivec2 tileMapDispl, posPlayer;
 	int jumpAngle, startY;
@@ -72,6 +84,20 @@ private:
 	float health;
 	float maxHealth;
 	string equippedWeapon;
+
+	void consumeItem(Item* item, string& itemName);
+
+	//buffs
+	std::unordered_map<BuffType, ActiveBuff> activeBuffs;
+	void applyBuff(BuffType type, float duration, float multiplier);
+
+	//aura
+	Sprite* auraSprite = nullptr;
+	Texture auraTexture;
+	bool showAura = false;
+	int auraFrameTime = 80; //ms
+	void setUpAuraSprites(ShaderProgram& shaderProgram);
+
 public:
 	~Player() {
 		for (Item* item : itemInventory) delete item;

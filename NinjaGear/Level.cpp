@@ -204,7 +204,7 @@ void Level::initializeObjects(int tileSize) {
 	medpackTexture->loadFromFile("images/items/Medipack.png", TEXTURE_PIXEL_FORMAT_RGBA);
 
 	Item* medipack = new Item(
-		glm::vec2(tileSize, tileSize),
+		glm::vec2(tileSize - 4, tileSize - 4),
 		glm::vec2(1.0f, 1.0f),
 		medpackTexture,
 		&this->texProgram,
@@ -213,7 +213,7 @@ void Level::initializeObjects(int tileSize) {
 	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(25, 10), false, tileSize);
 
 	Item* medipack2 = new Item(
-		glm::vec2(tileSize, tileSize),
+		glm::vec2(tileSize - 4, tileSize - 4),
 		glm::vec2(1.0f, 1.0f),
 		medpackTexture,  // Share same texture                     
 		&this->texProgram,
@@ -221,8 +221,20 @@ void Level::initializeObjects(int tileSize) {
 	);
 	medipack2->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(30, 15), false, tileSize);
 
+	Texture* speedPotionTexture = new Texture();
+	speedPotionTexture->loadFromFile("images/items/SPEED POTION.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	Item* speedPotion = new Item(
+		glm::vec2(tileSize - 3, tileSize - 3),
+		glm::vec2(1.0f, 1.0f),
+		speedPotionTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	speedPotion->setItem("SPEED POTION", 1, "Increases speed for 10 seconds.", glm::vec2(6, 10), false, tileSize);
+
 	items.push_back(medipack);
 	items.push_back(medipack2);
+	items.push_back(speedPotion);
 }
 
 void Level::initializeWeapons(int tileSize) {
