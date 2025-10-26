@@ -11,16 +11,22 @@ void Game::init(int screenWidth, int screenHeight)
 {
 	bPlay = true;
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-	/*UI MANAGER*/
-	this->uiManager = new UIManager();
-	this->uiManager->init();
+
+	mouseX = 0;
+	mouseY = 0;
+
+	/*UI MANAGER, same instance used in multiple classes*/ //todo singleton?
+	UIManager* GLOBAL_UI_MANAGER = new UIManager();
+	GLOBAL_UI_MANAGER->init();
+	this->uiManager = GLOBAL_UI_MANAGER;
 	/* PLAYER */
 	this->player = new Player();
 	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
 	
-	vector<string> titlesScreenMaps = { "levels/base_menu.txt" };
-	Scene* baseMenu = new Menu(titlesScreenMaps);
-	/* LEVELS */
+	Menu* startMenu = new Menu(MenuType::START);
+	startMenu->setMenuImage("images/StartMenu.png");
+	Menu* settingsMenu = new Menu(MenuType::SETTINGS);
+	settingsMenu->setMenuImage("images/SettingsMenu.png");
 
 	/* ------------- */
 	/*  JUNGLE LEVEL */
@@ -110,27 +116,35 @@ void Game::render()
 	if (currentScene != NULL)
 		currentScene->render();
 
-	if (uiManager != NULL)
+	//only render UI if we're not in a menu
+	Menu* menu = dynamic_cast<Menu*>(currentScene);
+	if (menu == NULL && uiManager != NULL) {
 		uiManager->render();
-
-	//// Render the menu UI (bottom 10%)
-	//auto it = levels.find("menu");
-	//if (it != levels.end()) {
-	//	Scene* menuScene = it->second;
-	//	if (menuScene != nullptr) {
-	//		menuScene->render();
-	//	}
-	//}
+		uiManager->renderGameOverlay();
+	}
 }
 
 void Game::keyPressed(int key)
 {
-	if (key == GLFW_KEY_ESCAPE) // Escape code
-		bPlay = false;
-	else if (key == GLFW_KEY_Z) {
+	if (key == GLFW_KEY_ESCAPE) {
+		// If in game, go back to menu
+		Menu* menu = dynamic_cast<Menu*>(currentScene);
+		if (menu == NULL) {
+			setCurrentScene("startMenu");
+		}
+		else {
+			if (menu->getType() == MenuType::SETTINGS) {
+				setCurrentScene("startMenu");
+			}
+			else if (menu->getType() == MenuType::START) {
+				bPlay = false; //exit if in menu
+			}
+		}
+	}
+  else if (key == GLFW_KEY_Z) {
 		if(currentScene == levels["dungeon"]) setCurrentScene("Jungle1");
 		else setCurrentScene("dungeon");
-	}
+  }
 	else if (key == GLFW_KEY_X) // Change sprite
 		player->setSpriteSheet("images/characters/ninja_blue/SpriteSheet.png");
 	else if (key == GLFW_KEY_G) 
@@ -145,10 +159,20 @@ void Game::keyReleased(int key)
 
 void Game::mouseMove(int x, int y)
 {
+	mouseX = x;
+	mouseY = y;
 }
 
 void Game::mousePress(int button)
 {
+	cout << mouseX << " " << mouseY << endl;
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		// Check if we're in a menu and handle the click
+		Menu* menu = dynamic_cast<Menu*>(currentScene);
+		if (menu != NULL) {
+			menu->handleClick(mouseX, mouseY);
+		}
+	}
 }
 
 void Game::mouseRelease(int button)
@@ -187,6 +211,4 @@ Player* Game::getPlayer() const
 glm::vec2 Game::getPlayerPosition() const {
 	return player->getPosition();
 }
-
-
 

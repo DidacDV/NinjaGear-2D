@@ -15,9 +15,6 @@
 Scene::Scene()
 {
 	this->currentTime = 0.0f;
-	mapFiles = {
-		"levels/base_menu.txt",
-	};
 }
 
 Scene::Scene(const vector<string>& tileMapFiles)
@@ -124,4 +121,6 @@ void Scene::setupViewport(float heightPercent, float yOffsetPercent) {
 }
 
 
-
+void Scene::resetViewportFullScreen() {
+	glViewport(0, 0, globalScreenWidth / 2, globalScreenHeight / 2);
+}

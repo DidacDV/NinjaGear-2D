@@ -28,16 +28,16 @@ public:
 	void addKeyframe(int animId, const glm::vec2 &frame);
 	void changeAnimation(int animId);
 	int animation() const;
-	
+	void setTexture(Texture* tex) { texture = tex; }
+
 	void setPosition(const glm::vec2 &pos);
 	void setRotation(float angleInRadians);
 
 protected:
 	Sprite(const glm::vec2& quadSize, const glm::vec2& sizeInSpritesheet, Texture* spritesheet, ShaderProgram* program);
-	glm::vec2 quadSize;
-private:
-	Texture *texture;
-	ShaderProgram *shaderProgram;
+	Sprite();
+	Texture* texture;
+	ShaderProgram* shaderProgram;
 	GLuint vao;
 	GLuint vbo;
 	GLint posLocation, texCoordLocation;

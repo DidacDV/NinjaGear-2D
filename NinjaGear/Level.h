@@ -6,15 +6,23 @@
 #include <map>
 #include <utility>
 
+#include "Item.h"
+#include "UIManager.h"
 class Enemy;
 class MovingStatue;
 class MovingObject;
+
+enum class EnemyType {
+    BASE,
+    MELEE,
+    RANGED
+};
 
 struct EnemyConfig {
     int xTile;
     int yTile;
     string spriteSheet;
-    Enemy* enemyInstance;
+    EnemyType type;
 };
 
 
@@ -55,6 +63,8 @@ class Level :
     ProjectileManager* getProjectileManager() { return &projectileManager; };
 
 
+    void setUIManager(UIManager* uiManager);
+
     private:
         // Moving objects
         vector<MovingObject*> movingObjects;
@@ -67,13 +77,16 @@ class Level :
         // Enemies
         vector<Enemy*> enemies;
         vector<EnemyConfig> enemyConfigs;
-		// Projectiles
+		    // Projectiles
         ProjectileManager projectileManager;
         //Music
         vector<MusicConfig> musicConfigs;
         map<pair<int, int>, MusicConfig> sectorMusicMap;  
         string currentMusicFile;
 
+		    vector<Item*> items;
+        //UIManager
+        UIManager* uiManager;
         // Camera sector traking
         int currentSectorI = 0;  
         int currentSectorJ = 0;  
@@ -104,5 +117,13 @@ class Level :
         void initializeMovingObjects();
         void initializeMusic();       
         void updateMusic();
+        void clearEnemies();
+        void initializeItems();
+		    void initializeObjects(int tileSize);
+		    void initializeWeapons(int tileSize);
+        void clearItems();
+        void checkItemPickUp();
+        bool checkColission(glm::vec2& pos1, glm::vec2& pos2, int size1, int size2);
+        void itemPickUpEvent(int indexInVector);
 };
 

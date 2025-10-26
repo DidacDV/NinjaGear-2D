@@ -1,5 +1,7 @@
 #include "Level.h"
 #include "MovingStatue.h" 
+#include "RangedEnemy.h"
+#include "MeleeEnemy.h"
 #include <iostream>
 #include "Projectile.h"
 #include "ServiceLocator.h"
@@ -16,6 +18,7 @@ Level::Level()
 	this->player = nullptr;
 	this->initPlayerX = 0;
 	this->initPlayerY = 0;
+	this->uiManager = nullptr;
 }
 
 Level::Level(const vector<string>& tileMapFiles, Player* player, 
@@ -33,25 +36,20 @@ Level::Level(const vector<string>& tileMapFiles, Player* player,
 	initializeEnemies();
 	//Initialize moving objects
 	initializeMovingObjects();
+	this->uiManager = nullptr;
 }
 
 Level::~Level()
 {
-	for (unsigned int i = 0; i < enemies.size(); i++)
-	{
-		if (enemies[i] != nullptr)
-		{
-			delete enemies[i];
-			enemies[i] = nullptr;
-		}
-	}
-	enemies.clear();
 	for (MovingObject* obj : movingObjects) {
 		if (obj != nullptr) {
 			delete obj;
 		}
 	}
 	movingObjects.clear();
+	clearEnemies();
+	clearItems();
+	this->player = nullptr;
 }
 
 void Level::init() 
@@ -104,7 +102,15 @@ void Level::update(int deltaTime)
 			obj->update(deltaTime);
 		}
 	}
+
+	checkItemPickUp();
+
 	updateCameraSector();
+}
+
+void Level::setUIManager(UIManager* uiManager)
+{
+	this->uiManager = uiManager;
 }
 
 void Level::updateCameraSector()
@@ -164,6 +170,9 @@ void Level::render()
 	for (unsigned int i = 0; i < maps.size(); i++)
 		maps[i]->render();
 
+	for (unsigned int i = 0; i < items.size(); i++)
+		items[i]->render(view);
+
 	// Render all enemies
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->render(view);
 	projectileManager.render(view);
@@ -178,8 +187,23 @@ void Level::render()
 
 void Level::initializeEnemies() {
 	for (const auto& config : enemyConfigs) {
-		Enemy* enemy = config.enemyInstance;
-		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0], config.spriteSheet);
+		Enemy* enemy = nullptr;
+		switch (config.type) {
+			case EnemyType::BASE:
+				enemy = new Enemy();
+				break;
+			case EnemyType::MELEE:
+				enemy = new MeleeEnemy();
+				break;
+			case EnemyType::RANGED:
+				enemy = new RangedEnemy();
+				break;
+			default:
+				enemy = new Enemy();
+				break;
+		}
+		enemy->setSpriteSheet(config.spriteSheet);
+		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0]);
 		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
 		enemy->setProjectileManager(&projectileManager);
 		enemies.push_back(enemy);
@@ -317,3 +341,167 @@ void Level::handlePlayerAttack()
 	}
 }
 
+void Level::initializeItems() {
+	int tileSize = maps[0]->getTileSize();
+
+	initializeObjects(tileSize);
+	initializeWeapons(tileSize);
+}
+
+void Level::initializeObjects(int tileSize) {
+	Texture* medpackTexture = new Texture();
+	medpackTexture->loadFromFile("images/items/Medipack.png", TEXTURE_PIXEL_FORMAT_RGBA);
+
+	Item* medipack = new Item(
+		glm::vec2(tileSize - 4, tileSize - 4),
+		glm::vec2(1.0f, 1.0f),
+		medpackTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(25, 10), false, tileSize);
+
+	Item* medipack2 = new Item(
+		glm::vec2(tileSize - 4, tileSize - 4),
+		glm::vec2(1.0f, 1.0f),
+		medpackTexture,  // Share same texture                     
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	medipack2->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(30, 15), false, tileSize);
+
+	Texture* speedPotionTexture = new Texture();
+	speedPotionTexture->loadFromFile("images/items/SPEED POTION.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	Item* speedPotion = new Item(
+		glm::vec2(tileSize - 3, tileSize - 3),
+		glm::vec2(1.0f, 1.0f),
+		speedPotionTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	speedPotion->setItem("SPEED POTION", 1, "Increases speed for 10 seconds.", glm::vec2(6, 10), false, tileSize);
+
+	Texture* arrowTexture = new Texture();
+	arrowTexture->loadFromFile("images/items/Arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	Item* arrow = new Item(
+		glm::vec2(tileSize - 3, tileSize - 3),
+		glm::vec2(1.0f, 1.0f),
+		arrowTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	arrow->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 5), false, tileSize);
+	Item* arrow2 = new Item(
+		glm::vec2(tileSize - 3, tileSize - 3),
+		glm::vec2(1.0f, 1.0f),
+		arrowTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	arrow2->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 8), false, tileSize);
+
+	items.push_back(medipack);
+	items.push_back(medipack2);
+	items.push_back(speedPotion);
+	items.push_back(arrow);
+	items.push_back(arrow2);
+}
+
+void Level::initializeWeapons(int tileSize) {
+	Texture* rapierTexture = new Texture();
+	rapierTexture->loadFromFile("images/items/Rapier.png", TEXTURE_PIXEL_FORMAT_RGBA);
+
+	Item* rapier = new Item(
+		glm::vec2(10, 15),
+		glm::vec2(1.0f, 1.0f),
+		rapierTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	rapier->setItem("RAPIER", 1, "Medium range weapon.", glm::vec2(15, 5), true, tileSize);
+	items.push_back(rapier);
+
+	Texture* bowTexture = new Texture();
+	bowTexture->loadFromFile("images/items/Bow.png", TEXTURE_PIXEL_FORMAT_RGBA);
+
+	Item* bow = new Item(
+		glm::vec2(16, 16),
+		glm::vec2(1.0f, 1.0f),
+		bowTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	bow->setItem("BOW", 1, "Long range weapon.", glm::vec2(15, 10), true, tileSize);
+	items.push_back(bow);
+}
+
+void Level::clearEnemies() {
+	for (unsigned int i = 0; i < enemies.size(); i++)
+	{
+		if (enemies[i] != nullptr)
+		{
+			delete enemies[i];
+			enemies[i] = nullptr;
+		}
+	}
+	enemies.clear();
+}
+
+void Level::clearItems() {
+	for (unsigned int i = 0; i < items.size(); i++)
+	{
+		if (items[i] != nullptr)
+		{
+			delete items[i];
+			items[i] = nullptr;
+		}
+	}
+	items.clear();
+}
+
+
+void Level::checkItemPickUp() {
+	glm::vec2 playerPos = player->getPositionFloat();
+	for (int i = 0; i < items.size(); i++)
+	{
+		glm::vec2 itemPos = items[i]->getPosition();
+		if (checkColission(playerPos, itemPos, 16, 16)) 
+		{
+			std::cout << "Item picked up at position: (" << itemPos.x << ", " << itemPos.y << ")\n";
+			itemPickUpEvent(i);
+			break;
+		}
+	}
+}
+
+void Level::itemPickUpEvent(int indexInVector) {
+	Item* itemPicked = items[indexInVector];
+
+	bool isFirstOfKind = (player->getItemQuantity(itemPicked->getName()) == 0);
+
+	player->addItem(itemPicked);
+
+	if (uiManager != nullptr) {
+		std::string pickupText = "PICKED UP " + itemPicked->getName() + "!";
+		glm::vec2 messagePos(320, 160);
+		glm::vec3 messageColor(0.f, 0.f, 0.f);
+		uiManager->showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
+	}
+
+	//only delete if itss not the first (Player keeps first instance)
+	if (!isFirstOfKind && !itemPicked->getIsWeapon()) {
+		delete itemPicked;
+	}
+
+	items.erase(items.begin() + indexInVector);
+}
+
+bool Level::checkColission(glm::vec2& pos1, glm::vec2& pos2, int size1, int size2) {
+	bool collisionX = pos1.x + size1 > pos2.x &&
+		pos2.x + size2 > pos1.x;
+
+	bool collisionY = pos1.y + size1 > pos2.y &&
+		pos2.y + size2 > pos1.y;
+
+	return collisionX && collisionY;
+}

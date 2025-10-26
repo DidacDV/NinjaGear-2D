@@ -10,9 +10,9 @@ UIManager::UIManager()
 {
     health = 3.5f;
     maxHealth = 5.f;
-    currentWeapon = 0;
+	currentItemName = "";
+    currentWeaponName = "";
     rank = 2;
-    currentObject = 0;
     vao = 0;
     vbo = 0;
 }
@@ -27,6 +27,8 @@ UIManager::~UIManager()
 
 void UIManager::init()
 {
+    weaponTextures.clear();
+    objectTextures.clear();
     screenWidth = globalScreenWidth / 2;
     screenHeight = globalScreenHeight / 2;
 
@@ -56,6 +58,15 @@ void UIManager::init()
     vShader.free();
     fShader.free();
 
+    initTextures();
+
+    textRenderer = new Text("resources/NormalFont.ttf", FONT_SIZE, screenWidth, screenHeight * 0.15);
+    calculateLayout();
+    
+    initQuad();
+}
+
+void UIManager::initTextures() {
     if (!fullHeartTexture.loadFromFile("images/ui/FullHeart.png", TEXTURE_PIXEL_FORMAT_RGBA)) {
         std::cout << "ERROR: Could not load star_filled.png" << std::endl;
     }
@@ -75,10 +86,9 @@ void UIManager::init()
         }
     }
 
-    textRenderer = new Text("resources/NormalFont.ttf", 24, screenWidth, screenHeight * 0.15);
-    calculateLayout();
-    
-    initQuad();
+    if (!dialogBoxTexture.loadFromFile("images/ui/DialogBox.png", TEXTURE_PIXEL_FORMAT_RGBA)) {
+        std::cout << "ERROR: Could not load DialogBox.png" << std::endl;
+    }
 }
 
 void UIManager::initQuad()
@@ -125,10 +135,29 @@ void UIManager::calculateLayout() {
 }
 
 //TODO: use player getter functions
-void UIManager::update(int deltaTime, Player* player)
-{
-    if (player != nullptr && health != player->getHealth() / 10.0f) health = player->getHealth()/10.0f;
-    if (player != nullptr && rank != player->getRank()) rank = player->getRank();
+void UIManager::update(int deltaTime, Player* player) {
+    if (player != nullptr) {
+        health = player->getHealth();
+        if (player != nullptr && rank != player->getRank()) rank = player->getRank();
+
+        Item* currentItem = player->getCurrentItem();
+        if (currentItem != nullptr) {
+            currentItemName = currentItem->getName();
+            currentItemQuantity = player->getItemQuantity(currentItemName);
+        }
+        else {
+            currentItemName = "";
+        }
+
+        Item* currentWeapon = player->getCurrentWeapon();
+        if (currentWeapon != nullptr) {
+            currentWeaponName = currentWeapon->getName();
+        }
+        else {
+            currentWeaponName = "Punch"; 
+        }
+    }
+    updateTemporaryMessages(deltaTime);
 }
 
 void UIManager::renderFixedText() {
@@ -177,9 +206,47 @@ void UIManager::render()
     texProgram.setUniformMatrix4f("projection", projection);
     texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
 
-    renderItem(uiPositions.weapon_value_pos, "images/weapons/", "axe1");
-    renderItem(uiPositions.object_value_pos, "images/weapons/", "axe1");
+    if (!currentWeaponName.empty()) {
+        string weaponLower = currentWeaponName;
+        transform(weaponLower.begin(), weaponLower.end(), weaponLower.begin(), ::tolower);
+        renderItem(uiPositions.weapon_value_pos, "images/weapons/", weaponLower, 1);
+    }
+
+    // Render current inventory item
+    if (!currentItemName.empty()) {
+        string itemLower = currentItemName;
+        transform(itemLower.begin(), itemLower.end(), itemLower.begin(), ::tolower);
+        renderItem(uiPositions.object_value_pos, "images/items/", itemLower, currentItemQuantity);
+    }
+
     glBindVertexArray(0);
+}
+
+//curently used for text when picking up items. maybe dialog too?
+void UIManager::renderGameOverlay()
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+
+    // Setup viewport for game area (85% of screen, top portion)
+    int gameHeight = static_cast<int>(screenHeight * 0.85f);
+    int gameY = static_cast<int>(screenHeight * 0.15f);  // Start above UI panel
+
+    glViewport(0, gameY, screenWidth, gameHeight);
+
+    // Create projection for game viewport
+    glm::mat4 gameProjection = glm::ortho(0.f, static_cast<float>(screenWidth),
+        static_cast<float>(gameHeight), 0.f);
+
+    // Update text renderer projection temporarily
+    textRenderer->UpdateScreenSize(screenWidth, gameHeight);
+
+    // Render temporary messages
+    renderTemporaryMessages();
+
+    // Restore text renderer to UI dimensions
+    textRenderer->UpdateScreenSize(screenWidth, screenHeight * 0.15f);
 }
 
 void UIManager::setupViewport(float heightPercent, float yOffsetPercent)
@@ -248,7 +315,7 @@ void UIManager::renderRank(const glm::vec2& position, int currentRank) {
     texProgram.use();
 }
 
-void UIManager::renderItem(const glm::vec2& position, const string& basePath, const string& itemName)
+void UIManager::renderItem(const glm::vec2& position, const string& basePath, const string& itemName, int quantity)
 {
     bool isWeapon = basePath.find("weapons") != std::string::npos;
     Texture* tex = UIManagerUtils::findOrLoadItemTexture(basePath, itemName, isWeapon, weaponTextures, objectTextures);
@@ -262,8 +329,75 @@ void UIManager::renderItem(const glm::vec2& position, const string& basePath, co
     renderPanel(glm::vec2(position.x, position.y - 3), glm::vec2(ICON_SIZE, ICON_SIZE), tex); // - 3 --> center with label, TODO try with different weapons etc
     //label
     std::string itemNameUpper = UIManagerUtils::toUppercase(itemName);
+    if (quantity > 1) {
+        itemNameUpper += " X" + std::to_string(quantity);
+    }
     textRenderer->RenderText(itemNameUpper, position.x + ICON_TEXT_MARGIN, position.y + 5, 0.8f, glm::vec3(1.f));
 
     glBindVertexArray(vao);
     texProgram.use();
+}
+
+void UIManager::renderTemporaryMessages()
+{
+    int gameHeight = static_cast<int>(screenHeight * 0.85f);
+    glm::mat4 gameProjection = glm::ortho(0.f, static_cast<float>(screenWidth),
+        static_cast<float>(gameHeight), 0.f);
+
+    texProgram.use();
+    texProgram.setUniformMatrix4f("projection", gameProjection);
+
+    for (const auto& msg : temporaryMessages)
+    {
+        glm::vec3 color = msg.color;
+        float alpha = msg.remainingTime / 500.0f;
+        if (msg.remainingTime < 500) {
+            color *= alpha;
+        }
+
+        showMessageAndDialog(msg, alpha, color);
+    }
+}
+
+void UIManager::showMessageAndDialog(TemporaryMessage msg, float alpha, glm::vec3 color) {
+    float paddingX = 8.0f;
+    float paddingY = 4.0f;
+
+    float estimatedWidth = msg.text.size() * FONT_SIZE * msg.scale * 0.9f;
+    float estimatedHeight = FONT_SIZE * msg.scale * 1.4f;
+
+    glm::vec2 boxPos = glm::vec2(msg.position.x - paddingX, msg.position.y - paddingY - 10);
+    glm::vec2 boxSize = glm::vec2(estimatedWidth + paddingX * 1.1, estimatedHeight + paddingY * 2);
+
+    glBindVertexArray(vao);
+    renderPanel(boxPos, boxSize, &dialogBoxTexture, glm::vec4(1.0f, 1.0f, 1.0f, alpha));
+
+    textRenderer->RenderText(msg.text, msg.position.x, msg.position.y, msg.scale, color);
+}
+
+void UIManager::showTemporaryMessage(const std::string& text, const glm::vec2& position,
+    float scale, const glm::vec3& color, int durationMs)
+{
+    TemporaryMessage msg;
+    msg.text = text;
+    msg.position = position;
+    msg.scale = scale;
+    msg.color = color;
+    msg.remainingTime = durationMs;
+    msg.totalDuration = durationMs;
+
+    temporaryMessages.push_back(msg);
+}
+
+//just to delete those who are expired
+void UIManager::updateTemporaryMessages(int deltaTime) {
+    for (int i = temporaryMessages.size() - 1; i >= 0; i--)
+    {
+        temporaryMessages[i].remainingTime -= deltaTime;
+        //remove expired messages
+        if (temporaryMessages[i].remainingTime <= 0)
+        {
+            temporaryMessages.erase(temporaryMessages.begin() + i);
+        }
+    }
 }

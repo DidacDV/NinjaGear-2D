@@ -146,7 +146,6 @@ bool TileMap::isTileBlocked(int x, int y) const
 	if (x < 0 || x >= mapSize.x || y < 0 || y >= mapSize.y) {
 		return true;
 	}
-
 	int tileId = map[y * mapSize.x + x];
 	return blockedTiles.find(tileId) != blockedTiles.end();
 }

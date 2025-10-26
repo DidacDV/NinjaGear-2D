@@ -17,6 +17,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="GeometryUtils.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="MeleeEnemy.h" />
     <ClInclude Include="Menu.h" />
@@ -25,6 +26,7 @@
     <ClInclude Include="MovingObject.h" />
     <ClInclude Include="MovingStatue.h" />
     <ClInclude Include="NullAudioService.h" />
+    <ClInclude Include="MenuScene.h" />
     <ClInclude Include="Pathfinder.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Projectile.h" />
@@ -45,6 +47,7 @@
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Globals.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeleeEnemy.cpp" />
@@ -53,6 +56,7 @@
     <ClCompile Include="MiniAudioService.cpp" />
     <ClCompile Include="MovingObject.cpp" />
     <ClCompile Include="MovingStatue.cpp" />
+    <ClCompile Include="MenuScene.cpp" />
     <ClCompile Include="Pathfinder.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Projectile.cpp" />

@@ -1,55 +1,100 @@
 #include "Menu.h"
+#include "Game.h"
 #include <iostream>
+#include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-#define CAMERA_WIDTH 480  
-#define CAMERA_HEIGHT 320
-
-
-Menu::Menu()
+Menu::Menu(MenuType menuType) : MenuScene()
 {
-	Scene::Scene();
-}
-
-Menu::Menu(const vector<string>& tileMapFiles)
-	: Scene(tileMapFiles)
-{
+    menuSprite = NULL;
+    imageLoaded = false;
+    type = menuType;
 }
 
 Menu::~Menu()
 {
-	Scene::~Scene();
+    if (menuSprite != NULL)
+        delete menuSprite;
 }
 
 void Menu::init()
 {
-	Scene::init();
+    MenuScene::menuImagePath = this->menuImagePath;
+    setUpButtons();
+    MenuScene::init();
+}
+
+MenuType Menu::getType()
+{
+    return type;
 }
 
 void Menu::update(int deltaTime)
 {
-	Scene::update(deltaTime);
+	MenuScene::update(deltaTime);
 }
 
 void Menu::render()
 {
-	if (maps.empty()) {
-		std::cout << "ERROR: Menu has no maps to render!" << std::endl;
-		return;
-	}
-	glm::mat4 modelview;
-	texProgram.use();
-	setupViewport(0.1f, 0.0f);
+    MenuScene::render();
+}
 
-	int mapHeightInPixels = maps[0]->mapSize.y * maps[0]->getTileSize();
+void Menu::setMenuImage(const string& imagePath)
+{
+    menuImagePath = imagePath;
+}
 
-	texProgram.setUniformMatrix4f("projection", projection);
-	texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
+void Menu::setUpButtons() {
+    if (type == MenuType::START) {
+        addButton(glm::vec2(365, 360), glm::vec2(280, 65), "start");
+		addButton(glm::vec2(365, 450), glm::vec2(280, 65), "settings");
+    }
+}
 
-	glm::mat4 view = glm::mat4(1.0f);
-	texProgram.setUniformMatrix4f("modelview", view);
-	texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
+void Menu::addButton(const glm::vec2& pos, const glm::vec2& size, const string& action)
+{
+    Button btn;
+    btn.position = pos;
+    btn.size = size;
+    btn.action = action;
+    buttons.push_back(btn);
 
-	for (unsigned int i = 0; i < maps.size(); i++)
-		maps[i]->render();
+    cout << "Added button: " << action << " at (" << pos.x << ", " << pos.y
+        << ") size (" << size.x << ", " << size.y << ")" << endl;
+}
+
+string Menu::getClickedButton(int mouseX, int mouseY)
+{
+    for (const Button& btn : buttons) {
+        //check if mouse click is within button bounds
+        if (mouseX >= btn.position.x &&
+            mouseX <= btn.position.x + btn.size.x &&
+            mouseY >= btn.position.y &&
+            mouseY <= btn.position.y + btn.size.y) {
+            return btn.action;
+        }
+    }
+    return ""; //no btn
+}
+
+void Menu::handleClick(int mouseX, int mouseY)
+{
+    string action = getClickedButton(mouseX, mouseY);
+
+    if (!action.empty()) {
+        cout << "Button clicked: " << action << endl;
+
+        if (action == "start") {
+            Game::instance().setCurrentScene("outside");
+        }
+        else if (action == "settings") {
+            Game::instance().setCurrentScene("settings");
+        }
+        else if (action == "back") {
+            Game::instance().setCurrentScene("menu");
+        }
+        else if (action == "exit") {
+            
+        }
+    }
 }

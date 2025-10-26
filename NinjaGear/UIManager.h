@@ -9,6 +9,17 @@
 #include "Player.h"
 #include "Text.h"
 
+struct TemporaryMessage {
+    std::string text;
+    glm::vec2 position;
+    float scale;
+    glm::vec3 color;
+    int remainingTime;  
+    int totalDuration;  
+};
+
+int const FONT_SIZE = 24;
+
 class UIManager
 {
 public:
@@ -18,6 +29,11 @@ public:
     void init();
     void update(int deltaTime, Player* player);
     void render();
+    void renderGameOverlay();
+
+    void showTemporaryMessage(const std::string& text, const glm::vec2& position,
+        float scale, const glm::vec3& color, int durationMs);
+    void showMessageAndDialog(TemporaryMessage msg, float alpha, glm::vec3 color);
 
 private:
     void setupViewport(float heightPercent, float yOffset);
@@ -25,21 +41,28 @@ private:
     void initQuad();
     void renderFixedText();
     void calculateLayout();
+    void initTextures();
 	void renderHealth(const glm::vec2& position, float currentHealth, float maxHealth);
     void renderRank(const glm::vec2& position, int currentRank);
-	void renderItem(const glm::vec2& position, const string& weaponName, const string& basepath); //used for both objects and weapons
+	void renderItem(const glm::vec2& position, const string& weaponName, const string& basepath, int quantity); //used for both objects and weapons
+
+    void renderTemporaryMessages();
+    void updateTemporaryMessages(int deltaTime);
 
 private:
     ShaderProgram texProgram;
     glm::mat4 projection;
 
+    vector<TemporaryMessage> temporaryMessages;
+
     //UI data
     float health;
     float maxHealth;
-    int currentWeapon;
+    string currentItemName;
+	int currentItemQuantity;
+    string currentWeaponName;
     int rank; //goes from 0 (worst) to 6 (best)
     int maxRank = 6;
-    int currentObject;
 
     //Rendering
     GLuint vao;
@@ -47,6 +70,7 @@ private:
     Texture fullHeartTexture;
     Texture halfHeartTexture;
     Texture emptyHeartTexture;
+    Texture dialogBoxTexture;
     std::vector<Texture> rankTextures;
     int screenWidth;
     int screenHeight;
