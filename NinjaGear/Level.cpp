@@ -232,9 +232,30 @@ void Level::initializeObjects(int tileSize) {
 	);
 	speedPotion->setItem("SPEED POTION", 1, "Increases speed for 10 seconds.", glm::vec2(6, 10), false, tileSize);
 
+	Texture* arrowTexture = new Texture();
+	arrowTexture->loadFromFile("images/items/Arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	Item* arrow = new Item(
+		glm::vec2(tileSize - 3, tileSize - 3),
+		glm::vec2(1.0f, 1.0f),
+		arrowTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	arrow->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 5), false, tileSize);
+	Item* arrow2 = new Item(
+		glm::vec2(tileSize - 3, tileSize - 3),
+		glm::vec2(1.0f, 1.0f),
+		arrowTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	arrow2->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 8), false, tileSize);
+
 	items.push_back(medipack);
 	items.push_back(medipack2);
 	items.push_back(speedPotion);
+	items.push_back(arrow);
+	items.push_back(arrow2);
 }
 
 void Level::initializeWeapons(int tileSize) {
@@ -248,8 +269,21 @@ void Level::initializeWeapons(int tileSize) {
 		&this->texProgram,
 		glm::ivec2(SCREEN_X, SCREEN_Y)
 	);
-	rapier->setItem("RAPIER", 1, "Medium range weapon.", glm::vec2(15, 10), true, tileSize);
+	rapier->setItem("RAPIER", 1, "Medium range weapon.", glm::vec2(15, 5), true, tileSize);
 	items.push_back(rapier);
+
+	Texture* bowTexture = new Texture();
+	bowTexture->loadFromFile("images/items/Bow.png", TEXTURE_PIXEL_FORMAT_RGBA);
+
+	Item* bow = new Item(
+		glm::vec2(16, 16),
+		glm::vec2(1.0f, 1.0f),
+		bowTexture,
+		&this->texProgram,
+		glm::ivec2(SCREEN_X, SCREEN_Y)
+	);
+	bow->setItem("BOW", 1, "Long range weapon.", glm::vec2(15, 10), true, tileSize);
+	items.push_back(bow);
 }
 
 void Level::clearEnemies() {

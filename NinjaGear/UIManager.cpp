@@ -27,6 +27,8 @@ UIManager::~UIManager()
 
 void UIManager::init()
 {
+    weaponTextures.clear();
+    objectTextures.clear();
     screenWidth = globalScreenWidth / 2;
     screenHeight = globalScreenHeight / 2;
 
