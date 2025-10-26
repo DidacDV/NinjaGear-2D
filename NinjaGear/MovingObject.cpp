@@ -35,13 +35,8 @@ void MovingObject::setMovementPath(const glm::vec2& startPos, const glm::vec2& e
 
 void MovingObject::update(int deltaTime)
 {
-    // Update sprite animation
     Sprite::update(deltaTime);
-
-    // Update movement pattern (can be overridden)
     updateMovementPattern(deltaTime);
-
-    // Update sprite position
     setPosition(glm::vec2(float(tileMapDispl.x + objectPosition.x),
         float(tileMapDispl.y + objectPosition.y)));
 }
@@ -49,38 +44,7 @@ void MovingObject::update(int deltaTime)
 void MovingObject::updateMovementPattern(int deltaTime)
 {
     // Base implementation: simple velocity-based movement
-    // Override this in subclasses for custom patterns
-
-    float dt = deltaTime / 1000.0f; // Convert to seconds
-    glm::vec2 displacement = velocity * dt;
-
-    // Try to move horizontally
-    if (displacement.x < 0) {
-        objectPosition.x += displacement.x;
-        if (collisionMoveLeft(objectPosition, glm::ivec2(quadSize))) {
-            objectPosition.x -= displacement.x;
-        }
-    }
-    else if (displacement.x > 0) {
-        objectPosition.x += displacement.x;
-        if (collisionMoveRight(objectPosition, glm::ivec2(quadSize))) {
-            objectPosition.x -= displacement.x;
-        }
-    }
-
-    // Try to move vertically
-    if (displacement.y < 0) {
-        objectPosition.y += displacement.y;
-        if (collisionMoveUp(objectPosition, glm::ivec2(quadSize))) {
-            objectPosition.y -= displacement.y;
-        }
-    }
-    else if (displacement.y > 0) {
-        objectPosition.y += displacement.y;
-        if (collisionMoveDown(objectPosition, glm::ivec2(quadSize))) {
-            objectPosition.y -= displacement.y;
-        }
-    }
+    cout << "MovingObject updateMovementPattern used. Should be overriden" << endl;
 }
 
 void MovingObject::setTileMapPosition(const glm::ivec2& tilePos, const glm::ivec2& tileMapDispl)

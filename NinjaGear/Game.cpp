@@ -37,9 +37,9 @@ void Game::init(int screenWidth, int screenHeight)
 	vector<MovingObjectConfig> jungleObjects;
 
 	vector<MusicConfig> jungleMusic;
-	jungleMusic.push_back(MusicConfig{ 0, 0, "sounds/village.wav" });
-	jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/village.wav" });
-	jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
+	//jungleMusic.push_back(MusicConfig{ 0, 0, "sounds/village.wav" });
+	//jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/village.wav" });
+	//jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
 	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic);
 
 	addScene("Jungle1", Jungle1);

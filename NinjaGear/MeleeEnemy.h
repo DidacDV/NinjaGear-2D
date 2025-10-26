@@ -15,8 +15,6 @@ public:
     bool isInAttackState() const override; 
     bool canDealDamage() const override;
 
-
-
 protected:
     void initializeAnimations() override;
     void changeAnimationsForDirection(glm::vec2 direction) override;

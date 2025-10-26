@@ -110,19 +110,14 @@ void Level::update(int deltaTime)
 void Level::updateCameraSector()
 {
 	glm::vec2 playerPos = player->getPosition();
-
-	// Calculate which sector the player is currently in
 	int newSectorI = static_cast<int>(playerPos.x) / sectorWidth;
 	int newSectorJ = static_cast<int>(playerPos.y) / sectorHeight;
-
-	// Clamp to valid sector range
 	newSectorI = glm::clamp(newSectorI, 0, numSectorsI - 1);
 	newSectorJ = glm::clamp(newSectorJ, 0, numSectorsJ - 1);
 
 	// Check if sector changed
 	if (newSectorI != currentSectorI || newSectorJ != currentSectorJ)
 	{
-
 		currentSectorI = newSectorI;
 		currentSectorJ = newSectorJ;
 		calculateCameraOffset();
@@ -256,7 +251,6 @@ void Level::checkCombat()
 	for (auto& enemy : enemies) {
 		glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
 		glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
-
 		if (isColliding(player->getPositionFloat(), playerSize,
 			enemy->getPosition(), enemySize)) {
 

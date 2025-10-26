@@ -25,7 +25,6 @@ MovingStatue::MovingStatue(const glm::vec2& quadSize,
     startPosition = glm::vec2(0.0f);
     endPosition = glm::vec2(0.0f);
     targetPosition = endPosition;
-
     isPaused = true;           // Start paused
     pauseTimer = 0.0f;
     pauseDuration = 2000.0f;
