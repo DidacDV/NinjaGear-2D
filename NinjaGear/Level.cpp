@@ -1,7 +1,10 @@
 #include "Level.h"
+#include "MovingStatue.h" 
 #include "RangedEnemy.h"
 #include "MeleeEnemy.h"
 #include <iostream>
+#include "Projectile.h"
+#include "ServiceLocator.h"
 
 #define SCREEN_X 0
 #define SCREEN_Y 0
@@ -18,38 +21,43 @@ Level::Level()
 	this->uiManager = nullptr;
 }
 
-Level::Level(const vector<string>& tileMapFiles, Player* player,
-	int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs)
+Level::Level(const vector<string>& tileMapFiles, Player* player, 
+	int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs, const vector<MovingObjectConfig>& objectConfigs, const vector<MusicConfig>& musicConfigs)
 	: Scene(tileMapFiles)
 {
 	this->player = player;
 	this->initPlayerX = initPlayerX;
 	this->initPlayerY = initPlayerY;
 	this->enemyConfigs = enemyConfigs;
+	this->movingObjectConfigs = objectConfigs;
+	this->musicConfigs = musicConfigs;
+	this->init();
+	//Initialize enemies
+	initializeEnemies();
+	//Initialize moving objects
+	initializeMovingObjects();
 	this->uiManager = nullptr;
-
-	//Initialize camera sector tracking variables
-	currentSectorI = 0;
-    currentSectorJ = 0;
-    numSectorsI = 0;
-    numSectorsJ = 0;
-    sectorWidth = 0;
-    sectorHeight = 0;
-    cameraOffsetX = 0.0f;
-    cameraOffsetY = 0.0f;
 }
 
 Level::~Level()
 {
-	Scene::~Scene();
+	for (MovingObject* obj : movingObjects) {
+		if (obj != nullptr) {
+			delete obj;
+		}
+	}
+	movingObjects.clear();
 	clearEnemies();
 	clearItems();
 	this->player = nullptr;
 }
 
 void Level::init() 
-{
+{	
 	Scene::init();
+	// Initialize projectile manager
+	projectileManager.init(&texProgram, maps[0]);
+
 	//Projection matrix override
 	projection = glm::ortho(0.f, float(CAMERA_WIDTH), float(CAMERA_HEIGHT), 0.f);
 	
@@ -57,13 +65,6 @@ void Level::init()
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
 	player->setTileMaps(maps);
-
-	//need to clear on each init to not duplicate enemies frames
-	clearEnemies();
-	initializeEnemies();
-
-	clearItems();
-	initializeItems();
 
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeight = maps[0]->mapSize.y * maps[0]->getTileSize();
@@ -85,6 +86,7 @@ void Level::init()
 	currentSectorJ = glm::clamp(currentSectorJ, 0, numSectorsJ - 1);
 
 	calculateCameraOffset();
+	initializeMusic();
 }
 
 void Level::update(int deltaTime)
@@ -92,6 +94,14 @@ void Level::update(int deltaTime)
 	Scene::update(deltaTime);
 	player->update(deltaTime);
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->update(deltaTime);
+	projectileManager.update(deltaTime);
+	checkCombat();
+	for (MovingObject* obj : movingObjects) {
+		if (obj != nullptr) {
+			obj->setCameraOffset(glm::vec2(cameraOffsetX, cameraOffsetY));
+			obj->update(deltaTime);
+		}
+	}
 
 	checkItemPickUp();
 
@@ -106,12 +116,8 @@ void Level::setUIManager(UIManager* uiManager)
 void Level::updateCameraSector()
 {
 	glm::vec2 playerPos = player->getPosition();
-
-	// Calculate which sector the player is currently in
 	int newSectorI = static_cast<int>(playerPos.x) / sectorWidth;
 	int newSectorJ = static_cast<int>(playerPos.y) / sectorHeight;
-
-	// Clamp to valid sector range
 	newSectorI = glm::clamp(newSectorI, 0, numSectorsI - 1);
 	newSectorJ = glm::clamp(newSectorJ, 0, numSectorsJ - 1);
 
@@ -121,6 +127,20 @@ void Level::updateCameraSector()
 		currentSectorI = newSectorI;
 		currentSectorJ = newSectorJ;
 		calculateCameraOffset();
+		updateMusic();
+	}
+}
+
+void Level::updateMusic()
+{
+	auto it = sectorMusicMap.find({ currentSectorI, currentSectorJ });
+
+	if (it != sectorMusicMap.end()) {
+		const MusicConfig& config = it->second;
+		if (config.musicFile != currentMusicFile) {
+			currentMusicFile = config.musicFile;
+			ServiceLocator::getAudio().playMusic(config.musicFile.c_str());
+		}
 	}
 }
 
@@ -133,7 +153,6 @@ void Level::calculateCameraOffset()
 
 void Level::render()
 {
-	glm::mat4 modelview;
 	texProgram.use();
 	setupViewport(0.85f, 0.15f);
 
@@ -156,16 +175,14 @@ void Level::render()
 
 	// Render all enemies
 	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->render(view);
+	projectileManager.render(view);
 	// Player render - pass the view matrix
+	for (MovingObject* obj : movingObjects) {
+		if (obj != nullptr) {
+			obj->render(view);
+		}
+	}
 	player->render(view);
-}
-
-// Helper method to add enemies
-void Level::addEnemy(const string& spriteSheet, int initX, int initY)
-{
-    Enemy* enemy = new Enemy();
-    enemy->setSpriteSheet(spriteSheet);
-    enemies.push_back(enemy);
 }
 
 void Level::initializeEnemies() {
@@ -188,7 +205,139 @@ void Level::initializeEnemies() {
 		enemy->setSpriteSheet(config.spriteSheet);
 		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0]);
 		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
+		enemy->setProjectileManager(&projectileManager);
 		enemies.push_back(enemy);
+	}
+}
+
+void Level::initializeMovingObjects()
+{
+	movingObjectTextures.resize(movingObjectConfigs.size());
+
+	for (size_t i = 0; i < movingObjectConfigs.size(); i++) {
+		const MovingObjectConfig& config = movingObjectConfigs[i];
+		MovingObject* obj = nullptr; // Initialize the pointer
+
+		// Load texture first, as it's needed for the constructor
+		bool loaded = movingObjectTextures[i].loadFromFile(config.spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
+		if (!loaded) {
+			std::cout << "ERROR: Failed to load moving object texture: " << config.spriteSheet << std::endl;
+			continue;
+		}
+
+		movingObjectTextures[i].setMinFilter(GL_NEAREST);
+		movingObjectTextures[i].setMagFilter(GL_NEAREST);
+
+		switch (config.type) {
+		case MovingObjectType::MOVING_STATUE:
+			obj = new MovingStatue(config.spriteSize, config.texCoordSize,
+				&movingObjectTextures[i], &texProgram);
+			break;
+			
+		default:
+			std::cout << "ERROR: Unknown MovingObject type in config." << std::endl;
+			continue; 
+		}
+
+		if (obj == nullptr) continue;
+
+		obj->setMovementPath(config.startPos, config.endPos, config.speed);
+
+		obj->setNumberAnimations(1);
+		obj->setAnimationSpeed(0, 8);
+		obj->addKeyframe(0, glm::vec2(0.0f, 0.0f));
+		obj->changeAnimation(0);
+
+		obj->setTileMapPosition(glm::ivec2(config.startPos.x, config.startPos.y),
+			glm::ivec2(SCREEN_X, SCREEN_Y));
+		obj->setTileMaps(maps);
+
+		movingObjects.push_back(obj);
+	}
+}
+
+void Level::initializeMusic()
+{
+	// Build a map for quick sector -> music lookup
+	for (const MusicConfig& config : musicConfigs) {
+		sectorMusicMap[{config.sectorI, config.sectorJ}] = config;
+	}
+
+	// Play initial music for starting sector
+	updateMusic();
+}
+
+void Level::checkCombat()
+{
+	if (!player->isAlive()) return;
+
+	// Check enemy collision with player (contact damage)
+	for (auto& enemy : enemies) {
+		glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
+		glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
+		if (isColliding(player->getPositionFloat(), playerSize,
+			enemy->getPosition(), enemySize)) {
+
+			// Only deal damage if enemy is ready to attack
+			if (enemy->canDealDamage()) {
+				player->takeDamage(enemy->getDamage());
+				enemy->onDamageDealt(); // Reset cooldown
+			}
+		}
+	}
+
+	//Check projectile collisions
+	for (Projectile* projectile : projectileManager.getActiveProjectiles()) {
+		glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
+
+		if (isColliding(player->getPositionFloat(), playerSize,
+			projectile->getPosition(), projectile->getSize())) {
+			player->takeDamage(projectile->getDamage());
+			projectile->deactivate();
+		}
+	}
+
+	handlePlayerAttack();
+}
+
+bool Level::isColliding(const glm::vec2& pos1, const glm::vec2& size1,
+	const glm::vec2& pos2, const glm::vec2& size2)
+{
+	// AABB (Axis-Aligned Bounding Box) collision detection
+	return (pos1.x < pos2.x + size2.x &&
+		pos1.x + size1.x > pos2.x &&
+		pos1.y < pos2.y + size2.y &&
+		pos1.y + size1.y > pos2.y);
+}
+
+void Level::handlePlayerAttack()
+{
+	if (!player->justStartedPunching()) return;
+
+	const float PUNCH_REACH = 20.0f;
+	const int PUNCH_DAMAGE = 25;
+
+	glm::vec2 punchPos = player->getPunchHitbox();
+
+	glm::vec2 punchSize(PLAYER_SIZE + PUNCH_REACH, PLAYER_SIZE + PUNCH_REACH);
+	glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
+
+
+	for (auto it = enemies.begin(); it != enemies.end(); ) {
+		Enemy* enemy = *it;
+
+		if (isColliding(punchPos, punchSize,
+			enemy->getPosition(), enemySize)) {
+			enemy->takeDamage(PUNCH_DAMAGE);
+
+			if (!enemy->isAlive()) {
+				delete enemy;
+				player->increaseRank(1);
+				it = enemies.erase(it);
+				continue;
+			}
+		}
+		++it;
 	}
 }
 

@@ -1,10 +1,5 @@
 #include "RangedEnemy.h"
-
-enum RangedEnemyAnims
-{
-	STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
-	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN
-};
+#include "ProjectileManager.h"
 
 void RangedEnemy::initializeAnimations()
 {
@@ -60,12 +55,10 @@ void RangedEnemy::initializeAnimations()
 }
 
 
-void RangedEnemy::update(int deltaTime)
+void RangedEnemy::updateStateMachine(int deltaTime)
 {
-	sprite->update(deltaTime);
 	glm::vec2 playerPos = Game::instance().getPlayerPosition();
 
-	// State machine logic
 	switch (currentState) {
 	case State::IDLE:
 		startPatrol();
@@ -79,11 +72,6 @@ void RangedEnemy::update(int deltaTime)
 		updateAttacking(deltaTime, playerPos);
 		break;
 	}
-
-	sprite->setPosition(glm::vec2(
-		float(tileMapDispl.x + posEnemy.x),
-		float(tileMapDispl.y + posEnemy.y)
-	));
 }
 
 
@@ -139,7 +127,7 @@ void RangedEnemy::updatePatrol(int deltaTime, const glm::vec2& playerPos)
 void RangedEnemy::changeAnimationsForDirection(glm::vec2 direction)
 {
 	Direction newDirection;
-	RangedEnemyAnims newAnimation;
+	Anims newAnimation;
 
 	if (std::abs(direction.x) > std::abs(direction.y)) {
 		newAnimation = direction.x > 0 ? MOVE_RIGHT : MOVE_LEFT;
@@ -150,10 +138,8 @@ void RangedEnemy::changeAnimationsForDirection(glm::vec2 direction)
 		newDirection = direction.y > 0 ? DOWN : UP;
 	}
 
-
-	this->currentDirection = newDirection;
-
 	if (sprite->animation() != newAnimation) {
+		currentDirection = newDirection;
 		sprite->changeAnimation(newAnimation);
 	}
 }
@@ -172,12 +158,20 @@ void RangedEnemy::startAttacking(const glm::vec2& playerPos)
 void RangedEnemy::updateAttacking(int deltaTime, const glm::vec2& playerPos)
 {
 	attackingTimer += deltaTime;
-
-
+	shootCooldownTimer += deltaTime;
 	float distanceToPlayer = glm::length(playerPos - posEnemy);
-	if (distanceToPlayer > MAX_ATTACKING_DISTANCE || attackingTimer >= MAX_ATTACKING_TIME) {
+
+	if (distanceToPlayer > MAX_ATTACKING_DISTANCE || 
+		attackingTimer >= MAX_ATTACKING_TIME 
+		)
+	{
 		stopAttacking();
 		return;
+	}
+
+	if (shootCooldownTimer >= SHOOT_COOLDOWN) {
+		shootAtPlayer(playerPos);
+		shootCooldownTimer = 0;
 	}
 
 
@@ -199,4 +193,26 @@ void RangedEnemy::stopAttacking()
 
 	if (!patrolInitialized) initializePatrol();
 	calculatePatrolPath(movingToEnd ? patrolEndTile : patrolStartTile);
+}
+
+bool RangedEnemy::isInAttackState() const
+{
+	return currentState == State::ATTACKING;
+}
+
+void RangedEnemy::shootAtPlayer(const glm::vec2& playerPos)
+{
+	if (!projectileManager) return;
+
+	glm::vec2 direction = glm::normalize(playerPos - posEnemy);
+	float speed = 100.0f; // pixels per second
+	int damage = 15;
+
+	projectileManager->spawnProjectile(
+		posEnemy,
+		direction,
+		speed,
+		damage,
+		"images/projectiles/Arrow.png"
+	);
 }

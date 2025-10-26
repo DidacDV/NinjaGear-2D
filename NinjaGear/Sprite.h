@@ -15,12 +15,11 @@
 
 class Sprite
 {
-
 public:
 	// Textured quads can only be created inside an OpenGL context
 	static Sprite *createSprite(const glm::vec2 &quadSize, const glm::vec2 &sizeInSpritesheet, Texture *spritesheet, ShaderProgram *program);
 
-	void update(int deltaTime);
+	virtual void update(int deltaTime);
 	void render(const glm::mat4& view = glm::mat4(1.0f)) const;
 	void free();
 
@@ -32,6 +31,7 @@ public:
 	void setTexture(Texture* tex) { texture = tex; }
 
 	void setPosition(const glm::vec2 &pos);
+	void setRotation(float angleInRadians);
 
 protected:
 	Sprite(const glm::vec2& quadSize, const glm::vec2& sizeInSpritesheet, Texture* spritesheet, ShaderProgram* program);
@@ -45,9 +45,8 @@ protected:
 	int currentAnimation, currentKeyframe;
 	float timeAnimation;
 	glm::vec2 texCoordDispl;
-
-private:
 	vector<AnimKeyframes> animations;
+	float rotationAngle = 0.0f;
 };
 
 

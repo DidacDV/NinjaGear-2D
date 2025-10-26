@@ -6,17 +6,26 @@ class MeleeEnemy :
     public Enemy
 {
 public:
-    void update(int deltaTime) override;
+    enum Anims {
+        STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
+        MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
+        DANCE
+    };
+    // Attack interface override
+    bool isInAttackState() const override; 
+    bool canDealDamage() const override;
 
 protected:
     void initializeAnimations() override;
     void changeAnimationsForDirection(glm::vec2 direction) override;
+    void updateStateMachine(int deltaTime) override;
 private: 
     enum class State {
         IDLE,
         TRACKING,
         RETURNING,
-        PATROLLING
+        PATROLLING,
+		ATTACKING
     };
 
     State currentState = State::IDLE;
@@ -30,8 +39,7 @@ private:
     void stopTracking();
     void recalculatePathToPlayer(const glm::vec2& playerPos);
 
-    //Patrolling
-    glm::vec2 spawnPosition;
+    // Patrolling
     glm::ivec2 patrolStartTile;
     glm::ivec2 patrolEndTile;
     glm::ivec2 originalPatrolPosition;
@@ -42,7 +50,12 @@ private:
     void calculatePatrolPath(const glm::ivec2& targetTile);
     void updatePatrol(int deltaTime, const glm::vec2& playerPos);
 
-    //Returning
+    // Returning
     void updateReturning(int deltaTime, const glm::vec2& playerPos);
+
+	// Attacking
+    const float ATTACK_RANGE = 16.0f; // Distance at which enemy can attack
+    void startAttacking();
+    void updateAttacking(int deltaTime, const glm::vec2& playerPos);
 };
 

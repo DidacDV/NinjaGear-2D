@@ -1,19 +1,9 @@
 #include "MeleeEnemy.h"
 #include <iostream>
 
-enum MeleeEnemyAnims
+void MeleeEnemy::updateStateMachine(int deltaTime)
 {
-	STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
-	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
-	DANCE
-};
-
-void MeleeEnemy::update(int deltaTime)
-{
-	sprite->update(deltaTime);
     glm::vec2 playerPos = Game::instance().getPlayerPosition();
-
-    // State machine logic
     switch (currentState) {
     case State::IDLE:
         if (checkPlayerVisibility(playerPos)) {
@@ -35,16 +25,16 @@ void MeleeEnemy::update(int deltaTime)
     case State::RETURNING:
         updateReturning(deltaTime, playerPos);
         break;
-    }
 
-    sprite->setPosition(glm::vec2(
-        float(tileMapDispl.x + posEnemy.x),
-        float(tileMapDispl.y + posEnemy.y)
-    ));
+    case State::ATTACKING:
+        updateAttacking(deltaTime, playerPos);
+        break;
+    }
 }
 
 void MeleeEnemy::initializeAnimations()
 {
+    cachedTileSize = static_cast<float>(map->getTileSize());
     const float FRAME_WIDTH = 1.0f / 4.0f;
 	const float FRAME_HEIGHT = 1.0f / 4.0f;
 	sprite->setNumberAnimations(9);
@@ -76,14 +66,11 @@ void MeleeEnemy::initializeAnimations()
 	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
 	sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
 
-
 	sprite->setAnimationSpeed(MOVE_LEFT, 8);
 	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
 	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
 	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
 	sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
-
-
 
 	sprite->setAnimationSpeed(MOVE_RIGHT, 8);
 	sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
@@ -119,8 +106,15 @@ void MeleeEnemy::updateTracking(int deltaTime, const glm::vec2& playerPos)
     trackingTimer += deltaTime;
     pathUpdateTimer += deltaTime;
 
+    float distanceToPlayer = glm::length(playerPos - posEnemy);
+
+    if (distanceToPlayer <= ATTACK_RANGE) {
+        startAttacking();
+        return;
+    }
+
     const float MAX_TRACKING_DISTANCE = 160.0f; 
-    if ((glm::length(playerPos - posEnemy) > MAX_TRACKING_DISTANCE) || trackingTimer >= MAX_TRACKING_TIME) {
+    if (distanceToPlayer > MAX_TRACKING_DISTANCE || trackingTimer >= MAX_TRACKING_TIME) {
         stopTracking();
         return;
     }
@@ -225,7 +219,7 @@ void MeleeEnemy::updateReturning(int deltaTime, const glm::vec2& playerPos)
 void MeleeEnemy::changeAnimationsForDirection(glm::vec2 direction)
 {
     Direction newDirection;
-    MeleeEnemyAnims newAnimation;
+    Anims newAnimation;
 
     if (std::abs(direction.x) > std::abs(direction.y)) {
         newAnimation = direction.x > 0 ? MOVE_RIGHT : MOVE_LEFT;
@@ -240,4 +234,63 @@ void MeleeEnemy::changeAnimationsForDirection(glm::vec2 direction)
         sprite->changeAnimation(newAnimation);
         this->currentDirection = newDirection;
     }
+}
+
+// Attacking logic
+void MeleeEnemy::startAttacking()
+{
+    currentState = State::ATTACKING;
+    attackCooldownTimer = 0;
+
+    switch (currentDirection) {
+    case UP:    sprite->changeAnimation(STAND_UP); break;
+    case DOWN:  sprite->changeAnimation(STAND_DOWN); break;
+    case LEFT:  sprite->changeAnimation(STAND_LEFT); break;
+    case RIGHT: sprite->changeAnimation(STAND_RIGHT); break;
+    }
+}
+
+void MeleeEnemy::updateAttacking(int deltaTime, const glm::vec2& playerPos)
+{
+    float distanceToPlayer = glm::length(playerPos - posEnemy);
+
+    // If player moves out of range, resume tracking
+    if (distanceToPlayer > ATTACK_RANGE) {
+        startTracking(playerPos);
+        return;
+    }
+
+    // Face the player while attacking
+    glm::vec2 directionToPlayer = glm::normalize(playerPos - posEnemy);
+
+    if (std::abs(directionToPlayer.x) > std::abs(directionToPlayer.y)) {
+        if (directionToPlayer.x > 0) {
+            sprite->changeAnimation(STAND_RIGHT);
+            currentDirection = RIGHT;
+        }
+        else {
+            sprite->changeAnimation(STAND_LEFT);
+            currentDirection = LEFT;
+        }
+    }
+    else {
+        if (directionToPlayer.y > 0) {
+            sprite->changeAnimation(STAND_DOWN);
+            currentDirection = DOWN;
+        }
+        else {
+            sprite->changeAnimation(STAND_UP);
+            currentDirection = UP;
+        }
+    }
+}  
+
+bool MeleeEnemy::isInAttackState() const
+{
+    return currentState == State::ATTACKING;
+}
+
+bool MeleeEnemy::canDealDamage() const
+{
+    return currentState == State::ATTACKING && attackCooldownTimer <= 0;
 }

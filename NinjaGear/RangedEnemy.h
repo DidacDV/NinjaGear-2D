@@ -1,26 +1,31 @@
 #pragma once
 #include "Enemy.h"
+
 class RangedEnemy :
     public Enemy
 {
 public:
-    void update(int deltaTime) override;
+    enum Anims {
+        STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
+        MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
+        DANCE
+    };
+    bool isInAttackState() const override;
 
 protected:
     void initializeAnimations() override;
 	void changeAnimationsForDirection(glm::vec2 direction) override;
+    void updateStateMachine(int deltaTime) override;
+
 private:
     enum class State {
         IDLE,
         ATTACKING,
         PATROLLING
     };
-
     State currentState = State::IDLE;
 
-
     // Patrolling
-    glm::vec2 spawnPosition;
     glm::ivec2 patrolStartTile;
     glm::ivec2 patrolEndTile;
     bool patrolInitialized = false;
@@ -35,9 +40,13 @@ private:
     const int MAX_ATTACKING_TIME = 5000;  
     const float MAX_ATTACKING_DISTANCE = 160.0f; 
     glm::ivec2 attackingTile; 
-
     void startAttacking(const glm::vec2& playerPos);
     void updateAttacking(int deltaTime, const glm::vec2& playerPos);
     void stopAttacking();
+
+    int shootCooldownTimer = 0;
+    const int SHOOT_COOLDOWN = 1000;
+    void shootAtPlayer(const glm::vec2& playerPos);
+
 };
 

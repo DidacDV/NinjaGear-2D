@@ -138,7 +138,7 @@ void UIManager::calculateLayout() {
 void UIManager::update(int deltaTime, Player* player) {
     if (player != nullptr) {
         health = player->getHealth();
-        rank = 1;
+        if (player != nullptr && rank != player->getRank()) rank = player->getRank();
 
         Item* currentItem = player->getCurrentItem();
         if (currentItem != nullptr) {

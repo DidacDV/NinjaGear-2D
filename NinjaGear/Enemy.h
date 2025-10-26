@@ -4,6 +4,7 @@
 #include "TileMap.h"
 #include "Game.h"
 #include "Pathfinder.h"
+#include "ProjectileManager.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/norm.hpp>
 #include <string>
@@ -14,38 +15,59 @@ class Enemy
 {
 public:
 	virtual ~Enemy() = default;
-	virtual void init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap);
+	void init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet);
 	virtual void update(int deltaTime);
 	virtual void render(const glm::mat4& view = glm::mat4(1.0f));
 
 	void setTileMap(TileMap* tileMap);
 	void setPosition(const glm::vec2& pos);
 	void setSpriteSheet(const string& spriteSheet);
-	glm::vec2 getPosition() { return posEnemy; }
+	glm::vec2 getPosition() const { return posEnemy; };
+	void setProjectileManager(ProjectileManager* pm) { projectileManager = pm; };
+
+	virtual void takeDamage(int damage);
+	virtual int getHealth() const { return health; }
+	virtual bool isAlive() const { return health > 0; }
+	virtual int getDamage() const { return attackDamage; }
+
+	virtual bool isInAttackState() const { return false; }
+	virtual bool canDealDamage() const { return false; }
+	virtual void onDamageDealt();
 
 protected:
-	virtual void initializeAnimations();
-	bool bJumping;
+	// Child class methods
+	virtual void initializeAnimations() = 0;
+	virtual void updateStateMachine(int deltaTime) = 0;
+	virtual void changeAnimationsForDirection(glm::vec2 direction) = 0;
+
+	// Attributes
+	int health = 60;
+	int attackDamage = 10;
 	glm::ivec2 tileMapDispl;
 	glm::vec2 posEnemy; 
-	int jumpAngle, startY;
+	Direction currentDirection;
+
+	// Visuals
 	Texture spritesheet;
 	Sprite* sprite;
+
+	// Tilemap
 	TileMap* map;
-	string spriteSheet;
-	Direction currentDirection;
 	bool checkPlayerVisibility(const glm::vec2 playerPos);
 	float cachedTileSize;
 
+	// Attacking 
+	int attackCooldownTimer = 0;
+	int attackCooldown = 1000;
+	ProjectileManager* projectileManager = nullptr;
+	
 	// Path following
 	std::vector<glm::ivec2> currentPath;
 	int currentPathIndex = 0;
 	int pathUpdateTimer = 0;
 	float moveSpeed = 5.0f; // tiles per second
-	float moveProgress = 0.0f;
 	glm::ivec2 lastTargetTile;
 	void followPath(int deltaTime);
-	virtual void changeAnimationsForDirection(glm::vec2 direction);
 
 	// Helpers
 	int findClosestPathIndex(const std::vector<glm::ivec2>& path, const glm::vec2& worldPos) const;
@@ -65,6 +87,6 @@ protected:
 		return glm::vec2(tile.x * cachedTileSize, tile.y * cachedTileSize);
 	}
 private:
-	void initializeSprite(ShaderProgram& shaderProgram);
+	void initializeSprite(ShaderProgram& shaderProgram, const string& spritesheetPath);
 };
 
