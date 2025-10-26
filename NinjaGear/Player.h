@@ -98,6 +98,11 @@ private:
 	int auraFrameTime = 80; //ms
 	void setUpAuraSprites(ShaderProgram& shaderProgram);
 
+	//bow
+	void setUpBowSprite(ShaderProgram& shaderProgram);
+	Texture bowSpritesheet;
+	Sprite* bowSprite = nullptr;
+	bool isBowEquipped = false;
 public:
 	~Player() {
 		for (Item* item : itemInventory) delete item;

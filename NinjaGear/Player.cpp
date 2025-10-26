@@ -15,7 +15,8 @@ enum PlayerAnims
 	STAND_LEFT, STAND_RIGHT, STAND_UP, STAND_DOWN,
 	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
 	PUNCH_LEFT, PUNCH_RIGHT, PUNCH_UP, PUNCH_DOWN,
-	DANCE
+	DANCE,
+	BOW_ATTACK_LEFT, BOW_ATTACK_RIGHT, BOW_ATTACK_UP, BOW_ATTACK_DOWN
 };
 
 
@@ -38,6 +39,7 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 
 	bJumping = false;
 	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
+
 	sprite = Sprite::createSprite(QUAD_SIZE, glm::vec2(0.25f, 0.142857f), &spritesheet, &shaderProgram);
 	sprite->setNumberAnimations(13);
 		// STANDING ANIMATIONS
@@ -112,12 +114,34 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 		
 	sprite->changeAnimation(STAND_DOWN); // Cambia a una animación que tenga keyframes válidos
 	
+	setUpBowSprite(shaderProgram);
+
 	setUpAuraSprites(shaderProgram);
 	
 	
 	tileMapDispl = tileMapPos;
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
 	
+}
+
+void Player::setUpBowSprite(ShaderProgram& shaderProgram) {
+	bowSpritesheet.loadFromFile("images/characters/ninja_dark/PlayerBowSpritesheet.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	bowSprite = Sprite::createSprite(glm::vec2(16.f, 22.f), glm::vec2(0.25f, 1.0f), &bowSpritesheet, &shaderProgram);
+	bowSprite->setNumberAnimations(4);  // Only 4 attack directions
+
+	bowSprite->setAnimationSpeed(0, 6); // DOWN
+	bowSprite->addKeyframe(0, glm::vec2(0.0f * 0.25f, 0.0f));
+
+	bowSprite->setAnimationSpeed(1, 6); // UP
+	bowSprite->addKeyframe(1, glm::vec2(1.0f * 0.25f, 0.0f));
+
+	bowSprite->setAnimationSpeed(2, 6); // LEFT
+	bowSprite->addKeyframe(2, glm::vec2(2.0f * 0.25f, 0.0f));
+
+	bowSprite->setAnimationSpeed(3, 6); // RIGHT
+	bowSprite->addKeyframe(3, glm::vec2(3.0f * 0.25f, 0.0f));
+
+	bowSprite->changeAnimation(0);
 }
 
 void Player::setUpAuraSprites(ShaderProgram& shaderProgram) {
@@ -141,7 +165,6 @@ void Player::update(int deltaTime)
 	float moveSpeed = baseSpeed;
 
 	checkBuffsState(deltaTime);
-
 	auto it = activeBuffs.find(BuffType::SPEED);
 	if (it != activeBuffs.end()) {
 		moveSpeed *= it->second.multiplier;
@@ -228,16 +251,32 @@ void Player::update(int deltaTime)
 		if (sprite->animation() != DANCE)
 			sprite->changeAnimation(DANCE);
 	}
-	else if (Game::instance().getKey(GLFW_KEY_G))  // PUNCH
+	else if (Game::instance().getKey(GLFW_KEY_G))  // ATTACK
 	{
-		if (sprite->animation() == MOVE_LEFT || sprite->animation() == STAND_LEFT)
-			sprite->changeAnimation(PUNCH_LEFT);
-		else if (sprite->animation() == MOVE_RIGHT || sprite->animation() == STAND_RIGHT)
-			sprite->changeAnimation(PUNCH_RIGHT);
-		else if (sprite->animation() == MOVE_UP || sprite->animation() == STAND_UP)
-			sprite->changeAnimation(PUNCH_UP);
-		else if (sprite->animation() == MOVE_DOWN || sprite->animation() == STAND_DOWN)
-			sprite->changeAnimation(PUNCH_DOWN);
+		Item* weapon = getCurrentWeapon();
+		bool usingBow = (weapon != nullptr && weapon->getName() == "BOW");
+
+		if (usingBow) {
+			if (sprite->animation() == MOVE_LEFT || sprite->animation() == STAND_LEFT)
+				bowSprite->changeAnimation(2); // LEFT
+			else if (sprite->animation() == MOVE_RIGHT || sprite->animation() == STAND_RIGHT)
+				bowSprite->changeAnimation(3); // RIGHT
+			else if (sprite->animation() == MOVE_UP || sprite->animation() == STAND_UP)
+				bowSprite->changeAnimation(1); // UP
+			else
+				bowSprite->changeAnimation(0); // DOWN
+		}
+		else {
+			// Use punch animations (original code)
+			if (sprite->animation() == MOVE_LEFT || sprite->animation() == STAND_LEFT)
+				sprite->changeAnimation(PUNCH_LEFT);
+			else if (sprite->animation() == MOVE_RIGHT || sprite->animation() == STAND_RIGHT)
+				sprite->changeAnimation(PUNCH_RIGHT);
+			else if (sprite->animation() == MOVE_UP || sprite->animation() == STAND_UP)
+				sprite->changeAnimation(PUNCH_UP);
+			else if (sprite->animation() == MOVE_DOWN || sprite->animation() == STAND_DOWN)
+				sprite->changeAnimation(PUNCH_DOWN);
+		}
 	}
 	else
 	{
@@ -253,7 +292,10 @@ void Player::update(int deltaTime)
 			sprite->changeAnimation(STAND_DOWN);
 	}
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
-
+	if (bowSprite) {
+		bowSprite->update(deltaTime);
+		bowSprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
+	}
 
 }
 
@@ -264,7 +306,18 @@ void Player::render(const glm::mat4& view)
 		auraSprite->render(view);
 	}
 
-	sprite->render(view);
+	Item* weapon = getCurrentWeapon();
+	bool isAttackingWithBow = (weapon != nullptr && weapon->getName() == "BOW" &&
+		Game::instance().getKey(GLFW_KEY_G) && !Game::instance().getKey(GLFW_KEY_DOWN) && !Game::instance().getKey(GLFW_KEY_UP)
+		&& !Game::instance().getKey(GLFW_KEY_RIGHT) && !Game::instance().getKey(GLFW_KEY_LEFT));
+
+	if (isAttackingWithBow) {
+		bowSprite->render(view);
+		cout << "attackin" << endl;
+	}
+	else {
+		sprite->render(view);
+	}
 }
 
 void Player::setTileMaps(const vector<TileMap*>& tileMaps)
