@@ -22,6 +22,9 @@ enum PlayerAnims
 
 void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 {
+	rank = 0;
+	baseSpeed = 2.0f;
+	godMode = false;
 	health = 100.0f;
 	maxHealth = 100.0f;
 
@@ -259,12 +262,16 @@ void Player::update(int deltaTime)
 		if (sprite->animation() != DANCE)
 			sprite->changeAnimation(DANCE);
 	}
-	else if (Game::instance().getKey(GLFW_KEY_G))  // ATTACK
+	else if (Game::instance().getKey(GLFW_KEY_Z))  // ATTACK
 	{
 		Item* weapon = getCurrentWeapon();
 		bool usingBow = (weapon != nullptr && weapon->getName() == "BOW");
 
 		if (usingBow) {
+			if (!lastFrameWasAttackingWithBow) {
+				shootBowProjectile();
+			}
+			lastFrameWasAttackingWithBow = true;
 			if (sprite->animation() == MOVE_LEFT || sprite->animation() == STAND_LEFT)
 				bowSprite->changeAnimation(2); // LEFT
 			else if (sprite->animation() == MOVE_RIGHT || sprite->animation() == STAND_RIGHT)
@@ -275,6 +282,7 @@ void Player::update(int deltaTime)
 				bowSprite->changeAnimation(0); // DOWN
 		}
 		else {
+			lastFrameWasAttackingWithBow = false;
 			// Use punch animations (original code)
 			if (sprite->animation() == MOVE_LEFT || sprite->animation() == STAND_LEFT)
 				sprite->changeAnimation(PUNCH_LEFT);
@@ -288,6 +296,7 @@ void Player::update(int deltaTime)
 	}
 	else
 	{
+		lastFrameWasAttackingWithBow = false;
 		if(sprite->animation() == MOVE_LEFT || sprite->animation() == PUNCH_LEFT)
 			sprite->changeAnimation(STAND_LEFT);
 		else if(sprite->animation() == MOVE_RIGHT || sprite->animation() == PUNCH_RIGHT)
@@ -316,12 +325,11 @@ void Player::render(const glm::mat4& view)
 
 	Item* weapon = getCurrentWeapon();
 	bool isAttackingWithBow = (weapon != nullptr && weapon->getName() == "BOW" &&
-		Game::instance().getKey(GLFW_KEY_G) && !Game::instance().getKey(GLFW_KEY_DOWN) && !Game::instance().getKey(GLFW_KEY_UP)
+		Game::instance().getKey(GLFW_KEY_Z) && !Game::instance().getKey(GLFW_KEY_DOWN) && !Game::instance().getKey(GLFW_KEY_UP)
 		&& !Game::instance().getKey(GLFW_KEY_RIGHT) && !Game::instance().getKey(GLFW_KEY_LEFT));
 
 	if (isAttackingWithBow) {
 		bowSprite->render(view);
-		cout << "attackin" << endl;
 	}
 	else {
 		sprite->render(view);
@@ -385,6 +393,8 @@ bool Player::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) cons
 
 void Player::takeDamage(int damage)
 {
+	if (isGodModeOn())
+		return;
 	if (invulnerable || health <= 0) {
 		return;
 	}
@@ -452,7 +462,7 @@ void Player::increaseRank(const int& increase) {
 
 void Player::onPunchKeyPressed()
 {
-	ServiceLocator::getAudio().playSound("sounds/punch.wav");
+	//ServiceLocator::getAudio().playSound("sounds/punch.wav");
 }
 void Player::heal(float amount) {
 	health += amount;
@@ -549,7 +559,7 @@ void Player::useCurrentItem() {
 	}
 
 	if (itemName == "SPEED POTION") {
-		applyBuff(BuffType::SPEED, 5, 1.3f);
+		applyBuff(BuffType::SPEED, 3, 2.f);
 		consumeItem(item, itemName);
 	}
 
@@ -601,4 +611,105 @@ void Player::checkBuffsState(int deltaTime) {
 	else {
 		showAura = false;
 	}
+}
+//bow attacking
+void Player::shootBowProjectile()
+{
+	if (!projectileManager) return;
+
+	if (getItemQuantity("ARROW") <= 0) {
+		cout << "No arrows!" << endl;
+		return;
+	}
+
+	glm::vec2 direction(0.0f);
+
+	//determine direction based on current animation
+	if (sprite->animation() == MOVE_LEFT || sprite->animation() == STAND_LEFT) {
+		direction = glm::vec2(-1, 0);
+	}
+	else if (sprite->animation() == MOVE_RIGHT || sprite->animation() == STAND_RIGHT) {
+		direction = glm::vec2(1, 0);
+	}
+	else if (sprite->animation() == MOVE_UP || sprite->animation() == STAND_UP) {
+		direction = glm::vec2(0, -1);
+	}
+	else {
+		direction = glm::vec2(0, 1); // DOWN
+	}
+
+	float speed = 100.f;
+	int damage = 3;
+
+	//SPAWN PROJECTILE FIRST
+	projectileManager->spawnProjectile(
+		posPlayer,
+		direction,
+		speed,
+		damage,
+		"images/projectiles/Arrow.png",
+		true  
+	);
+
+	//consume arrow
+	string arrowName = "ARROW";
+	itemQuantities[arrowName]--;
+
+	if (itemQuantities[arrowName] <= 0) {
+		itemQuantities.erase(arrowName);
+
+		for (auto it = itemInventory.begin(); it != itemInventory.end(); ++it) {
+			if ((*it)->getName() == arrowName) {
+				delete* it;
+				itemInventory.erase(it);
+
+				if (currentItemIndex >= itemInventory.size() && !itemInventory.empty()) {
+					currentItemIndex = 0;
+				}
+				break;
+			}
+		}
+	}
+
+	cout << "Shot arrow! Remaining: " << getItemQuantity("ARROW") << endl;
+}
+
+void Player::giveAllItems() {
+	cout << "=== GIVING ALL ITEMS ===" << endl;
+
+	for (auto& item : itemInventory) {
+		delete item;
+	}
+	itemInventory.clear();
+	itemQuantities.clear();
+
+	//MEDIPACK
+	Item* medipack = new Item();
+	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(0, 0), false, 16);
+	itemInventory.push_back(medipack);
+	itemQuantities["MEDIPACK"] = 1;
+
+	//SPEED POTION
+	Item* speedPotion = new Item();
+	speedPotion->setItem("SPEED POTION", 1, "Increases speed for 10 seconds.", glm::vec2(0, 0), false, 16);
+	itemInventory.push_back(speedPotion);
+	itemQuantities["SPEED POTION"] = 1;
+
+	//ARROW
+	Item* arrow = new Item();
+	arrow->setItem("ARROW", 1, "Projectile for bow", glm::vec2(0, 0), false, 16);
+	itemInventory.push_back(arrow);
+	itemQuantities["ARROW"] = 5; // Give 5 arrows
+
+	//BOW weapon
+	Item* bow = new Item();
+	bow->setItem("BOW", 1, "Long range weapon.", glm::vec2(0, 0), true, 16);
+	weaponInventory.push_back(bow);
+
+
+	if (!itemInventory.empty()) currentItemIndex = 0;
+
+	cout << "Given: MEDIPACK, SPEED POTION, ARROW (x5), BOW" << endl;
+	cout << "Total items: " << itemInventory.size() << endl;
+	cout << "Total weapons: " << weaponInventory.size() << endl;
 }

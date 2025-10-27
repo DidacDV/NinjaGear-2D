@@ -13,6 +13,12 @@ public:
         int animationSpeed = 10,
         const vector<glm::vec2>& animationKeyframes = {});
 
+    void spawnProjectile(const glm::vec2& startPos,
+        const glm::vec2& direction,
+        float speed, int damage,
+        const string& spritePath,
+        bool isPlayerProjectile = false);
+
     void update(int deltaTime);
     void render(const glm::mat4& view);
     void clear();

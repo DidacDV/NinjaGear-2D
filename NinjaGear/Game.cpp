@@ -26,10 +26,21 @@ void Game::init(int screenWidth, int screenHeight)
 	
 	Menu* startMenu = new Menu(MenuType::START);
 	startMenu->setMenuImage("images/StartMenu.png");
+
 	Menu* settingsMenu = new Menu(MenuType::SETTINGS);
 	settingsMenu->setMenuImage("images/SettingsMenu.png");
+
+	Menu* deathMenu = new Menu(MenuType::DEATH);
+	deathMenu->setMenuImage("images/DeathMenu.png");
+
+	Menu* winMenu = new Menu(MenuType::CREDITS);
+	winMenu->setMenuImage("images/WinMenu.png");
+	
+
 	addScene("menu", startMenu);
 	addScene("settings",settingsMenu);
+	addScene("death",deathMenu);
+	addScene("win", winMenu);
 
 
 	/* ------------- */
@@ -50,8 +61,8 @@ void Game::init(int screenWidth, int screenHeight)
 	//jungleMusic.push_back(MusicConfig{ 0, 0, "sounds/village.wav" });
 	//jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/village.wav" });
 	//jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
-	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic);
-
+	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic, LevelType::OUTSIDE);
+	Jungle1->setUIManager(GLOBAL_UI_MANAGER);
 	addScene("outside", Jungle1);
 
 	/* ------------- */
@@ -115,7 +126,7 @@ void Game::init(int screenWidth, int screenHeight)
 		glm::vec2(1.0f, 1.0f),
 		});
 	vector<MusicConfig> dungeonMusic;
-	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic);
+	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic, LevelType::DUNGEON);
 	addScene("dungeon", Dungeon);
 
 
@@ -124,6 +135,12 @@ void Game::init(int screenWidth, int screenHeight)
 
 bool Game::update(int deltaTime)
 {
+	if (player->getHealth() == 0) {
+		setCurrentScene("win");
+
+		player->setHealth(player->getMaxHealth());
+	}
+
 	if (currentScene != NULL)
 		currentScene->update(deltaTime);
 
@@ -165,13 +182,24 @@ void Game::keyPressed(int key)
 			}
 		}
 	}
-  else if (key == GLFW_KEY_Z) {
-		if(currentScene == levels["dungeon"]) setCurrentScene("Jungle1");
+	//interior tp cheat
+	else if (key == GLFW_KEY_K) {
+		if (currentScene == levels["dungeon"]) setCurrentScene("Jungle1");
 		else setCurrentScene("dungeon");
-  }
-	else if (key == GLFW_KEY_X) // Change sprite
-		player->setSpriteSheet("images/characters/ninja_blue/SpriteSheet.png");
-	else if (key == GLFW_KEY_G) 
+	}
+	else if (key == GLFW_KEY_Z)
+		player->onPunchKeyPressed();
+	//items cheat
+	else if (key == GLFW_KEY_I)
+		player->giveAllItems();
+	//heal cheat
+	else if (key == GLFW_KEY_H)
+		player->setHealth(player->getMaxHealth());
+	//god mode cheat
+	else if (key == GLFW_KEY_G)
+		player->toggleGodMode();
+	//boss tp cheat
+	else if (key == GLFW_KEY_B) 
 		player->onPunchKeyPressed();
 	keys[key] = true;
 }

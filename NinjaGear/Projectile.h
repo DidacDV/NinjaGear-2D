@@ -28,6 +28,8 @@ public:
     void setDamage(int dmg) { damage = dmg; }
     void setLifetime(int ms) { maxLifetime = ms; }
 
+    void setIsPlayerProjectile(bool isPlayer) { isPlayerProjectile = isPlayer; }
+    bool getIsPlayerProjectile() const { return isPlayerProjectile; }
 private:
     // Position & movement
     glm::vec2 position;
@@ -50,4 +52,6 @@ private:
     // Collision
     TileMap* map;
     bool checkWallCollision() const;
+    bool isPlayerProjectile = false;
+
 };
