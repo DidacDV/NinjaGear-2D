@@ -22,11 +22,12 @@ enum PlayerAnims
 
 void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 {
+	initialized = true;
 	rank = 0;
 	baseSpeed = 2.0f;
 	godMode = false;
-	health = 100.0f;
-	maxHealth = 100.0f;
+	health = 5.0f;
+	maxHealth = 5.0f;
 
 	activeBuffs.clear();
 	showAura = false;
@@ -213,7 +214,7 @@ void Player::update(int deltaTime)
 	else {
 		vKeyPressed = false;
 	}
-	if (Game::instance().getKey(GLFW_KEY_LEFT))
+	if (Game::instance().getKey(GLFW_KEY_LEFT) || Game::instance().getKey(GLFW_KEY_A))
 	{
 		if (sprite->animation() != MOVE_LEFT)
 			sprite->changeAnimation(MOVE_LEFT);
@@ -224,7 +225,7 @@ void Player::update(int deltaTime)
 			sprite->changeAnimation(STAND_LEFT);
 		}
 	}
-	else if (Game::instance().getKey(GLFW_KEY_RIGHT))
+	else if (Game::instance().getKey(GLFW_KEY_RIGHT) || Game::instance().getKey(GLFW_KEY_D))
 	{
 		if (sprite->animation() != MOVE_RIGHT)
 			sprite->changeAnimation(MOVE_RIGHT);
@@ -235,7 +236,7 @@ void Player::update(int deltaTime)
 			sprite->changeAnimation(STAND_RIGHT);
 		}
 	}
-	else if (Game::instance().getKey(GLFW_KEY_DOWN))
+	else if (Game::instance().getKey(GLFW_KEY_DOWN) || Game::instance().getKey(GLFW_KEY_S))
 	{
 		if (sprite->animation() != MOVE_DOWN)
 			sprite->changeAnimation(MOVE_DOWN);
@@ -246,7 +247,7 @@ void Player::update(int deltaTime)
 			sprite->changeAnimation(STAND_DOWN);
 		}
 	}
-	else if (Game::instance().getKey(GLFW_KEY_UP))
+	else if (Game::instance().getKey(GLFW_KEY_UP) || Game::instance().getKey(GLFW_KEY_W))
 	{
 		if (sprite->animation() != MOVE_UP)
 			sprite->changeAnimation(MOVE_UP);
@@ -647,8 +648,8 @@ void Player::shootBowProjectile()
 		direction,
 		speed,
 		damage,
-		"images/projectiles/Arrow.png",
-		true  
+		"images/projectiles/Arrow.png", 
+		true
 	);
 
 	//consume arrow

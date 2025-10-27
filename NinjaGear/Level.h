@@ -68,6 +68,14 @@ class Level :
     ProjectileManager* getProjectileManager() { return &projectileManager; };
 
     private:
+        struct TransitionTile {
+            int tileId;
+            std::string targetScene;
+            int targetTileX;
+            int targetTileY;
+        };
+
+        std::vector<TransitionTile> transitionTiles;
         // Moving objects
         vector<MovingObject*> movingObjects;
         vector<MovingObjectConfig> movingObjectConfigs;
@@ -110,7 +118,8 @@ class Level :
         bool isColliding(const glm::vec2& pos1, const glm::vec2& size1,
             const glm::vec2& pos2, const glm::vec2& size2);
 
-      
+        void checkTransitionTiles();
+        void initializeTransitionTiles();
         
         void updateCameraSector();
         void calculateCameraOffset();

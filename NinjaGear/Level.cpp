@@ -68,6 +68,7 @@ void Level::init()
 {	
 	Scene::init();
 	reStartLevel();
+	initializeTransitionTiles();
 	// Initialize projectile manager
 	projectileManager.init(&texProgram, maps[0]);
 
@@ -75,7 +76,7 @@ void Level::init()
 	projection = glm::ortho(0.f, float(CAMERA_WIDTH), float(CAMERA_HEIGHT), 0.f);
 	
 	// Initialize player
-	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
+	if(!player->isInitialized()) player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
 	player->setTileMaps(maps);
 
@@ -108,7 +109,13 @@ void Level::update(int deltaTime)
 {
 	Scene::update(deltaTime);
 	player->update(deltaTime);
-	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->update(deltaTime);
+
+	checkTransitionTiles();
+
+	for (unsigned int i = 0; i < enemies.size(); i++) {
+		enemies[i]->setCameraOffset(glm::vec2(cameraOffsetX, cameraOffsetY));
+		enemies[i]->update(deltaTime);
+	}
 	projectileManager.update(deltaTime);
 	checkCombat();
 	for (MovingObject* obj : movingObjects) {
@@ -121,15 +128,15 @@ void Level::update(int deltaTime)
 	checkItemPickUp();
 	updateCameraSector();
 
-	if (uiManager && !introMessagesDisplayed)
+	if (!introMessagesDisplayed)
 	{
 		introMessageDelayTimer -= deltaTime;
 		if (introMessageDelayTimer <= 0)
 		{
-			uiManager->showTemporaryMessage("HELLO SOLID NINJA, KILL ALL ENEMIES",
+			ServiceLocator::getUI().showTemporaryMessage("HELLO SOLID NINJA, KILL ALL ENEMIES",
 				glm::vec2(320, 160), 1.f, glm::vec3(0.f, 0.f, 0.f), 4000);
 
-			uiManager->showTemporaryMessage("AND WE WON'T KILL YOU...",
+			ServiceLocator::getUI().showTemporaryMessage("AND WE WON'T KILL YOU...",
 				glm::vec2(320, 200), 1.f, glm::vec3(1.f, 0.f, 0.f), 5000);
 
 			introMessagesDisplayed = true;
@@ -378,6 +385,7 @@ void Level::handlePlayerAttack()
 			enemy->takeDamage(PUNCH_DAMAGE);
 
 			if (!enemy->isAlive()) {
+				if (enemy->isBoss()) Game::instance().victory();
 				delete enemy;
 				player->increaseRank(1);
 				it = enemies.erase(it);
@@ -544,4 +552,41 @@ bool Level::checkColission(glm::vec2& pos1, glm::vec2& pos2, int size1, int size
 		pos2.y + size2 > pos1.y;
 
 	return collisionX && collisionY;
+}
+
+void Level::initializeTransitionTiles()
+{
+	// Clear any existing transitions
+	transitionTiles.clear();
+
+	// Tile 99 = Cart to dungeon entrance
+	transitionTiles.push_back({ 5002, "dungeon", 17, 38 });
+
+	// Tile 98 = Dungeon exit back to outside
+	transitionTiles.push_back({ 5102, "outside", 10, 10 });
+}
+
+void Level::checkTransitionTiles()
+{
+	glm::vec2 playerPos = player->getPosition();
+	int tileSize = maps[0]->getTileSize();
+
+	int playerTileX = static_cast<int>(playerPos.x) / tileSize;
+	int playerTileY = static_cast<int>(playerPos.y) / tileSize;
+
+	for (unsigned int layer = 0; layer < maps.size(); layer++) {
+		int tileId = maps[layer]->getTileAt(playerTileX, playerTileY);
+
+		// Check if this tile triggers a transition
+		for (const auto& transition : transitionTiles) {
+			if (transition.tileId == tileId) {
+				Game::instance().setCurrentScene(transition.targetScene);
+
+				glm::vec2 newPos(transition.targetTileX * tileSize,
+					transition.targetTileY * tileSize);
+				player->setPosition(newPos);
+				return; // Exit after triggering transition
+			}
+		}
+	}
 }

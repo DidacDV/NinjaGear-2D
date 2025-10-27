@@ -34,16 +34,18 @@ public:
 	virtual bool isInAttackState() const { return false; }
 	virtual bool canDealDamage() const { return false; }
 	virtual void onDamageDealt();
+	virtual bool isBoss() const { return false; }
+	void setCameraOffset(const glm::vec2& offset) { cameraOffset = offset; }
 
 protected:
 	// Child class methods
 	virtual void initializeAnimations() = 0;
 	virtual void updateStateMachine(int deltaTime) = 0;
 	virtual void changeAnimationsForDirection(glm::vec2 direction) = 0;
-
+    glm::vec2 cameraOffset = glm::vec2(0.0f, 0.0f);
 	// Attributes
-	int health = 60;
-	int attackDamage = 10;
+	int health = 10;
+	int attackDamage = 1;
 	glm::vec2 enemySize = glm::vec2(16.f, 16.f);
 	glm::ivec2 tileMapDispl;
 	glm::vec2 posEnemy; 
