@@ -33,7 +33,14 @@ public:
     glm::vec2 getVelocity() const { return velocity; }
 
     void setCameraOffset(const glm::vec2& offset) { cameraOffset = offset; }
-
+    void setDamageProperties(bool deals, int amount) {
+        dealsDamage = deals;
+        damageAmount = amount;
+    };
+    void setDamage(int amount) { damageAmount = amount; };
+    virtual bool getDealsDamage() const { return dealsDamage; }
+    int getDamageAmount() const { return damageAmount; }
+    glm::vec2 getSize() const { return quadSize; }
 protected:
     // Collision detection helpers
     bool collisionMoveLeft(const glm::ivec2& pos, const glm::ivec2& size) const;
@@ -48,4 +55,6 @@ protected:
     glm::ivec2 tileMapDispl;
     std::vector<TileMap*> maps;
     glm::vec2 cameraOffset;
+    bool dealsDamage;
+    int damageAmount;
 };

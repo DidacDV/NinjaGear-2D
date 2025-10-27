@@ -77,53 +77,113 @@ void Game::init(int screenWidth, int screenHeight)
 	dungeonEnemies.push_back(EnemyConfig{ 10, 41,  "images/boss/flame.png", EnemyType::BOSS });
 
 	vector<MovingObjectConfig> dungeonObjects;
-	// AT ROOM
+	//dungeonObjects.push_back(MovingObjectConfig{
+	//	glm::vec2(368.0f, 720.0f),
+	//	glm::vec2(576.0f, 720.0f),
+	//	500.0f,
+	//	MovingObjectType::MOVING_STATUE,
+	//	"images/statue.png",
+	//	glm::vec2(32.f, 47.f),
+	//	glm::vec2(1.0f, 1.0f),
+	//	true,
+	//	1,
+	//	0,
+	//	0
+	//	});
 	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(368.0f, 720.0f),            // startPos
-		glm::vec2(576.0f, 720.0f),           // endPos
-		500.0f,                              // speed
+		glm::vec2(576.0f, 784.0f),
+		glm::vec2(368.0f, 784.0f),
+		500.0f,
 		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
+		"images/statue.png",
+		glm::vec2(32.f, 47.f),
 		glm::vec2(1.0f, 1.0f),
-	});
-	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(576.0f, 784.0f),           // endPos
-		glm::vec2(368.0f, 784.0f),            // startPos
-		500.0f,                              // speed
-		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
-		glm::vec2(1.0f, 1.0f),
-	});
-	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(368.0f, 848.0f),            // startPos
-		glm::vec2(576.0f, 848.0f),           // endPos
-		500.0f,                              // speed
-		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
-		glm::vec2(1.0f, 1.0f),
-	});
-	// AT BOSS ROOM
-	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(48.0f, 800.0f),            // startPos
-		glm::vec2(112.0f, 800.0f),           // endPos
-		500.0f,                              // speed
-		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
-		glm::vec2(1.0f, 1.0f),
+		true,
+		1,
+		0,
+		0
 		});
 	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(48.0f, 896.0f),            // startPos
-		glm::vec2(112.0f, 896.0f),           // endPos
-		500.0f,                              // speed
+		glm::vec2(368.0f, 848.0f),
+		glm::vec2(576.0f, 848.0f),
+		500.0f,
 		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
+		"images/statue.png",
+		glm::vec2(32.f, 47.f),
 		glm::vec2(1.0f, 1.0f),
+		true,
+		1,
+		0,
+		0
 		});
+	dungeonObjects.push_back(MovingObjectConfig{
+		glm::vec2(48.0f, 800.0f),
+		glm::vec2(112.0f, 800.0f),
+		500.0f,
+		MovingObjectType::MOVING_STATUE,
+		"images/statue.png",
+		glm::vec2(32.f, 47.f),
+		glm::vec2(1.0f, 1.0f),
+		false,
+		0,
+		0,
+		0
+		});
+	dungeonObjects.push_back(MovingObjectConfig{
+		glm::vec2(48.0f, 896.0f),
+		glm::vec2(112.0f, 896.0f),
+		500.0f,
+		MovingObjectType::MOVING_STATUE,
+		"images/statue.png",
+		glm::vec2(32.f, 47.f),
+		glm::vec2(1.0f, 1.0f),
+		false,
+		0,
+		0,
+		0
+		});
+
+	//SPIKES
+	float tileSize = 16.0f;
+	float startX = 23.0f * tileSize;
+	float fixedY = 45.0f * tileSize;
+	int numTiles = 13;
+
+	int durationA = 7000;
+	int durationB = 7000;
+
+	int cycleDuration = durationA + durationB;
+	int halfCycle = cycleDuration / 2;
+
+	for (int i = 0; i < numTiles; ++i)
+	{
+		float currentX = startX + (float)i * tileSize;
+
+		int idleTime = durationA;
+		int spikeTime = durationB;
+		int timerOffset;
+
+		if (i % 2 == 0) {
+			timerOffset = 0;
+		}
+		else {
+			timerOffset = halfCycle;
+		}
+
+		dungeonObjects.push_back(MovingObjectConfig{
+			glm::vec2(currentX, fixedY),
+			glm::vec2(currentX, fixedY),
+			0.0f,
+			MovingObjectType::SPIKE_TRAP,
+			"images/spikes.png",
+			glm::vec2(16.f, 16.f),
+			glm::vec2(0.5f, 1.0f),
+			true,
+			1,
+			idleTime,
+			spikeTime,
+			});
+	}
 	vector<MusicConfig> dungeonMusic;
 	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic, LevelType::DUNGEON);
 	addScene("dungeon", Dungeon);

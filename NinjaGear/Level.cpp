@@ -6,6 +6,7 @@
 #include <iostream>
 #include "Projectile.h"
 #include "ServiceLocator.h"
+#include "SpikeTrap.h"
 
 #define SCREEN_X 0
 #define SCREEN_Y 0
@@ -125,6 +126,7 @@ void Level::update(int deltaTime)
 		}
 	}
 
+	checkMovingObjectCollisions();
 	checkItemPickUp();
 	updateCameraSector();
 
@@ -246,45 +248,56 @@ void Level::initializeEnemies() {
 void Level::initializeMovingObjects()
 {
 	movingObjectTextures.resize(movingObjectConfigs.size());
-
 	for (size_t i = 0; i < movingObjectConfigs.size(); i++) {
 		const MovingObjectConfig& config = movingObjectConfigs[i];
-		MovingObject* obj = nullptr; // Initialize the pointer
-
-		// Load texture first, as it's needed for the constructor
+		MovingObject* obj = nullptr;
 		bool loaded = movingObjectTextures[i].loadFromFile(config.spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
 		if (!loaded) {
 			std::cout << "ERROR: Failed to load moving object texture: " << config.spriteSheet << std::endl;
 			continue;
 		}
-
 		movingObjectTextures[i].setMinFilter(GL_NEAREST);
 		movingObjectTextures[i].setMagFilter(GL_NEAREST);
-
 		switch (config.type) {
 		case MovingObjectType::MOVING_STATUE:
 			obj = new MovingStatue(config.spriteSize, config.texCoordSize,
 				&movingObjectTextures[i], &texProgram);
+			obj->setMovementPath(config.startPos, config.endPos, config.speed);
+			obj->setNumberAnimations(1);
+			obj->setAnimationSpeed(0, 8);
+			obj->addKeyframe(0, glm::vec2(0.0f, 0.0f));
+			obj->changeAnimation(0);
 			break;
-			
+		case MovingObjectType::SPIKE_TRAP:
+		{
+			SpikeTrap* trap = new SpikeTrap(config.spriteSize, config.texCoordSize,
+				&movingObjectTextures[i], &texProgram);
+			trap->setCycleDuration(config.idleDuration, config.spikeDuration);
+			trap->setNumberAnimations(2);
+			trap->setAnimationSpeed(0, 8);
+			trap->addKeyframe(0, glm::vec2(0.0f, 0.0f));
+			trap->setAnimationSpeed(1, 8);
+			trap->addKeyframe(1, glm::vec2(0.5f, 0.0f));
+			trap->changeAnimation(0);
+			// Set damage amount only (spike trap manages dealsDamage internally)
+			trap->setDamage(config.damage);
+			obj = trap;
+		}
+		break;
 		default:
 			std::cout << "ERROR: Unknown MovingObject type in config." << std::endl;
-			continue; 
+			continue;
 		}
-
 		if (obj == nullptr) continue;
 
-		obj->setMovementPath(config.startPos, config.endPos, config.speed);
-
-		obj->setNumberAnimations(1);
-		obj->setAnimationSpeed(0, 8);
-		obj->addKeyframe(0, glm::vec2(0.0f, 0.0f));
-		obj->changeAnimation(0);
+		// Only set damage properties for non-spike objects
+		if (config.type != MovingObjectType::SPIKE_TRAP) {
+			obj->setDamageProperties(config.dealsDamage, config.damage);
+		}
 
 		obj->setTileMapPosition(glm::ivec2(config.startPos.x, config.startPos.y),
 			glm::ivec2(SCREEN_X, SCREEN_Y));
 		obj->setTileMaps(maps);
-
 		movingObjects.push_back(obj);
 	}
 }
@@ -559,10 +572,7 @@ void Level::initializeTransitionTiles()
 	// Clear any existing transitions
 	transitionTiles.clear();
 
-	// Tile 99 = Cart to dungeon entrance
 	transitionTiles.push_back({ 5002, "dungeon", 17, 38 });
-
-	// Tile 98 = Dungeon exit back to outside
 	transitionTiles.push_back({ 5102, "outside", 10, 10 });
 }
 
@@ -586,6 +596,29 @@ void Level::checkTransitionTiles()
 					transition.targetTileY * tileSize);
 				player->setPosition(newPos);
 				return; // Exit after triggering transition
+			}
+		}
+	}
+}
+
+void Level::checkMovingObjectCollisions()
+{
+	if (!player->isAlive()) return;
+
+	glm::vec2 playerPos = player->getPositionFloat();
+	glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
+
+	for (MovingObject* obj : movingObjects) {
+		if (obj == nullptr) continue;
+
+		glm::vec2 objPos = obj->getPosition();
+		glm::vec2 objSize = obj->getSize();
+
+		if (isColliding(playerPos, playerSize, objPos, objSize)) {
+			// Deal damage if this object is configured to do so
+			if (obj->getDealsDamage()) {
+				player->takeDamage(obj->getDamageAmount());
+				break; // Only take damage from one object per frame
 			}
 		}
 	}

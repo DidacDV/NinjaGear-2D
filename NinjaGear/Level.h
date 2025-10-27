@@ -29,7 +29,7 @@ struct EnemyConfig {
 
 enum class MovingObjectType {
     MOVING_STATUE,
-    // MOVING_PLATFORM, // Add other types here
+    SPIKE_TRAP
 };
 
 struct MovingObjectConfig {
@@ -40,6 +40,10 @@ struct MovingObjectConfig {
     string spriteSheet;
     glm::vec2 spriteSize;
     glm::vec2 texCoordSize;
+    bool dealsDamage;        
+    int damage;
+    int idleDuration;   
+    int spikeDuration;
 };
 
 struct MusicConfig {
@@ -120,6 +124,8 @@ class Level :
 
         void checkTransitionTiles();
         void initializeTransitionTiles();
+
+        void checkMovingObjectCollisions();
         
         void updateCameraSector();
         void calculateCameraOffset();
