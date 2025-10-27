@@ -5,6 +5,7 @@
 #include "Sprite.h"
 #include "TileMap.h"
 #include "Item.h"
+#include "ProjectileManager.h"
 #include <unordered_map>
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
@@ -78,8 +79,8 @@ public:
 	bool hasWeapons() const { return !weaponInventory.empty(); }
 	int getItemQuantity(const std::string& itemName) const;
 
+	void setProjectileManager(ProjectileManager* manager) { projectileManager = manager; }
 private:
-
 	int currentFacingDirection = STAND_DOWN; // Track last direction
 	int lastFrameAnimation = -1;
 
@@ -132,6 +133,10 @@ private:
 	Texture bowSpritesheet;
 	Sprite* bowSprite = nullptr;
 	bool isBowEquipped = false;
+	//bow attacking
+	void shootBowProjectile();
+	ProjectileManager* projectileManager = nullptr;
+	bool lastFrameWasAttackingWithBow = false;
 public:
 	~Player() {
 		for (Item* item : itemInventory) delete item;

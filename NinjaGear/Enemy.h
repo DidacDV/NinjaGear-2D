@@ -41,8 +41,8 @@ protected:
 	virtual void changeAnimationsForDirection(glm::vec2 direction) = 0;
 
 	// Attributes
-	int health = 60;
-	int attackDamage = 10;
+	int health = 5;
+	int attackDamage = 1;
 	glm::ivec2 tileMapDispl;
 	glm::vec2 posEnemy; 
 	Direction currentDirection;
