@@ -76,7 +76,7 @@ void Level::init()
 	projection = glm::ortho(0.f, float(CAMERA_WIDTH), float(CAMERA_HEIGHT), 0.f);
 	
 	// Initialize player
-	if(!player->isInitialized()) player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
+	if(!player->isInitialized() || type != LevelType::DUNGEON) player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
 	player->setTileMaps(maps);
 
@@ -404,65 +404,56 @@ void Level::initializeItems() {
 }
 
 void Level::initializeObjects(int tileSize) {
-	if (type == LevelType::OUTSIDE) {
-		Texture* medpackTexture = new Texture();
-		medpackTexture->loadFromFile("images/items/Medipack.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	if (type != LevelType::OUTSIDE) return;
 
-		Item* medipack = new Item(
-			glm::vec2(tileSize - 4, tileSize - 4),
-			glm::vec2(1.0f, 1.0f),
-			medpackTexture,
-			&this->texProgram,
-			glm::ivec2(SCREEN_X, SCREEN_Y)
-		);
-		medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(25, 10), false, tileSize);
+	auto createItem = [&](Texture* texture, const string& name, int quantity,
+		const string& description, const glm::vec2& position, bool isWeapon = false) -> Item* {
+			Item* item = new Item(
+				glm::vec2(tileSize - 3, tileSize - 3),
+				glm::vec2(1.0f, 1.0f),
+				texture,
+				&this->texProgram,
+				glm::ivec2(SCREEN_X, SCREEN_Y)
+			);
+			item->setItem(name, quantity, description, position, isWeapon, tileSize);
+			return item;
+		};
 
-		Item* medipack2 = new Item(
-			glm::vec2(tileSize - 4, tileSize - 4),
-			glm::vec2(1.0f, 1.0f),
-			medpackTexture,  // Share same texture                     
-			&this->texProgram,
-			glm::ivec2(SCREEN_X, SCREEN_Y)
-		);
-		medipack2->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(30, 15), false, tileSize);
+	// --- Load textures once ---
+	auto* medpackTexture = new Texture();
+	medpackTexture->loadFromFile("images/items/Medipack.png", TEXTURE_PIXEL_FORMAT_RGBA);
 
-		Texture* speedPotionTexture = new Texture();
-		speedPotionTexture->loadFromFile("images/items/SPEED POTION.png", TEXTURE_PIXEL_FORMAT_RGBA);
-		Item* speedPotion = new Item(
-			glm::vec2(tileSize - 3, tileSize - 3),
-			glm::vec2(1.0f, 1.0f),
-			speedPotionTexture,
-			&this->texProgram,
-			glm::ivec2(SCREEN_X, SCREEN_Y)
-		);
-		speedPotion->setItem("SPEED POTION", 1, "Increases speed for 10 seconds.", glm::vec2(6, 10), false, tileSize);
+	auto* speedPotionTexture = new Texture();
+	speedPotionTexture->loadFromFile("images/items/SPEED POTION.png", TEXTURE_PIXEL_FORMAT_RGBA);
 
-		Texture* arrowTexture = new Texture();
-		arrowTexture->loadFromFile("images/items/Arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
-		Item* arrow = new Item(
-			glm::vec2(tileSize - 3, tileSize - 3),
-			glm::vec2(1.0f, 1.0f),
-			arrowTexture,
-			&this->texProgram,
-			glm::ivec2(SCREEN_X, SCREEN_Y)
-		);
-		arrow->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 5), false, tileSize);
-		Item* arrow2 = new Item(
-			glm::vec2(tileSize - 3, tileSize - 3),
-			glm::vec2(1.0f, 1.0f),
-			arrowTexture,
-			&this->texProgram,
-			glm::ivec2(SCREEN_X, SCREEN_Y)
-		);
-		arrow2->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 8), false, tileSize);
+	auto* arrowTexture = new Texture();
+	arrowTexture->loadFromFile("images/items/Arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
 
-		items.push_back(medipack);
-		items.push_back(medipack2);
-		items.push_back(speedPotion);
-		items.push_back(arrow);
-		items.push_back(arrow2);
+	vector<ItemData> itemData = {
+		//Medipacks
+		{ "MEDIPACK", 1, "Restores 1 health points.", {34, 2}, medpackTexture },
+		{ "MEDIPACK", 1, "Restores 1 health points.", {58, 8}, medpackTexture },
+		{ "MEDIPACK", 1, "Restores 1 health points.", {34, 2}, medpackTexture },
+		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 31}, medpackTexture },
+
+		//Speed potions
+		{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {6, 10}, speedPotionTexture },
+		{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {58, 13}, speedPotionTexture },
+
+		//Arrows
+		{ "ARROW", 2, "Projectile for bow", {17, 10}, arrowTexture },
+		{ "ARROW", 2, "Projectile for bow", {30, 18}, arrowTexture },
+		{ "ARROW", 1, "Projectile for bow", {45, 2}, arrowTexture },
+		{ "ARROW", 1, "Projectile for bow", {46, 2}, arrowTexture },
+		{ "ARROW", 3, "Projectile for bow", {55, 36}, arrowTexture },
+		{ "ARROW", 4, "Projectile for bow", {58, 27}, arrowTexture },
+	};
+
+	for (const auto& data : itemData) {
+		items.push_back(createItem(data.texture, data.name, data.quantity, data.description, data.pos));
 	}
 }
+
 
 void Level::initializeWeapons(int tileSize) {
 	if (type == LevelType::OUTSIDE) {
@@ -476,7 +467,7 @@ void Level::initializeWeapons(int tileSize) {
 			&this->texProgram,
 			glm::ivec2(SCREEN_X, SCREEN_Y)
 		);
-		bow->setItem("BOW", 1, "Long range weapon.", glm::vec2(15, 10), true, tileSize);
+		bow->setItem("BOW", 1, "Long range weapon.", glm::vec2(16, 10), true, tileSize);
 		items.push_back(bow);
 	}
 }

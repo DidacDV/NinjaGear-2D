@@ -53,7 +53,7 @@ void Game::init(int screenWidth, int screenHeight)
 
 	vector<EnemyConfig> jungleEnemies;
 	jungleEnemies.push_back(EnemyConfig{35, 10, "images/enemies/cyclope.png", EnemyType ::MELEE});
-	jungleEnemies.push_back(EnemyConfig{ 10, 5,  "images/enemies/cyclope.png", EnemyType::RANGED });
+//	jungleEnemies.push_back(EnemyConfig{ 10, 5,  "images/enemies/cyclope.png", EnemyType::RANGED });
 
 	vector<MovingObjectConfig> jungleObjects;
 
@@ -182,21 +182,36 @@ void Game::keyPressed(int key)
 		}
 	}
 	//interior tp cheat
+	//interior tp cheat
 	else if (key == GLFW_KEY_K) {
 		if (currentScene == levels["dungeon"]) setCurrentScene("Jungle1");
-		else setCurrentScene("dungeon");
+		else {
+			setCurrentScene("dungeon");
+			ServiceLocator::getUI().showTemporaryMessage("INTERIOR TP ACTIVATED",
+				glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+		}
 	}
 	else if (key == GLFW_KEY_Z)
 		player->onPunchKeyPressed();
 	//items cheat
-	else if (key == GLFW_KEY_I)
+	else if (key == GLFW_KEY_I) {
 		player->giveAllItems();
+		ServiceLocator::getUI().showTemporaryMessage("ALL ITEMS CHEAT ACTIVATED",
+			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+	}
 	//heal cheat
-	else if (key == GLFW_KEY_H)
+	else if (key == GLFW_KEY_H) {
 		player->setHealth(player->getMaxHealth());
+		ServiceLocator::getUI().showTemporaryMessage("FULL HEAL ACTIVATED",
+			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+	}
 	//god mode cheat
-	else if (key == GLFW_KEY_G)
+	else if (key == GLFW_KEY_G) {
 		player->toggleGodMode();
+		string message = player->isGodModeOn() ? "GOD MODE ACTIVATED" : "GOD MODE DEACTIVATED";
+		ServiceLocator::getUI().showTemporaryMessage(message,
+			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+	}
 	//boss tp cheat
 	else if (key == GLFW_KEY_B) {
 		setCurrentScene("dungeon");
@@ -206,6 +221,8 @@ void Game::keyPressed(int key)
 
 		glm::vec2 newPos(targetTileX * tileSize, targetTileY * tileSize);
 		player->setPosition(newPos);
+		ServiceLocator::getUI().showTemporaryMessage("BOSS TP ACTIVATED",
+			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
 		
 

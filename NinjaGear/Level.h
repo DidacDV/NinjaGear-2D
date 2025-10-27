@@ -50,6 +50,13 @@ struct MusicConfig {
 
 enum class LevelType { OUTSIDE, DUNGEON };
 
+struct ItemData {
+    std::string name;
+    int quantity;
+    std::string description;
+    glm::vec2 pos;
+    Texture* texture;
+};
 
 class Level :
     public Scene
