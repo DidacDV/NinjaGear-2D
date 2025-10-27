@@ -25,10 +25,17 @@ void Game::init(int screenWidth, int screenHeight)
 	
 	Menu* startMenu = new Menu(MenuType::START);
 	startMenu->setMenuImage("images/StartMenu.png");
+
 	Menu* settingsMenu = new Menu(MenuType::SETTINGS);
 	settingsMenu->setMenuImage("images/SettingsMenu.png");
+
+	Menu* deathMenu = new Menu(MenuType::DEATH);
+	deathMenu->setMenuImage("images/DeathMenu.png");
+	
+
 	addScene("menu", startMenu);
 	addScene("settings",settingsMenu);
+	addScene("death",deathMenu);
 
 
 	/* ------------- */
@@ -49,8 +56,8 @@ void Game::init(int screenWidth, int screenHeight)
 	//jungleMusic.push_back(MusicConfig{ 0, 0, "sounds/village.wav" });
 	//jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/village.wav" });
 	//jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
-	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic);
-
+	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic, LevelType::OUTSIDE);
+	Jungle1->setUIManager(GLOBAL_UI_MANAGER);
 	addScene("outside", Jungle1);
 
 	/* ------------- */
@@ -93,7 +100,7 @@ void Game::init(int screenWidth, int screenHeight)
 		glm::vec2(1.0f, 1.0f),
 	});
 	vector<MusicConfig> dungeonMusic;
-	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic);
+	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic, LevelType::DUNGEON);
 	addScene("dungeon", Dungeon);
 
 
@@ -102,6 +109,12 @@ void Game::init(int screenWidth, int screenHeight)
 
 bool Game::update(int deltaTime)
 {
+	if (player->getHealth() == 0) {
+		setCurrentScene("death");
+
+		player->setHealth(player->getMaxHealth());
+	}
+
 	if (currentScene != NULL)
 		currentScene->update(deltaTime);
 

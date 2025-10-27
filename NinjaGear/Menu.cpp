@@ -41,6 +41,11 @@ void Menu::update(int deltaTime)
 void Menu::render()
 {
     MenuScene::render();
+    if (type == MenuType::DEATH) {
+        if (Game::instance().getKey(GLFW_KEY_ESCAPE)) {
+            Game::instance().setCurrentScene("menu");
+        }
+    }
 }
 
 void Menu::setMenuImage(const string& imagePath)
@@ -50,21 +55,28 @@ void Menu::setMenuImage(const string& imagePath)
 
 void Menu::setUpButtons() {
     if (type == MenuType::START) {
-        addButton(glm::vec2(365, 360), glm::vec2(280, 65), "start");
-		addButton(glm::vec2(365, 450), glm::vec2(280, 65), "settings");
+        addButton(glm::vec2(0.38, 0.68f), glm::vec2(0.29f, 0.125f), "start"); //0.38 -> 365/960, where 360 was original position on my 1920width screen
+        addButton(glm::vec2(0.38, 0.835f), glm::vec2(0.29f, 0.125f), "settings");
+    }
+    if (type == MenuType::DEATH) {
+        addButton(glm::vec2(0.325, 0.73), glm::vec2(0.38f, 0.116f), "start");
     }
 }
 
-void Menu::addButton(const glm::vec2& pos, const glm::vec2& size, const string& action)
+void Menu::addButton(const glm::vec2& relativePos, const glm::vec2& relativeSize, const string& action)
 {
     Button btn;
-    btn.position = pos;
-    btn.size = size;
+
+    btn.position = glm::vec2(relativePos.x * globalScreenWidth/2,
+        relativePos.y * globalScreenHeight/2);
+    btn.size = glm::vec2(relativeSize.x * globalScreenWidth/2,
+        relativeSize.y * globalScreenHeight/2);
     btn.action = action;
+
     buttons.push_back(btn);
 
-    cout << "Added button: " << action << " at (" << pos.x << ", " << pos.y
-        << ") size (" << size.x << ", " << size.y << ")" << endl;
+    std::cout << "Added button: " << action << " at (" << btn.position.x << ", " << btn.position.y
+        << ") size (" << btn.size.x << ", " << btn.size.y << ")" << std::endl;
 }
 
 string Menu::getClickedButton(int mouseX, int mouseY)
