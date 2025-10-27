@@ -15,7 +15,8 @@ class MovingObject;
 enum class EnemyType {
     BASE,
     MELEE,
-    RANGED
+    RANGED,
+    BOSS
 };
 
 struct EnemyConfig {
@@ -66,9 +67,6 @@ class Level :
 	void render() override;
     ProjectileManager* getProjectileManager() { return &projectileManager; };
 
-
-    void setUIManager(UIManager* uiManager);
-
     private:
         // Moving objects
         vector<MovingObject*> movingObjects;
@@ -81,16 +79,14 @@ class Level :
         // Enemies
         vector<Enemy*> enemies;
         vector<EnemyConfig> enemyConfigs;
-		    // Projectiles
+		// Projectiles
         ProjectileManager projectileManager;
         //Music
         vector<MusicConfig> musicConfigs;
         map<pair<int, int>, MusicConfig> sectorMusicMap;  
         string currentMusicFile;
 
-		    vector<Item*> items;
-        //UIManager
-        UIManager* uiManager;
+		vector<Item*> items;
         // Camera sector traking
         int currentSectorI = 0;  
         int currentSectorJ = 0;  

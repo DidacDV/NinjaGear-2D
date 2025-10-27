@@ -56,7 +56,6 @@ private:
 							    // we can have access at any time
 	map<string, Scene*> levels;
 	Scene* currentScene;
-	UIManager* uiManager;
 	int mouseX, mouseY;
 };
 

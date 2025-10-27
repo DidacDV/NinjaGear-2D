@@ -22,11 +22,12 @@ enum PlayerAnims
 
 void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 {
-	health = 5.0f;
-	maxHealth = 5.0f;
 	rank = 0;
 	baseSpeed = 2.0f;
 	godMode = false;
+	health = 100.0f;
+	maxHealth = 100.0f;
+
 	activeBuffs.clear();
 	showAura = false;
 	itemQuantities.clear();

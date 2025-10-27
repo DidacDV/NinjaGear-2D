@@ -56,9 +56,8 @@ void Enemy::setSpriteSheet(const string& spriteSheet)
 }
 
 void Enemy::initializeSprite(ShaderProgram& shaderProgram, const string& spritesheetPath) {
-	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
 	spritesheet.loadFromFile(spritesheetPath, TEXTURE_PIXEL_FORMAT_RGBA);
-	sprite = Sprite::createSprite(QUAD_SIZE, glm::vec2(0.25f, 0.25f), &spritesheet, &shaderProgram);
+	sprite = Sprite::createSprite(enemySize, sizeInSpritesheet, &spritesheet, &shaderProgram);
 }
 
 bool Enemy::checkPlayerVisibility(const glm::vec2 playerPos)
@@ -195,6 +194,7 @@ void Enemy::takeDamage(int damage)
 	}
 
 	//TODO visuals
+	onDamageReceived();
 }
 
 // Common attacking behaviour
@@ -202,3 +202,4 @@ void Enemy::onDamageDealt()
 {
 	attackCooldownTimer = attackCooldown;
 }
+

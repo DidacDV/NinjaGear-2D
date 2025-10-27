@@ -16,6 +16,7 @@ protected:
     void initializeAnimations() override;
 	void changeAnimationsForDirection(glm::vec2 direction) override;
     void updateStateMachine(int deltaTime) override;
+	void onDamageReceived() override;
 
 private:
     enum class State {

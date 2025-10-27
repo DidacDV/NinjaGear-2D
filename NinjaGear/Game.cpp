@@ -4,6 +4,7 @@
 #include "MeleeEnemy.h"
 #include "RangedEnemy.h"
 #include "MovingStatue.h"
+#include "ServiceLocator.h"
 #include <iostream>
 
 
@@ -18,7 +19,7 @@ void Game::init(int screenWidth, int screenHeight)
 	/*UI MANAGER, same instance used in multiple classes*/ //todo singleton?
 	UIManager* GLOBAL_UI_MANAGER = new UIManager();
 	GLOBAL_UI_MANAGER->init();
-	this->uiManager = GLOBAL_UI_MANAGER;
+	ServiceLocator::provide(GLOBAL_UI_MANAGER);
 	/* PLAYER */
 	this->player = new Player();
 	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
@@ -74,8 +75,10 @@ void Game::init(int screenWidth, int screenHeight)
 	};
 
 	vector<EnemyConfig> dungeonEnemies;
+	dungeonEnemies.push_back(EnemyConfig{ 10, 41,  "images/boss/flame.png", EnemyType::BOSS });
 
 	vector<MovingObjectConfig> dungeonObjects;
+	// AT ROOM
 	dungeonObjects.push_back(MovingObjectConfig{
 		glm::vec2(368.0f, 720.0f),            // startPos
 		glm::vec2(576.0f, 720.0f),           // endPos
@@ -103,6 +106,25 @@ void Game::init(int screenWidth, int screenHeight)
 		glm::vec2(32.f, 47.f),				 // Actual statue size
 		glm::vec2(1.0f, 1.0f),
 	});
+	// AT BOSS ROOM
+	dungeonObjects.push_back(MovingObjectConfig{
+		glm::vec2(48.0f, 800.0f),            // startPos
+		glm::vec2(112.0f, 800.0f),           // endPos
+		500.0f,                              // speed
+		MovingObjectType::MOVING_STATUE,
+		"images/statue.png",				 // spriteSheet
+		glm::vec2(32.f, 47.f),				 // Actual statue size
+		glm::vec2(1.0f, 1.0f),
+		});
+	dungeonObjects.push_back(MovingObjectConfig{
+		glm::vec2(48.0f, 896.0f),            // startPos
+		glm::vec2(112.0f, 896.0f),           // endPos
+		500.0f,                              // speed
+		MovingObjectType::MOVING_STATUE,
+		"images/statue.png",				 // spriteSheet
+		glm::vec2(32.f, 47.f),				 // Actual statue size
+		glm::vec2(1.0f, 1.0f),
+		});
 	vector<MusicConfig> dungeonMusic;
 	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic, LevelType::DUNGEON);
 	addScene("dungeon", Dungeon);
@@ -122,8 +144,7 @@ bool Game::update(int deltaTime)
 	if (currentScene != NULL)
 		currentScene->update(deltaTime);
 
-	if (uiManager != NULL)
-		uiManager->update(deltaTime, player);
+	ServiceLocator::getUI().update(deltaTime, player);
 
 	return bPlay;
 }
@@ -138,9 +159,9 @@ void Game::render()
 
 	//only render UI if we're not in a menu
 	Menu* menu = dynamic_cast<Menu*>(currentScene);
-	if (menu == NULL && uiManager != NULL) {
-		uiManager->render();
-		uiManager->renderGameOverlay();
+	if (menu == NULL) {
+		ServiceLocator::getUI().render();
+		ServiceLocator::getUI().renderGameOverlay();
 	}
 }
 

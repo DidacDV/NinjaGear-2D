@@ -217,3 +217,8 @@ void RangedEnemy::shootAtPlayer(const glm::vec2& playerPos)
 		false
 	);
 }
+
+void RangedEnemy::onDamageReceived()
+{
+	// Placeholder for damage reaction (e.g., flash red, play sound)
+}

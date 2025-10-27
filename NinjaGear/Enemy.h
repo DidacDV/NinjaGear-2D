@@ -29,6 +29,7 @@ public:
 	virtual int getHealth() const { return health; }
 	virtual bool isAlive() const { return health > 0; }
 	virtual int getDamage() const { return attackDamage; }
+	virtual glm::vec2 getEnemySize() const { return enemySize; }
 
 	virtual bool isInAttackState() const { return false; }
 	virtual bool canDealDamage() const { return false; }
@@ -41,8 +42,9 @@ protected:
 	virtual void changeAnimationsForDirection(glm::vec2 direction) = 0;
 
 	// Attributes
-	int health = 5;
-	int attackDamage = 1;
+	int health = 60;
+	int attackDamage = 10;
+	glm::vec2 enemySize = glm::vec2(16.f, 16.f);
 	glm::ivec2 tileMapDispl;
 	glm::vec2 posEnemy; 
 	Direction currentDirection;
@@ -50,6 +52,8 @@ protected:
 	// Visuals
 	Texture spritesheet;
 	Sprite* sprite;
+	glm::vec2 sizeInSpritesheet = glm::vec2(0.25f, 0.25f);
+	virtual void onDamageReceived() = 0;
 
 	// Tilemap
 	TileMap* map;

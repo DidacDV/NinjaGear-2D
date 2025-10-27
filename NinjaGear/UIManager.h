@@ -24,16 +24,16 @@ class UIManager
 {
 public:
     UIManager();
-    ~UIManager();
+    virtual ~UIManager();
 
-    void init();
-    void update(int deltaTime, Player* player);
-    void render();
-    void renderGameOverlay();
+    virtual void init();
+    virtual void update(int deltaTime, Player* player);
+    virtual void render();
+    virtual void renderGameOverlay();
 
-    void showTemporaryMessage(const std::string& text, const glm::vec2& position,
+    virtual void showTemporaryMessage(const std::string& text, const glm::vec2& position,
         float scale, const glm::vec3& color, int durationMs);
-    void showMessageAndDialog(TemporaryMessage msg, float alpha, glm::vec3 color);
+    virtual void showMessageAndDialog(TemporaryMessage msg, float alpha, glm::vec3 color);
 
 private:
     void setupViewport(float heightPercent, float yOffset);
