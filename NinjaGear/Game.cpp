@@ -4,6 +4,7 @@
 #include "MeleeEnemy.h"
 #include "RangedEnemy.h"
 #include "MovingStatue.h"
+#include "ServiceLocator.h"
 #include <iostream>
 
 
@@ -18,17 +19,28 @@ void Game::init(int screenWidth, int screenHeight)
 	/*UI MANAGER, same instance used in multiple classes*/ //todo singleton?
 	UIManager* GLOBAL_UI_MANAGER = new UIManager();
 	GLOBAL_UI_MANAGER->init();
-	this->uiManager = GLOBAL_UI_MANAGER;
+	ServiceLocator::provide(GLOBAL_UI_MANAGER);
 	/* PLAYER */
 	this->player = new Player();
 	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
 	
 	Menu* startMenu = new Menu(MenuType::START);
 	startMenu->setMenuImage("images/StartMenu.png");
+
 	Menu* settingsMenu = new Menu(MenuType::SETTINGS);
 	settingsMenu->setMenuImage("images/SettingsMenu.png");
+
+	Menu* deathMenu = new Menu(MenuType::DEATH);
+	deathMenu->setMenuImage("images/DeathMenu.png");
+
+	Menu* winMenu = new Menu(MenuType::CREDITS);
+	winMenu->setMenuImage("images/WinMenu.png");
+	
+
 	addScene("menu", startMenu);
 	addScene("settings",settingsMenu);
+	addScene("death",deathMenu);
+	addScene("win", winMenu);
 
 
 	/* ------------- */
@@ -49,8 +61,8 @@ void Game::init(int screenWidth, int screenHeight)
 	//jungleMusic.push_back(MusicConfig{ 0, 0, "sounds/village.wav" });
 	//jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/village.wav" });
 	//jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
-	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic);
-
+	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic, LevelType::OUTSIDE);
+	Jungle1->setUIManager(GLOBAL_UI_MANAGER);
 	addScene("outside", Jungle1);
 
 	/* ------------- */
@@ -63,8 +75,10 @@ void Game::init(int screenWidth, int screenHeight)
 	};
 
 	vector<EnemyConfig> dungeonEnemies;
+	dungeonEnemies.push_back(EnemyConfig{ 10, 41,  "images/boss/flame.png", EnemyType::BOSS });
 
 	vector<MovingObjectConfig> dungeonObjects;
+	// AT ROOM
 	dungeonObjects.push_back(MovingObjectConfig{
 		glm::vec2(368.0f, 720.0f),            // startPos
 		glm::vec2(576.0f, 720.0f),           // endPos
@@ -92,8 +106,27 @@ void Game::init(int screenWidth, int screenHeight)
 		glm::vec2(32.f, 47.f),				 // Actual statue size
 		glm::vec2(1.0f, 1.0f),
 	});
+	// AT BOSS ROOM
+	dungeonObjects.push_back(MovingObjectConfig{
+		glm::vec2(48.0f, 800.0f),            // startPos
+		glm::vec2(112.0f, 800.0f),           // endPos
+		500.0f,                              // speed
+		MovingObjectType::MOVING_STATUE,
+		"images/statue.png",				 // spriteSheet
+		glm::vec2(32.f, 47.f),				 // Actual statue size
+		glm::vec2(1.0f, 1.0f),
+		});
+	dungeonObjects.push_back(MovingObjectConfig{
+		glm::vec2(48.0f, 896.0f),            // startPos
+		glm::vec2(112.0f, 896.0f),           // endPos
+		500.0f,                              // speed
+		MovingObjectType::MOVING_STATUE,
+		"images/statue.png",				 // spriteSheet
+		glm::vec2(32.f, 47.f),				 // Actual statue size
+		glm::vec2(1.0f, 1.0f),
+		});
 	vector<MusicConfig> dungeonMusic;
-	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic);
+	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic, LevelType::DUNGEON);
 	addScene("dungeon", Dungeon);
 
 
@@ -102,11 +135,16 @@ void Game::init(int screenWidth, int screenHeight)
 
 bool Game::update(int deltaTime)
 {
+	if (player->getHealth() == 0) {
+		setCurrentScene("win");
+
+		player->setHealth(player->getMaxHealth());
+	}
+
 	if (currentScene != NULL)
 		currentScene->update(deltaTime);
 
-	if (uiManager != NULL)
-		uiManager->update(deltaTime, player);
+	ServiceLocator::getUI().update(deltaTime, player);
 
 	return bPlay;
 }
@@ -121,9 +159,9 @@ void Game::render()
 
 	//only render UI if we're not in a menu
 	Menu* menu = dynamic_cast<Menu*>(currentScene);
-	if (menu == NULL && uiManager != NULL) {
-		uiManager->render();
-		uiManager->renderGameOverlay();
+	if (menu == NULL) {
+		ServiceLocator::getUI().render();
+		ServiceLocator::getUI().renderGameOverlay();
 	}
 }
 
@@ -144,13 +182,24 @@ void Game::keyPressed(int key)
 			}
 		}
 	}
-  else if (key == GLFW_KEY_Z) {
-		if(currentScene == levels["dungeon"]) setCurrentScene("Jungle1");
+	//interior tp cheat
+	else if (key == GLFW_KEY_K) {
+		if (currentScene == levels["dungeon"]) setCurrentScene("Jungle1");
 		else setCurrentScene("dungeon");
-  }
-	else if (key == GLFW_KEY_X) // Change sprite
-		player->setSpriteSheet("images/characters/ninja_blue/SpriteSheet.png");
-	else if (key == GLFW_KEY_G) 
+	}
+	else if (key == GLFW_KEY_Z)
+		player->onPunchKeyPressed();
+	//items cheat
+	else if (key == GLFW_KEY_I)
+		player->giveAllItems();
+	//heal cheat
+	else if (key == GLFW_KEY_H)
+		player->setHealth(player->getMaxHealth());
+	//god mode cheat
+	else if (key == GLFW_KEY_G)
+		player->toggleGodMode();
+	//boss tp cheat
+	else if (key == GLFW_KEY_B) 
 		player->onPunchKeyPressed();
 	keys[key] = true;
 }

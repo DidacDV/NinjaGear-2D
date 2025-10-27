@@ -294,3 +294,8 @@ bool MeleeEnemy::canDealDamage() const
 {
     return currentState == State::ATTACKING && attackCooldownTimer <= 0;
 }
+
+void MeleeEnemy::onDamageReceived()
+{
+    sprite->changeAnimation(DANCE);
+}

@@ -9,7 +9,10 @@ class Projectile
 public:
     void init(const glm::vec2& startPos, const glm::vec2& direction,
         float speed, ShaderProgram& shaderProgram,
-        const string& spritePath, TileMap* map);
+        const std::string& spritePath, TileMap* map,
+        const glm::vec2& sizeInSprite,
+        int animationSpeed,
+        const std::vector<glm::vec2>& animationKeyframes);
 
     void update(int deltaTime);
     void render(const glm::mat4& view);
@@ -25,6 +28,8 @@ public:
     void setDamage(int dmg) { damage = dmg; }
     void setLifetime(int ms) { maxLifetime = ms; }
 
+    void setIsPlayerProjectile(bool isPlayer) { isPlayerProjectile = isPlayer; }
+    bool getIsPlayerProjectile() const { return isPlayerProjectile; }
 private:
     // Position & movement
     glm::vec2 position;
@@ -47,4 +52,6 @@ private:
     // Collision
     TileMap* map;
     bool checkWallCollision() const;
+    bool isPlayerProjectile = false;
+
 };

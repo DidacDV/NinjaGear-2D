@@ -206,13 +206,19 @@ void RangedEnemy::shootAtPlayer(const glm::vec2& playerPos)
 
 	glm::vec2 direction = glm::normalize(playerPos - posEnemy);
 	float speed = 100.0f; // pixels per second
-	int damage = 15;
+	int damage = 1;
 
 	projectileManager->spawnProjectile(
 		posEnemy,
 		direction,
 		speed,
 		damage,
-		"images/projectiles/Arrow.png"
+		"images/projectiles/Rock.png",
+		false
 	);
+}
+
+void RangedEnemy::onDamageReceived()
+{
+	// Placeholder for damage reaction (e.g., flash red, play sound)
 }
