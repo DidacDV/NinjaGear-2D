@@ -80,6 +80,11 @@ public:
 	int getItemQuantity(const std::string& itemName) const;
 
 	void setProjectileManager(ProjectileManager* manager) { projectileManager = manager; }
+	//items cheat
+	void giveAllItems();
+	//godmode cheat
+	bool isGodModeOn() const { return godMode; }
+	void toggleGodMode() { godMode = !godMode; }
 private:
 	int currentFacingDirection = STAND_DOWN; // Track last direction
 	int lastFrameAnimation = -1;
@@ -137,6 +142,8 @@ private:
 	void shootBowProjectile();
 	ProjectileManager* projectileManager = nullptr;
 	bool lastFrameWasAttackingWithBow = false;
+	//godmode cheat
+	bool godMode = false;
 public:
 	~Player() {
 		for (Item* item : itemInventory) delete item;

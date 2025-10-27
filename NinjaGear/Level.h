@@ -100,6 +100,8 @@ class Level :
         int sectorHeight = 0;
         float cameraOffsetX = 0.0f;
         float cameraOffsetY = 0.0f;
+        bool introMessagesDisplayed = false;
+        int introMessageDelayTimer = 500;
         // Combat manager
         static constexpr float PLAYER_SIZE = 16.0f;
         static constexpr float ENEMY_SIZE = 16.0f;

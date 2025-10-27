@@ -31,11 +31,15 @@ void Game::init(int screenWidth, int screenHeight)
 
 	Menu* deathMenu = new Menu(MenuType::DEATH);
 	deathMenu->setMenuImage("images/DeathMenu.png");
+
+	Menu* winMenu = new Menu(MenuType::CREDITS);
+	winMenu->setMenuImage("images/WinMenu.png");
 	
 
 	addScene("menu", startMenu);
 	addScene("settings",settingsMenu);
 	addScene("death",deathMenu);
+	addScene("win", winMenu);
 
 
 	/* ------------- */
@@ -110,7 +114,7 @@ void Game::init(int screenWidth, int screenHeight)
 bool Game::update(int deltaTime)
 {
 	if (player->getHealth() == 0) {
-		setCurrentScene("death");
+		setCurrentScene("win");
 
 		player->setHealth(player->getMaxHealth());
 	}
@@ -157,13 +161,24 @@ void Game::keyPressed(int key)
 			}
 		}
 	}
-  else if (key == GLFW_KEY_Z) {
-		if(currentScene == levels["dungeon"]) setCurrentScene("Jungle1");
+	//interior tp cheat
+	else if (key == GLFW_KEY_K) {
+		if (currentScene == levels["dungeon"]) setCurrentScene("Jungle1");
 		else setCurrentScene("dungeon");
-  }
-	else if (key == GLFW_KEY_X) // Change sprite
-		player->setSpriteSheet("images/characters/ninja_blue/SpriteSheet.png");
-	else if (key == GLFW_KEY_G) 
+	}
+	else if (key == GLFW_KEY_Z)
+		player->onPunchKeyPressed();
+	//items cheat
+	else if (key == GLFW_KEY_I)
+		player->giveAllItems();
+	//heal cheat
+	else if (key == GLFW_KEY_H)
+		player->setHealth(player->getMaxHealth());
+	//god mode cheat
+	else if (key == GLFW_KEY_G)
+		player->toggleGodMode();
+	//boss tp cheat
+	else if (key == GLFW_KEY_B) 
 		player->onPunchKeyPressed();
 	keys[key] = true;
 }

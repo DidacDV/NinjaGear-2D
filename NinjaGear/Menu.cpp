@@ -41,7 +41,7 @@ void Menu::update(int deltaTime)
 void Menu::render()
 {
     MenuScene::render();
-    if (type == MenuType::DEATH) {
+    if (type == MenuType::DEATH || type == MenuType::CREDITS) {
         if (Game::instance().getKey(GLFW_KEY_ESCAPE)) {
             Game::instance().setCurrentScene("menu");
         }
@@ -60,6 +60,9 @@ void Menu::setUpButtons() {
     }
     if (type == MenuType::DEATH) {
         addButton(glm::vec2(0.325, 0.73), glm::vec2(0.38f, 0.116f), "start");
+    }
+    if (type == MenuType::CREDITS) {
+        addButton(glm::vec2(0.328, 0.78), glm::vec2(0.36f, 0.12f), "start");
     }
 }
 

@@ -26,6 +26,7 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 	maxHealth = 5.0f;
 	rank = 0;
 	baseSpeed = 2.0f;
+	godMode = false;
 	activeBuffs.clear();
 	showAura = false;
 	itemQuantities.clear();
@@ -260,7 +261,7 @@ void Player::update(int deltaTime)
 		if (sprite->animation() != DANCE)
 			sprite->changeAnimation(DANCE);
 	}
-	else if (Game::instance().getKey(GLFW_KEY_G))  // ATTACK
+	else if (Game::instance().getKey(GLFW_KEY_Z))  // ATTACK
 	{
 		Item* weapon = getCurrentWeapon();
 		bool usingBow = (weapon != nullptr && weapon->getName() == "BOW");
@@ -323,7 +324,7 @@ void Player::render(const glm::mat4& view)
 
 	Item* weapon = getCurrentWeapon();
 	bool isAttackingWithBow = (weapon != nullptr && weapon->getName() == "BOW" &&
-		Game::instance().getKey(GLFW_KEY_G) && !Game::instance().getKey(GLFW_KEY_DOWN) && !Game::instance().getKey(GLFW_KEY_UP)
+		Game::instance().getKey(GLFW_KEY_Z) && !Game::instance().getKey(GLFW_KEY_DOWN) && !Game::instance().getKey(GLFW_KEY_UP)
 		&& !Game::instance().getKey(GLFW_KEY_RIGHT) && !Game::instance().getKey(GLFW_KEY_LEFT));
 
 	if (isAttackingWithBow) {
@@ -391,6 +392,8 @@ bool Player::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) cons
 
 void Player::takeDamage(int damage)
 {
+	if (isGodModeOn())
+		return;
 	if (invulnerable || health <= 0) {
 		return;
 	}
@@ -668,4 +671,44 @@ void Player::shootBowProjectile()
 	}
 
 	cout << "Shot arrow! Remaining: " << getItemQuantity("ARROW") << endl;
+}
+
+void Player::giveAllItems() {
+	cout << "=== GIVING ALL ITEMS ===" << endl;
+
+	for (auto& item : itemInventory) {
+		delete item;
+	}
+	itemInventory.clear();
+	itemQuantities.clear();
+
+	//MEDIPACK
+	Item* medipack = new Item();
+	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(0, 0), false, 16);
+	itemInventory.push_back(medipack);
+	itemQuantities["MEDIPACK"] = 1;
+
+	//SPEED POTION
+	Item* speedPotion = new Item();
+	speedPotion->setItem("SPEED POTION", 1, "Increases speed for 10 seconds.", glm::vec2(0, 0), false, 16);
+	itemInventory.push_back(speedPotion);
+	itemQuantities["SPEED POTION"] = 1;
+
+	//ARROW
+	Item* arrow = new Item();
+	arrow->setItem("ARROW", 1, "Projectile for bow", glm::vec2(0, 0), false, 16);
+	itemInventory.push_back(arrow);
+	itemQuantities["ARROW"] = 5; // Give 5 arrows
+
+	//BOW weapon
+	Item* bow = new Item();
+	bow->setItem("BOW", 1, "Long range weapon.", glm::vec2(0, 0), true, 16);
+	weaponInventory.push_back(bow);
+
+
+	if (!itemInventory.empty()) currentItemIndex = 0;
+
+	cout << "Given: MEDIPACK, SPEED POTION, ARROW (x5), BOW" << endl;
+	cout << "Total items: " << itemInventory.size() << endl;
+	cout << "Total weapons: " << weaponInventory.size() << endl;
 }

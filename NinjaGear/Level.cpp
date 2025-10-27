@@ -61,7 +61,8 @@ void Level::reStartLevel() {
 	initializeEnemies();
 	initializeItems();
 	initializeMusic();
-
+	introMessagesDisplayed = false;
+	introMessageDelayTimer = 500;
 }
 
 void Level::init() 
@@ -119,8 +120,22 @@ void Level::update(int deltaTime)
 	}
 
 	checkItemPickUp();
-
 	updateCameraSector();
+
+	if (uiManager && !introMessagesDisplayed)
+	{
+		introMessageDelayTimer -= deltaTime;
+		if (introMessageDelayTimer <= 0)
+		{
+			uiManager->showTemporaryMessage("HELLO SOLID NINJA, KILL ALL ENEMIES",
+				glm::vec2(320, 160), 1.f, glm::vec3(0.f, 0.f, 0.f), 4000);
+
+			uiManager->showTemporaryMessage("AND WE WON'T KILL YOU...",
+				glm::vec2(320, 200), 1.f, glm::vec3(1.f, 0.f, 0.f), 5000);
+
+			introMessagesDisplayed = true;
+		}
+	}
 }
 
 void Level::setUIManager(UIManager* uiManager)
