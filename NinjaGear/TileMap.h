@@ -78,6 +78,7 @@ public:
 	int width() const { return mapSize.x; }
 	int height() const { return mapSize.y; }
 	bool isTileBlocked(int x, int y) const;
+	int getTileAt(int x, int y) const;
 private:
 	bool loadLevel(const string &levelFile);
 	void prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program);

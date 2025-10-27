@@ -42,6 +42,7 @@ public:
 
 	void setTileMaps(const vector<TileMap*>& tileMaps);
 	void setPosition(const glm::vec2 &pos);
+
 	void setSpriteSheet(const string& spriteSheet);
 	glm::ivec2 getPosition() const { return posPlayer; }
 	glm::vec2 getPositionFloat() const { return glm::vec2(posPlayer); }
@@ -85,7 +86,10 @@ public:
 	//godmode cheat
 	bool isGodModeOn() const { return godMode; }
 	void toggleGodMode() { godMode = !godMode; }
+
+	bool isInitialized() const { return initialized;  }
 private:
+	bool initialized = false;
 	int currentFacingDirection = STAND_DOWN; // Track last direction
 	int lastFrameAnimation = -1;
 

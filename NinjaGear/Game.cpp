@@ -62,7 +62,6 @@ void Game::init(int screenWidth, int screenHeight)
 	//jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/village.wav" });
 	//jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
 	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic, LevelType::OUTSIDE);
-	Jungle1->setUIManager(GLOBAL_UI_MANAGER);
 	addScene("outside", Jungle1);
 
 	/* ------------- */
@@ -136,7 +135,7 @@ void Game::init(int screenWidth, int screenHeight)
 bool Game::update(int deltaTime)
 {
 	if (player->getHealth() == 0) {
-		setCurrentScene("win");
+		setCurrentScene("death");
 
 		player->setHealth(player->getMaxHealth());
 	}
@@ -199,8 +198,18 @@ void Game::keyPressed(int key)
 	else if (key == GLFW_KEY_G)
 		player->toggleGodMode();
 	//boss tp cheat
-	else if (key == GLFW_KEY_B) 
-		player->onPunchKeyPressed();
+	else if (key == GLFW_KEY_B) {
+		setCurrentScene("dungeon");
+		int tileSize = 16.0f;
+		int targetTileX = 10; // Change to the tile X coordinate you want
+		int targetTileY = 51; // Change to the tile Y coordinate you want
+
+		glm::vec2 newPos(targetTileX * tileSize, targetTileY * tileSize);
+		player->setPosition(newPos);
+	}
+		
+
+
 	keys[key] = true;
 }
 
@@ -248,6 +257,10 @@ void Game::setCurrentScene(const string& name)
 		currentScene = it->second;
 		currentScene->init();
 	}
+}
+
+void Game::victory() {
+	setCurrentScene("win");
 }
 
 Scene* Game::getCurrentScene() const

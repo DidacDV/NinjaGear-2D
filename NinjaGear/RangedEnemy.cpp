@@ -3,6 +3,8 @@
 
 void RangedEnemy::initializeAnimations()
 {
+	health = 5.0f;
+
 	cachedTileSize = static_cast<float>(map->getTileSize());
 	const float FRAME_WIDTH = 1.0f / 4.0f;
 	const float FRAME_HEIGHT = 1.0f / 4.0f;

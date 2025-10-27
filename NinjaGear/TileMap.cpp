@@ -239,3 +239,11 @@ bool TileMap::hasLineOfSight(const glm::vec2& from, const glm::vec2& to) const
 
 	return true;
 }
+
+int TileMap::getTileAt(int x, int y) const
+{
+	if (x < 0 || x >= mapSize.x || y < 0 || y >= mapSize.y)
+		return -1; // Out of bounds
+
+	return map[y * mapSize.x + x];
+}

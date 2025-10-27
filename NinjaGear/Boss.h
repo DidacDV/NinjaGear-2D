@@ -9,7 +9,7 @@ public:
 		IDLE, HIT, IDLE_PHASE3, HIT_PHASE3
     };
     bool isInAttackState() const override;
-	
+    bool isBoss() const override { return true; }
 protected:
     void initializeAnimations() override;
     void changeAnimationsForDirection(glm::vec2 direction) override;
@@ -34,6 +34,7 @@ private:
 	};
 	Phase currentPhase = Phase::PHASE_ONE;
 
+    bool isOnScreen(int cameraWidth, int cameraHeight, float margin = 50.0f) const;
     // Moving
     glm::ivec2 moveStartTile;
     glm::ivec2 moveEndTile;

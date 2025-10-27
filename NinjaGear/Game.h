@@ -45,6 +45,7 @@ public:
 	void addScene(const string& name, Scene* scene);
 	void setCurrentScene(const string& name);
 	Scene* getCurrentScene() const;
+	void victory();
 	//Player management
 	Player* getPlayer() const;
 	glm::vec2 getPlayerPosition() const;

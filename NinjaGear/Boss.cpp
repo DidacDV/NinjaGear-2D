@@ -4,7 +4,7 @@
 
 Boss::Boss() : Enemy()
 {
-    health = 300;
+    health = 100;
     attackDamage = 15;
     moveSpeed = 3.0f;
 	enemySize = glm::vec2(50.f, 50.f);
@@ -49,9 +49,14 @@ void Boss::initializeAnimations()
     sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
 }
 
-void Boss::updateStateMachine(int deltaTime)
-{
-	// PHASE MANAGEMENT
+void Boss::updateStateMachine(int deltaTime){
+    const int CAMERA_WIDTH = 320;
+    const int CAMERA_HEIGHT = 320;
+    if (!isOnScreen(CAMERA_WIDTH, CAMERA_HEIGHT)) {
+
+        return; 
+    }
+    // PHASE MANAGEMENT
     float healthPercent = static_cast<float>(health) / 300.0f;
 
     if (currentPhase == Phase::PHASE_ONE && healthPercent <= 0.66f) {
@@ -186,7 +191,7 @@ void Boss::shootAtPlayer(const glm::vec2& playerPos)
     cout << "about to shoot!" << endl;
     glm::vec2 direction = glm::normalize(playerPos - posEnemy);
     float speed = 100.0f;
-    int damage = 15;
+    int damage = 1;
 
     vector<glm::vec2> projectileKeyframes = {
     glm::vec2(0.0f, 0.0f), 
@@ -201,6 +206,7 @@ void Boss::shootAtPlayer(const glm::vec2& playerPos)
         speed,
         damage,
         "images/projectiles/fireball.png",
+        false,
         glm::vec2(0.25f, 1.0f),
         10,
         projectileKeyframes
@@ -224,4 +230,14 @@ void Boss::onDamageReceived()
 {
     sprite->changeAnimation(getHitAnim());
     hitAnimationTimer = HIT_ANIMATION_DURATION;
+}
+
+bool Boss::isOnScreen(int cameraWidth, int cameraHeight, float margin) const
+{
+    glm::vec2 worldPos = glm::vec2(tileMapDispl.x + posEnemy.x,
+        tileMapDispl.y + posEnemy.y);
+    glm::vec2 screenPos = worldPos + cameraOffset;
+
+    return (screenPos.x > -margin && screenPos.x < cameraWidth + margin &&
+        screenPos.y > -margin && screenPos.y < cameraHeight + margin);
 }
