@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="AnimKeyframes.h" />
     <ClInclude Include="AudioService.h" />
+    <ClInclude Include="Boss.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GeometryUtils.h" />
@@ -27,6 +28,7 @@
     <ClInclude Include="MovingStatue.h" />
     <ClInclude Include="NullAudioService.h" />
     <ClInclude Include="MenuScene.h" />
+    <ClInclude Include="NullUIManager.h" />
     <ClInclude Include="Pathfinder.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Projectile.h" />
@@ -44,6 +46,7 @@
     <ClInclude Include="UIManagerUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Boss.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Globals.cpp" />

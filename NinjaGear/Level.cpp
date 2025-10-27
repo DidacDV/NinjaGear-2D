@@ -2,6 +2,7 @@
 #include "MovingStatue.h" 
 #include "RangedEnemy.h"
 #include "MeleeEnemy.h"
+#include "Boss.h"
 #include <iostream>
 #include "Projectile.h"
 #include "ServiceLocator.h"
@@ -18,7 +19,6 @@ Level::Level()
 	this->player = nullptr;
 	this->initPlayerX = 0;
 	this->initPlayerY = 0;
-	this->uiManager = nullptr;
 }
 
 Level::Level(const vector<string>& tileMapFiles, Player* player, 
@@ -36,7 +36,6 @@ Level::Level(const vector<string>& tileMapFiles, Player* player,
 	initializeEnemies();
 	//Initialize moving objects
 	initializeMovingObjects();
-	this->uiManager = nullptr;
 }
 
 Level::~Level()
@@ -107,11 +106,6 @@ void Level::update(int deltaTime)
 	checkItemPickUp();
 
 	updateCameraSector();
-}
-
-void Level::setUIManager(UIManager* uiManager)
-{
-	this->uiManager = uiManager;
 }
 
 void Level::updateCameraSector()
@@ -199,6 +193,9 @@ void Level::initializeEnemies() {
 			case EnemyType::RANGED:
 				enemy = new RangedEnemy();
 				break;
+			case EnemyType::BOSS:
+				enemy = new Boss();
+				break;
 			default:
 				enemy = nullptr;
 				break;
@@ -274,7 +271,7 @@ void Level::checkCombat()
 	// Check enemy collision with player (contact damage)
 	for (auto& enemy : enemies) {
 		glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
-		glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
+		glm::vec2 enemySize = enemy->getEnemySize();
 		if (isColliding(player->getPositionFloat(), playerSize,
 			enemy->getPosition(), enemySize)) {
 
@@ -320,12 +317,11 @@ void Level::handlePlayerAttack()
 	glm::vec2 punchPos = player->getPunchHitbox();
 
 	glm::vec2 punchSize(PLAYER_SIZE + PUNCH_REACH, PLAYER_SIZE + PUNCH_REACH);
-	glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
 
 
 	for (auto it = enemies.begin(); it != enemies.end(); ) {
 		Enemy* enemy = *it;
-
+		glm::vec2 enemySize = enemy->getEnemySize();
 		if (isColliding(punchPos, punchSize,
 			enemy->getPosition(), enemySize)) {
 			enemy->takeDamage(PUNCH_DAMAGE);
@@ -481,12 +477,10 @@ void Level::itemPickUpEvent(int indexInVector) {
 
 	player->addItem(itemPicked);
 
-	if (uiManager != nullptr) {
-		std::string pickupText = "PICKED UP " + itemPicked->getName() + "!";
-		glm::vec2 messagePos(320, 160);
-		glm::vec3 messageColor(0.f, 0.f, 0.f);
-		uiManager->showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
-	}
+	std::string pickupText = "PICKED UP " + itemPicked->getName() + "!";
+	glm::vec2 messagePos(320, 160);
+	glm::vec3 messageColor(0.f, 0.f, 0.f);
+	ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
 
 	//only delete if itss not the first (Player keeps first instance)
 	if (!isFirstOfKind && !itemPicked->getIsWeapon()) {

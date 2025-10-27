@@ -9,7 +9,9 @@ public:
     void init(ShaderProgram* shaderProgram, TileMap* map);
 
     void spawnProjectile(const glm::vec2& startPos, const glm::vec2& direction,
-        float speed, int damage, const string& spritePath);
+        float speed, int damage, const string& spritePath, const glm::vec2& sizeInSprite = glm::vec2(1.0f, 1.0f),
+        int animationSpeed = 10,
+        const vector<glm::vec2>& animationKeyframes = {});
 
     void update(int deltaTime);
     void render(const glm::mat4& view);

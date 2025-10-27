@@ -22,8 +22,8 @@ enum PlayerAnims
 
 void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 {
-	health = 3.0f;
-	maxHealth = 5.0f;
+	health = 100.0f;
+	maxHealth = 100.0f;
 
 	activeBuffs.clear();
 	showAura = false;

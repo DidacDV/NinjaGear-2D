@@ -9,14 +9,18 @@ void ProjectileManager::init(ShaderProgram* shaderProgram, TileMap* map)
 void ProjectileManager::spawnProjectile(const glm::vec2& startPos,
     const glm::vec2& direction,
     float speed, int damage,
-    const string& spritePath)
+    const string& spritePath,
+    const glm::vec2& sizeInSprite,
+    int animationSpeed,
+    const vector<glm::vec2>& animationKeyframes
+    )
 {
     if (projectiles.size() >= MAX_PROJECTILES) {
         removeInactiveProjectiles();
     }
 
     auto projectile = std::make_unique<Projectile>();
-    projectile->init(startPos, direction, speed, *shaderProgram, spritePath, map);
+    projectile->init(startPos, direction, speed, *shaderProgram, spritePath,map, sizeInSprite, animationSpeed, animationKeyframes);
     projectile->setDamage(damage);
     projectiles.push_back(std::move(projectile));
 }

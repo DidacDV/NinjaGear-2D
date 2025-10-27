@@ -3,7 +3,11 @@
 
 void Projectile::init(const glm::vec2& startPos, const glm::vec2& direction,
     float speed, ShaderProgram& shaderProgram,
-    const string& spritePath, TileMap* map)
+    const string& spritePath, TileMap* map,
+    const glm::vec2& sizeInSprite,
+    int animationSpeed, 
+    const std::vector<glm::vec2>& animationKeyframes
+)
 {
     this->position = startPos;
     this->direction = glm::normalize(direction);
@@ -15,11 +19,22 @@ void Projectile::init(const glm::vec2& startPos, const glm::vec2& direction,
 
     // Load sprite
     spritesheet.loadFromFile(spritePath, TEXTURE_PIXEL_FORMAT_RGBA);
-    sprite = Sprite::createSprite(size, glm::vec2(1.0f, 1.0f),
+    sprite = Sprite::createSprite(size, sizeInSprite,
         &spritesheet, &shaderProgram);
-    sprite->setNumberAnimations(1);
-    sprite->setAnimationSpeed(0, 8);
-    sprite->addKeyframe(0, glm::vec2(0.0f, 0.0f));
+
+    if (animationKeyframes.empty()) {
+        sprite->setNumberAnimations(1);
+        sprite->setAnimationSpeed(0, 8);
+        sprite->addKeyframe(0, glm::vec2(0.0f, 0.0f));
+    }
+    else {
+        sprite->setNumberAnimations(1);
+        sprite->setAnimationSpeed(0, animationSpeed);
+        for (const glm::vec2& keyframeDisplacement : animationKeyframes) {
+            sprite->addKeyframe(0, keyframeDisplacement);
+        }
+    }
+
     sprite->changeAnimation(0);
     sprite->setRotation(rotationAngle);
 }
