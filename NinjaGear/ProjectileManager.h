@@ -11,6 +11,12 @@ public:
     void spawnProjectile(const glm::vec2& startPos, const glm::vec2& direction,
         float speed, int damage, const string& spritePath);
 
+    void spawnProjectile(const glm::vec2& startPos,
+        const glm::vec2& direction,
+        float speed, int damage,
+        const string& spritePath,
+        bool isPlayerProjectile = false);
+
     void update(int deltaTime);
     void render(const glm::mat4& view);
     void clear();

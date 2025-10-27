@@ -22,7 +22,7 @@ Level::Level()
 }
 
 Level::Level(const vector<string>& tileMapFiles, Player* player, 
-	int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs, const vector<MovingObjectConfig>& objectConfigs, const vector<MusicConfig>& musicConfigs)
+	int initPlayerX, int initPlayerY, const vector<EnemyConfig>& enemyConfigs, const vector<MovingObjectConfig>& objectConfigs, const vector<MusicConfig>& musicConfigs, LevelType type)
 	: Scene(tileMapFiles)
 {
 	this->player = player;
@@ -31,9 +31,11 @@ Level::Level(const vector<string>& tileMapFiles, Player* player,
 	this->enemyConfigs = enemyConfigs;
 	this->movingObjectConfigs = objectConfigs;
 	this->musicConfigs = musicConfigs;
+	this->type = type;
 	this->init();
 	//Initialize enemies
 	initializeEnemies();
+	initializeItems();
 	//Initialize moving objects
 	initializeMovingObjects();
 	this->uiManager = nullptr;
@@ -52,9 +54,20 @@ Level::~Level()
 	this->player = nullptr;
 }
 
+void Level::reStartLevel() {
+	clearItems();
+	clearEnemies();
+	clearProjectiles();
+	initializeEnemies();
+	initializeItems();
+	initializeMusic();
+
+}
+
 void Level::init() 
 {	
 	Scene::init();
+	reStartLevel();
 	// Initialize projectile manager
 	projectileManager.init(&texProgram, maps[0]);
 
@@ -65,6 +78,9 @@ void Level::init()
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
 	player->setTileMaps(maps);
+
+	player->setProjectileManager(&projectileManager);
+
 
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeight = maps[0]->mapSize.y * maps[0]->getTileSize();
@@ -86,8 +102,6 @@ void Level::init()
 	currentSectorJ = glm::clamp(currentSectorJ, 0, numSectorsJ - 1);
 
 	calculateCameraOffset();
-	initializeMusic();
-	initializeItems();
 }
 
 void Level::update(int deltaTime)
@@ -285,18 +299,40 @@ void Level::checkCombat()
 			}
 		}
 	}
-
-	//Check projectile collisions
 	for (Projectile* projectile : projectileManager.getActiveProjectiles()) {
-		glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
+		if (projectile->getIsPlayerProjectile()) {
+			// PLAYER projectiles hit ENEMIES
+			glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
 
-		if (isColliding(player->getPositionFloat(), playerSize,
-			projectile->getPosition(), projectile->getSize())) {
-			player->takeDamage(projectile->getDamage());
-			projectile->deactivate();
+			for (auto it = enemies.begin(); it != enemies.end(); ) {
+				Enemy* enemy = *it;
+
+				if (isColliding(projectile->getPosition(), projectile->getSize(),
+					enemy->getPosition(), enemySize)) {
+					enemy->takeDamage(projectile->getDamage());
+					projectile->deactivate();
+
+					if (!enemy->isAlive()) {
+						delete enemy;
+						player->increaseRank(1);
+						it = enemies.erase(it);
+						continue;
+					}
+				}
+				++it;
+			}
+		}
+		else {
+			// ENEMY projectiles hit PLAYER
+			glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
+
+			if (isColliding(player->getPositionFloat(), playerSize,
+				projectile->getPosition(), projectile->getSize())) {
+				player->takeDamage(projectile->getDamage());
+				projectile->deactivate();
+			}
 		}
 	}
-
 	handlePlayerAttack();
 }
 
@@ -315,7 +351,7 @@ void Level::handlePlayerAttack()
 	if (!player->justStartedPunching()) return;
 
 	const float PUNCH_REACH = 20.0f;
-	const int PUNCH_DAMAGE = 25;
+	const int PUNCH_DAMAGE = 1.f;
 
 	glm::vec2 punchPos = player->getPunchHitbox();
 
@@ -349,90 +385,85 @@ void Level::initializeItems() {
 }
 
 void Level::initializeObjects(int tileSize) {
-	Texture* medpackTexture = new Texture();
-	medpackTexture->loadFromFile("images/items/Medipack.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	if (type == LevelType::OUTSIDE) {
+		Texture* medpackTexture = new Texture();
+		medpackTexture->loadFromFile("images/items/Medipack.png", TEXTURE_PIXEL_FORMAT_RGBA);
 
-	Item* medipack = new Item(
-		glm::vec2(tileSize - 4, tileSize - 4),
-		glm::vec2(1.0f, 1.0f),
-		medpackTexture,
-		&this->texProgram,
-		glm::ivec2(SCREEN_X, SCREEN_Y)
-	);
-	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(25, 10), false, tileSize);
+		Item* medipack = new Item(
+			glm::vec2(tileSize - 4, tileSize - 4),
+			glm::vec2(1.0f, 1.0f),
+			medpackTexture,
+			&this->texProgram,
+			glm::ivec2(SCREEN_X, SCREEN_Y)
+		);
+		medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(25, 10), false, tileSize);
 
-	Item* medipack2 = new Item(
-		glm::vec2(tileSize - 4, tileSize - 4),
-		glm::vec2(1.0f, 1.0f),
-		medpackTexture,  // Share same texture                     
-		&this->texProgram,
-		glm::ivec2(SCREEN_X, SCREEN_Y)
-	);
-	medipack2->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(30, 15), false, tileSize);
+		Item* medipack2 = new Item(
+			glm::vec2(tileSize - 4, tileSize - 4),
+			glm::vec2(1.0f, 1.0f),
+			medpackTexture,  // Share same texture                     
+			&this->texProgram,
+			glm::ivec2(SCREEN_X, SCREEN_Y)
+		);
+		medipack2->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(30, 15), false, tileSize);
 
-	Texture* speedPotionTexture = new Texture();
-	speedPotionTexture->loadFromFile("images/items/SPEED POTION.png", TEXTURE_PIXEL_FORMAT_RGBA);
-	Item* speedPotion = new Item(
-		glm::vec2(tileSize - 3, tileSize - 3),
-		glm::vec2(1.0f, 1.0f),
-		speedPotionTexture,
-		&this->texProgram,
-		glm::ivec2(SCREEN_X, SCREEN_Y)
-	);
-	speedPotion->setItem("SPEED POTION", 1, "Increases speed for 10 seconds.", glm::vec2(6, 10), false, tileSize);
+		Texture* speedPotionTexture = new Texture();
+		speedPotionTexture->loadFromFile("images/items/SPEED POTION.png", TEXTURE_PIXEL_FORMAT_RGBA);
+		Item* speedPotion = new Item(
+			glm::vec2(tileSize - 3, tileSize - 3),
+			glm::vec2(1.0f, 1.0f),
+			speedPotionTexture,
+			&this->texProgram,
+			glm::ivec2(SCREEN_X, SCREEN_Y)
+		);
+		speedPotion->setItem("SPEED POTION", 1, "Increases speed for 10 seconds.", glm::vec2(6, 10), false, tileSize);
 
-	Texture* arrowTexture = new Texture();
-	arrowTexture->loadFromFile("images/items/Arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
-	Item* arrow = new Item(
-		glm::vec2(tileSize - 3, tileSize - 3),
-		glm::vec2(1.0f, 1.0f),
-		arrowTexture,
-		&this->texProgram,
-		glm::ivec2(SCREEN_X, SCREEN_Y)
-	);
-	arrow->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 5), false, tileSize);
-	Item* arrow2 = new Item(
-		glm::vec2(tileSize - 3, tileSize - 3),
-		glm::vec2(1.0f, 1.0f),
-		arrowTexture,
-		&this->texProgram,
-		glm::ivec2(SCREEN_X, SCREEN_Y)
-	);
-	arrow2->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 8), false, tileSize);
+		Texture* arrowTexture = new Texture();
+		arrowTexture->loadFromFile("images/items/Arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
+		Item* arrow = new Item(
+			glm::vec2(tileSize - 3, tileSize - 3),
+			glm::vec2(1.0f, 1.0f),
+			arrowTexture,
+			&this->texProgram,
+			glm::ivec2(SCREEN_X, SCREEN_Y)
+		);
+		arrow->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 5), false, tileSize);
+		Item* arrow2 = new Item(
+			glm::vec2(tileSize - 3, tileSize - 3),
+			glm::vec2(1.0f, 1.0f),
+			arrowTexture,
+			&this->texProgram,
+			glm::ivec2(SCREEN_X, SCREEN_Y)
+		);
+		arrow2->setItem("ARROW", 1, "Projectile for bow", glm::vec2(6, 8), false, tileSize);
 
-	items.push_back(medipack);
-	items.push_back(medipack2);
-	items.push_back(speedPotion);
-	items.push_back(arrow);
-	items.push_back(arrow2);
+		items.push_back(medipack);
+		items.push_back(medipack2);
+		items.push_back(speedPotion);
+		items.push_back(arrow);
+		items.push_back(arrow2);
+	}
 }
 
 void Level::initializeWeapons(int tileSize) {
-	Texture* rapierTexture = new Texture();
-	rapierTexture->loadFromFile("images/items/Rapier.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	if (type == LevelType::OUTSIDE) {
+		Texture* bowTexture = new Texture();
+		bowTexture->loadFromFile("images/items/Bow.png", TEXTURE_PIXEL_FORMAT_RGBA);
 
-	Item* rapier = new Item(
-		glm::vec2(10, 15),
-		glm::vec2(1.0f, 1.0f),
-		rapierTexture,
-		&this->texProgram,
-		glm::ivec2(SCREEN_X, SCREEN_Y)
-	);
-	rapier->setItem("RAPIER", 1, "Medium range weapon.", glm::vec2(15, 5), true, tileSize);
-	items.push_back(rapier);
+		Item* bow = new Item(
+			glm::vec2(16, 16),
+			glm::vec2(1.0f, 1.0f),
+			bowTexture,
+			&this->texProgram,
+			glm::ivec2(SCREEN_X, SCREEN_Y)
+		);
+		bow->setItem("BOW", 1, "Long range weapon.", glm::vec2(15, 10), true, tileSize);
+		items.push_back(bow);
+	}
+}
 
-	Texture* bowTexture = new Texture();
-	bowTexture->loadFromFile("images/items/Bow.png", TEXTURE_PIXEL_FORMAT_RGBA);
-
-	Item* bow = new Item(
-		glm::vec2(16, 16),
-		glm::vec2(1.0f, 1.0f),
-		bowTexture,
-		&this->texProgram,
-		glm::ivec2(SCREEN_X, SCREEN_Y)
-	);
-	bow->setItem("BOW", 1, "Long range weapon.", glm::vec2(15, 10), true, tileSize);
-	items.push_back(bow);
+void Level::clearProjectiles() {
+	projectileManager.clear();
 }
 
 void Level::clearEnemies() {

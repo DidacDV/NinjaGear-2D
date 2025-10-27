@@ -47,6 +47,9 @@ struct MusicConfig {
     string musicFile;      // Path to music file
 };
 
+enum class LevelType { OUTSIDE, DUNGEON };
+
+
 class Level :
     public Scene
 {
@@ -54,10 +57,11 @@ class Level :
     Level();
     Level(const vector<string>& tileMapFiles, Player* player, int initPlayerX, 
         int initPlayerY, const vector<EnemyConfig>& enemyConfigs, 
-        const vector<MovingObjectConfig>& objectConfigs, const vector<MusicConfig>& musicConfigs);
+        const vector<MovingObjectConfig>& objectConfigs, const vector<MusicConfig>& musicConfigs, LevelType type);
     ~Level();
 
     void init() override;
+    void reStartLevel();
     void update(int deltaTime) override;
 	void render() override;
     ProjectileManager* getProjectileManager() { return &projectileManager; };
@@ -96,7 +100,6 @@ class Level :
         int sectorHeight = 0;
         float cameraOffsetX = 0.0f;
         float cameraOffsetY = 0.0f;
-
         // Combat manager
         static constexpr float PLAYER_SIZE = 16.0f;
         static constexpr float ENEMY_SIZE = 16.0f;
@@ -119,11 +122,13 @@ class Level :
         void updateMusic();
         void clearEnemies();
         void initializeItems();
-		    void initializeObjects(int tileSize);
-		    void initializeWeapons(int tileSize);
+		void initializeObjects(int tileSize);
+		void initializeWeapons(int tileSize);
         void clearItems();
         void checkItemPickUp();
         bool checkColission(glm::vec2& pos1, glm::vec2& pos2, int size1, int size2);
         void itemPickUpEvent(int indexInVector);
+        void clearProjectiles();
+        LevelType type;
 };
 
