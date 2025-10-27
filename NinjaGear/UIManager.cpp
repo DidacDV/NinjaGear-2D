@@ -360,10 +360,10 @@ void UIManager::renderTemporaryMessages()
 }
 
 void UIManager::showMessageAndDialog(TemporaryMessage msg, float alpha, glm::vec3 color) {
-    float paddingX = 20.f;
+    float paddingX = 15;
     float paddingY = 4.0f;
 
-    float estimatedWidth = msg.text.size() * FONT_SIZE * msg.scale * 0.7f;
+    float estimatedWidth = msg.text.size() * FONT_SIZE * msg.scale * 0.75f;
     float estimatedHeight = FONT_SIZE * msg.scale * 1.4f;
 
     glm::vec2 boxPos = glm::vec2(msg.position.x - paddingX, msg.position.y - paddingY - 10);

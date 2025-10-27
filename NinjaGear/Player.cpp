@@ -498,13 +498,13 @@ void Player::addItem(Item* item) {
 	}
 	else {
 		string name = item->getName();
-		itemQuantities[name]++;
-		if (itemQuantities[name] == 1) {
+		if (itemQuantities.find(name) == itemQuantities.end()) {
 			itemInventory.push_back(item);
 			if (itemInventory.size() == 1) {
 				currentItemIndex = 0;
 			}
 		}
+		itemQuantities[name] += item->getQuantity();
 	}
 }
 
