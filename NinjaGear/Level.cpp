@@ -2,6 +2,7 @@
 #include "MovingStatue.h" 
 #include "RangedEnemy.h"
 #include "MeleeEnemy.h"
+#include "TankEnemy.h"
 #include "Boss.h"
 #include <iostream>
 #include "Projectile.h"
@@ -228,6 +229,9 @@ void Level::initializeEnemies() {
 				break;
 			case EnemyType::RANGED:
 				enemy = new RangedEnemy();
+				break;
+			case EnemyType::TANK:
+				enemy = new TankEnemy();
 				break;
 			case EnemyType::BOSS:
 				enemy = new Boss();

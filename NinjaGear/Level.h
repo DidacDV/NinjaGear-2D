@@ -16,6 +16,7 @@ enum class EnemyType {
     BASE,
     MELEE,
     RANGED,
+    TANK,
     BOSS
 };
 

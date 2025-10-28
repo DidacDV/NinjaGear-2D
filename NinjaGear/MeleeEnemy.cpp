@@ -159,7 +159,7 @@ void MeleeEnemy::initializePatrol()
 
     patrolEndTile = glm::ivec2(
         currentTile.x,
-        std::min(map->height() - 1, currentTile.y + 2)
+        std::min(map->height() - 1, currentTile.y + 5)
     );
 
     patrolInitialized = true;

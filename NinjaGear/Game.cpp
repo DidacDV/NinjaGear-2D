@@ -52,7 +52,8 @@ void Game::init(int screenWidth, int screenHeight)
 	};
 
 	vector<EnemyConfig> jungleEnemies;
-	jungleEnemies.push_back(EnemyConfig{35, 10, "images/enemies/cyclope.png", EnemyType ::MELEE});
+	jungleEnemies.push_back(EnemyConfig{35, 8, "images/enemies/miniFlame.png", EnemyType ::MELEE});
+	//jungleEnemies.push_back(EnemyConfig{15, 10, "images/enemies/larvaTank.png", EnemyType ::TANK});
 //	jungleEnemies.push_back(EnemyConfig{ 10, 5,  "images/enemies/cyclope.png", EnemyType::RANGED });
 
 	vector<MovingObjectConfig> jungleObjects;
