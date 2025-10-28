@@ -20,6 +20,8 @@ MovingObject::MovingObject(const glm::vec2& quadSize,
     velocity = glm::vec2(0.f);
     tileMapDispl = glm::ivec2(0);
     cameraOffset = glm::vec2(0.f);
+    collisionSize = quadSize;
+    collisionOffset = glm::vec2(0.0f, 0.0f);
 }
 
 void MovingObject::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram,

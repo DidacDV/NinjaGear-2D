@@ -1,6 +1,27 @@
 #pragma once
 #include "Sprite.h"
 #include "TileMap.h"
+
+enum class MovingObjectType {
+    MOVING_STATUE,
+    SPIKE_TRAP
+};
+
+struct MovingObjectConfig {
+    glm::vec2 startPos;
+    glm::vec2 endPos;
+    float speed;
+    MovingObjectType type;
+    std::string spriteSheet;
+    glm::vec2 spriteSize;
+    glm::vec2 texCoordSize;
+    bool dealsDamage;
+    int damage;
+    int idleDuration;
+    int spikeDuration;
+    int timerOffset = 0;
+};
+
 class MovingObject :
     public Sprite
 {
@@ -37,6 +58,14 @@ public:
         dealsDamage = deals;
         damageAmount = amount;
     };
+
+    virtual glm::vec2 getCollisionSize() const { return collisionSize; }
+    virtual glm::vec2 getCollisionOffset() const { return collisionOffset; }
+    void setCollisionBox(const glm::vec2& size, const glm::vec2& offset = glm::vec2(0.0f, 0.0f)) {
+        collisionSize = size;
+        collisionOffset = offset;
+    }
+
     void setDamage(int amount) { damageAmount = amount; };
     virtual bool getDealsDamage() const { return dealsDamage; }
     int getDamageAmount() const { return damageAmount; }
@@ -48,7 +77,9 @@ protected:
     bool collisionMoveDown(const glm::ivec2& pos, const glm::ivec2& size) const;
     bool collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) const;
     bool isOnScreen(int cameraWidth, int cameraHeight, float margin = 50.0f) const;
-        
+    glm::vec2 collisionSize;   
+    glm::vec2 collisionOffset;
+
 	void playSoundIfOnScreen(const std::string& soundFile) const;
     glm::vec2 objectPosition;
     glm::vec2 velocity;

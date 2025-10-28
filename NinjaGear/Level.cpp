@@ -1,12 +1,11 @@
 #include "Level.h"
-#include "MovingStatue.h" 
 #include "RangedEnemy.h"
 #include "MeleeEnemy.h"
 #include "Boss.h"
 #include <iostream>
 #include "Projectile.h"
 #include "ServiceLocator.h"
-#include "SpikeTrap.h"
+#include "MovingObjectFactory.h"
 
 #define SCREEN_X 0
 #define SCREEN_Y 0
@@ -34,10 +33,9 @@ Level::Level(const vector<string>& tileMapFiles, Player* player,
 	this->musicConfigs = musicConfigs;
 	this->type = type;
 	this->init();
-	//Initialize enemies
+
 	initializeEnemies();
 	initializeItems();
-	//Initialize moving objects
 	initializeMovingObjects();
 }
 
@@ -248,68 +246,37 @@ void Level::initializeEnemies() {
 void Level::initializeMovingObjects()
 {
 	movingObjectTextures.resize(movingObjectConfigs.size());
+
 	for (size_t i = 0; i < movingObjectConfigs.size(); i++) {
 		const MovingObjectConfig& config = movingObjectConfigs[i];
-		MovingObject* obj = nullptr;
-		bool loaded = movingObjectTextures[i].loadFromFile(config.spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
-		if (!loaded) {
-			std::cout << "ERROR: Failed to load moving object texture: " << config.spriteSheet << std::endl;
+
+		if (!movingObjectTextures[i].loadFromFile(config.spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA)) {
+			std::cout << "ERROR: Failed to load texture: " << config.spriteSheet << std::endl;
 			continue;
 		}
+
 		movingObjectTextures[i].setMinFilter(GL_NEAREST);
 		movingObjectTextures[i].setMagFilter(GL_NEAREST);
-		switch (config.type) {
-		case MovingObjectType::MOVING_STATUE:
-			obj = new MovingStatue(config.spriteSize, config.texCoordSize,
-				&movingObjectTextures[i], &texProgram);
-			obj->setMovementPath(config.startPos, config.endPos, config.speed);
-			obj->setNumberAnimations(1);
-			obj->setAnimationSpeed(0, 8);
-			obj->addKeyframe(0, glm::vec2(0.0f, 0.0f));
-			obj->changeAnimation(0);
-			break;
-		case MovingObjectType::SPIKE_TRAP:
-		{
-			SpikeTrap* trap = new SpikeTrap(config.spriteSize, config.texCoordSize,
-				&movingObjectTextures[i], &texProgram);
-			trap->setCycleDuration(config.idleDuration, config.spikeDuration);
-			trap->setNumberAnimations(2);
-			trap->setAnimationSpeed(0, 8);
-			trap->addKeyframe(0, glm::vec2(0.0f, 0.0f));
-			trap->setAnimationSpeed(1, 8);
-			trap->addKeyframe(1, glm::vec2(0.5f, 0.0f));
-			trap->changeAnimation(0);
-			// Set damage amount only (spike trap manages dealsDamage internally)
-			trap->setDamage(config.damage);
-			obj = trap;
-		}
-		break;
-		default:
-			std::cout << "ERROR: Unknown MovingObject type in config." << std::endl;
-			continue;
-		}
-		if (obj == nullptr) continue;
 
-		// Only set damage properties for non-spike objects
-		if (config.type != MovingObjectType::SPIKE_TRAP) {
-			obj->setDamageProperties(config.dealsDamage, config.damage);
-		}
+		MovingObject* obj = MovingObjectFactory::create(
+			config,
+			&movingObjectTextures[i],
+			&texProgram,
+			maps,
+			glm::ivec2(SCREEN_X, SCREEN_Y)
+		);
 
-		obj->setTileMapPosition(glm::ivec2(config.startPos.x, config.startPos.y),
-			glm::ivec2(SCREEN_X, SCREEN_Y));
-		obj->setTileMaps(maps);
-		movingObjects.push_back(obj);
+		if (obj) {
+			movingObjects.push_back(obj);
+		}
 	}
 }
 
 void Level::initializeMusic()
 {
-	// Build a map for quick sector -> music lookup
 	for (const MusicConfig& config : musicConfigs) {
 		sectorMusicMap[{config.sectorI, config.sectorJ}] = config;
 	}
-
-	// Play initial music for starting sector
 	updateMusic();
 }
 
@@ -371,11 +338,8 @@ void Level::checkCombat()
 bool Level::isColliding(const glm::vec2& pos1, const glm::vec2& size1,
 	const glm::vec2& pos2, const glm::vec2& size2)
 {
-	// AABB (Axis-Aligned Bounding Box) collision detection
-	return (pos1.x < pos2.x + size2.x &&
-		pos1.x + size1.x > pos2.x &&
-		pos1.y < pos2.y + size2.y &&
-		pos1.y + size1.y > pos2.y);
+	return (pos1.x < pos2.x + size2.x && pos1.x + size1.x > pos2.x &&
+		pos1.y < pos2.y + size2.y && pos1.y + size1.y > pos2.y);
 }
 
 void Level::handlePlayerAttack()
@@ -411,7 +375,6 @@ void Level::handlePlayerAttack()
 
 void Level::initializeItems() {
 	int tileSize = maps[0]->getTileSize();
-
 	initializeObjects(tileSize);
 	initializeWeapons(tileSize);
 }
@@ -603,23 +566,22 @@ void Level::checkTransitionTiles()
 
 void Level::checkMovingObjectCollisions()
 {
-	if (!player->isAlive()) return;
-
-	glm::vec2 playerPos = player->getPositionFloat();
-	glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
-
-	for (MovingObject* obj : movingObjects) {
-		if (obj == nullptr) continue;
-
-		glm::vec2 objPos = obj->getPosition();
-		glm::vec2 objSize = obj->getSize();
-
-		if (isColliding(playerPos, playerSize, objPos, objSize)) {
-			// Deal damage if this object is configured to do so
-			if (obj->getDealsDamage()) {
-				player->takeDamage(obj->getDamageAmount());
-				break; // Only take damage from one object per frame
-			}
-		}
-	}
+    if (!player->isAlive()) return;
+    
+    glm::vec2 playerPos = player->getPositionFloat();
+    glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
+    
+    for (MovingObject* obj : movingObjects) {
+        if (obj == nullptr) continue;
+        
+        glm::vec2 objPos = obj->getPosition();
+        glm::vec2 objSize = obj->getCollisionSize();
+        
+        if (isColliding(playerPos, playerSize, objPos, objSize)) {
+            if (obj->getDealsDamage()) {
+                player->takeDamage(obj->getDamageAmount());
+                break;
+            }
+        }
+    }
 }

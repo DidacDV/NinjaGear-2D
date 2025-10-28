@@ -6,6 +6,8 @@ class SpikeTrap : public MovingObject
 public:
     enum State {
         IDLE,
+        TRANSITION_UP,
+        TRANSITION_DOWN,
         SPIKE
     };
 
@@ -16,7 +18,8 @@ public:
 
     void update(int deltaTime) override;
 
-    void setCycleDuration(int idleMs, int spikeMs);
+    void setCycleDuration(int idleMs, int spikeMs, int transitionMs);
+    void setTimerOffset(int offset) { stateTimer = offset; };
     void updateMovementPattern(int deltaTime) override {};
 
     bool isActive() const { return currentState == SPIKE; }
@@ -26,9 +29,10 @@ public:
 private:
     State currentState;
     int stateTimer;
-    int idleDuration;   // Time in IDLE state (ms)
-    int spikeDuration;  // Time in SPIKE state (ms)
-
+    int idleDuration;   
+    int spikeDuration;  
+    int transitionDuration;
+    int timerOffset;
     void switchState();
 };
 

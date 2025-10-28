@@ -1,16 +1,22 @@
 #pragma once
+#include <string>
+#include <vector>
+#include <map>
+#include <utility>
+#include <glm/glm.hpp>
 #include "Scene.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "MovingObject.h"
 #include "ProjectileManager.h"
-#include <map>
-#include <utility>
-
 #include "Item.h"
 #include "UIManager.h"
+
 class Enemy;
 class MovingStatue;
 class MovingObject;
+
+using namespace std;
 
 enum class EnemyType {
     BASE,
@@ -26,30 +32,10 @@ struct EnemyConfig {
     EnemyType type;
 };
 
-
-enum class MovingObjectType {
-    MOVING_STATUE,
-    SPIKE_TRAP
-};
-
-struct MovingObjectConfig {
-    glm::vec2 startPos;
-    glm::vec2 endPos;
-    float speed;
-    MovingObjectType type;
-    string spriteSheet;
-    glm::vec2 spriteSize;
-    glm::vec2 texCoordSize;
-    bool dealsDamage;        
-    int damage;
-    int idleDuration;   
-    int spikeDuration;
-};
-
 struct MusicConfig {
-    int sectorI;           // Sector column
-    int sectorJ;           // Sector row
-    string musicFile;      // Path to music file
+    int sectorI;           
+    int sectorJ;           
+    string musicFile;      
 };
 
 enum class LevelType { OUTSIDE, DUNGEON };

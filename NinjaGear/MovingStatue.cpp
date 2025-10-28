@@ -1,5 +1,5 @@
 #include "MovingStatue.h"
-#include <glm/gtx/norm.hpp> 
+#include <glm/gtx/norm.hpp>
 
 MovingStatue* MovingStatue::createMovingStatue(const glm::vec2& quadSize,
     const glm::vec2& sizeInSpritesheet,
@@ -20,12 +20,12 @@ MovingStatue::MovingStatue(const glm::vec2& quadSize,
     ShaderProgram* program)
     : MovingObject(quadSize, sizeInSpritesheet, spritesheet, program)
 {
-    movementSpeed = 200.0f;  // Default speed
+    movementSpeed = 200.0f;
     movingToEnd = true;
     startPosition = glm::vec2(0.0f);
     endPosition = glm::vec2(0.0f);
     targetPosition = endPosition;
-    isPaused = true;           // Start paused
+    isPaused = true;
     pauseTimer = 0.0f;
     pauseDuration = 2000.0f;
 }
@@ -46,35 +46,29 @@ void MovingStatue::setMovementPath(const glm::vec2& startPos, const glm::vec2& e
     objectPosition = startPosition;
     targetPosition = endPosition;
     movingToEnd = true;
-
     isPaused = true;
     pauseTimer = 0.0f;
 }
 
 void MovingStatue::updateMovementPattern(int deltaTime)
 {
-    // If paused, just wait
     if (isPaused) {
         pauseTimer += deltaTime;
         if (pauseTimer >= pauseDuration) {
             isPaused = false;
             pauseTimer = 0.0f;
         }
-        return;  // Don't move while paused
+        return;
     }
 
-    float dt = deltaTime / 1000.0f;  // Convert to seconds
+    float dt = deltaTime / 1000.0f;
 
-    // Calculate direction to target
     glm::vec2 direction = targetPosition - objectPosition;
     float distanceToTarget = glm::length(direction);
 
-    // If we reached the target, pause and switch direction
     if (distanceToTarget < 2.0f) {
-        // Snap to exact position
         objectPosition = targetPosition;
 
-        // Switch target
         if (movingToEnd) {
             targetPosition = startPosition;
             movingToEnd = false;
@@ -83,8 +77,9 @@ void MovingStatue::updateMovementPattern(int deltaTime)
             targetPosition = endPosition;
             movingToEnd = true;
         }
-		playSoundIfOnScreen("sounds/fastslide.wav");
-        // Start pause
+
+        playSoundIfOnScreen("sounds/fastslide.wav");
+
         isPaused = true;
         pauseTimer = 0.0f;
         return;

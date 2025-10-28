@@ -25,6 +25,7 @@
     <ClInclude Include="miniaudio.h" />
     <ClInclude Include="MiniAudioService.h" />
     <ClInclude Include="MovingObject.h" />
+    <ClInclude Include="MovingObjectFactory.h" />
     <ClInclude Include="MovingStatue.h" />
     <ClInclude Include="NullAudioService.h" />
     <ClInclude Include="MenuScene.h" />
@@ -59,6 +60,7 @@
     <ClCompile Include="miniaudio.cpp" />
     <ClCompile Include="MiniAudioService.cpp" />
     <ClCompile Include="MovingObject.cpp" />
+    <ClCompile Include="MovingObjectFactory.cpp" />
     <ClCompile Include="MovingStatue.cpp" />
     <ClCompile Include="MenuScene.cpp" />
     <ClCompile Include="Pathfinder.cpp" />
