@@ -223,7 +223,7 @@ void Game::keyPressed(int key)
 		else {
 			setCurrentScene("dungeon");
 			ServiceLocator::getUI().showTemporaryMessage("INTERIOR TP ACTIVATED",
-				glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+				glm::vec2(GameConfig::CENTER_X, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 		}
 	}
 	else if (key == GLFW_KEY_Z)

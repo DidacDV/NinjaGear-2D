@@ -1,6 +1,7 @@
 #include "MovingObject.h"
 #include "ServiceLocator.h"
 #include <iostream>
+#include "GameConfig.h"
 
 MovingObject* MovingObject::createMovingObject(const glm::vec2& quadSize,
     const glm::vec2& sizeInSpritesheet,
@@ -109,7 +110,7 @@ bool MovingObject::isOnScreen(int cameraWidth, int cameraHeight, float margin) c
 
 void MovingObject::playSoundIfOnScreen(const std::string& soundFile) const
 {
-    if (isOnScreen(320, 320,0.0f)) {
-        ServiceLocator::getAudio().playSound(soundFile.c_str());
-    }
+    if (!isOnScreen(GameConfig::CAMERA_WIDTH, GameConfig::CAMERA_HEIGHT)) {
+    return;
+}
 }

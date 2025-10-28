@@ -50,19 +50,14 @@ void Boss::initializeAnimations()
 }
 
 void Boss::updateStateMachine(int deltaTime) {
-    const int CAMERA_WIDTH = 320;
-    const int CAMERA_HEIGHT = 320;
-    if (!isOnScreen(CAMERA_WIDTH, CAMERA_HEIGHT)) {
-
-        return;
-    }
+    if (!isOnScreen(GameConfig::CAMERA_WIDTH, GameConfig::CAMERA_HEIGHT)) return;
     // PHASE MANAGEMENT
     float healthPercent = static_cast<float>(health) / 300.0f;
 
     if (currentPhase == Phase::PHASE_ONE && healthPercent <= 0.66f) {
         currentPhase = Phase::PHASE_TWO;
         std::string pickupText = "I AM TIRED OF YOU! GO DIE! ";
-        glm::vec2 messagePos(320, 160);
+        glm::vec2 messagePos(GameConfig::CENTER_X, GameConfig::CENTER_Y);
         glm::vec3 messageColor(0.f, 0.f, 0.f);
         ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
 

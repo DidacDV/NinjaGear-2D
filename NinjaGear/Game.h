@@ -16,9 +16,6 @@ using namespace std;
 class Level;
 struct MovingObjectConfig;
 
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 320
-
 // Game is a singleton (a class with a single instance) that represents our whole application
 
 class Game
