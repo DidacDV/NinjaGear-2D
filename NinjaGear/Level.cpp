@@ -1,11 +1,11 @@
 #include "Level.h"
-#include "MovingStatue.h" 
 #include "RangedEnemy.h"
 #include "MeleeEnemy.h"
 #include "Boss.h"
 #include <iostream>
 #include "Projectile.h"
 #include "ServiceLocator.h"
+#include "MovingObjectFactory.h"
 
 #define SCREEN_X 0
 #define SCREEN_Y 0
@@ -33,10 +33,9 @@ Level::Level(const vector<string>& tileMapFiles, Player* player,
 	this->musicConfigs = musicConfigs;
 	this->type = type;
 	this->init();
-	//Initialize enemies
+
 	initializeEnemies();
 	initializeItems();
-	//Initialize moving objects
 	initializeMovingObjects();
 }
 
@@ -125,6 +124,7 @@ void Level::update(int deltaTime)
 		}
 	}
 
+	checkMovingObjectCollisions();
 	checkItemPickUp();
 	updateCameraSector();
 
@@ -249,54 +249,34 @@ void Level::initializeMovingObjects()
 
 	for (size_t i = 0; i < movingObjectConfigs.size(); i++) {
 		const MovingObjectConfig& config = movingObjectConfigs[i];
-		MovingObject* obj = nullptr; // Initialize the pointer
 
-		// Load texture first, as it's needed for the constructor
-		bool loaded = movingObjectTextures[i].loadFromFile(config.spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
-		if (!loaded) {
-			std::cout << "ERROR: Failed to load moving object texture: " << config.spriteSheet << std::endl;
+		if (!movingObjectTextures[i].loadFromFile(config.spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA)) {
+			std::cout << "ERROR: Failed to load texture: " << config.spriteSheet << std::endl;
 			continue;
 		}
 
 		movingObjectTextures[i].setMinFilter(GL_NEAREST);
 		movingObjectTextures[i].setMagFilter(GL_NEAREST);
 
-		switch (config.type) {
-		case MovingObjectType::MOVING_STATUE:
-			obj = new MovingStatue(config.spriteSize, config.texCoordSize,
-				&movingObjectTextures[i], &texProgram);
-			break;
-			
-		default:
-			std::cout << "ERROR: Unknown MovingObject type in config." << std::endl;
-			continue; 
+		MovingObject* obj = MovingObjectFactory::create(
+			config,
+			&movingObjectTextures[i],
+			&texProgram,
+			maps,
+			glm::ivec2(SCREEN_X, SCREEN_Y)
+		);
+
+		if (obj) {
+			movingObjects.push_back(obj);
 		}
-
-		if (obj == nullptr) continue;
-
-		obj->setMovementPath(config.startPos, config.endPos, config.speed);
-
-		obj->setNumberAnimations(1);
-		obj->setAnimationSpeed(0, 8);
-		obj->addKeyframe(0, glm::vec2(0.0f, 0.0f));
-		obj->changeAnimation(0);
-
-		obj->setTileMapPosition(glm::ivec2(config.startPos.x, config.startPos.y),
-			glm::ivec2(SCREEN_X, SCREEN_Y));
-		obj->setTileMaps(maps);
-
-		movingObjects.push_back(obj);
 	}
 }
 
 void Level::initializeMusic()
 {
-	// Build a map for quick sector -> music lookup
 	for (const MusicConfig& config : musicConfigs) {
 		sectorMusicMap[{config.sectorI, config.sectorJ}] = config;
 	}
-
-	// Play initial music for starting sector
 	updateMusic();
 }
 
@@ -358,11 +338,8 @@ void Level::checkCombat()
 bool Level::isColliding(const glm::vec2& pos1, const glm::vec2& size1,
 	const glm::vec2& pos2, const glm::vec2& size2)
 {
-	// AABB (Axis-Aligned Bounding Box) collision detection
-	return (pos1.x < pos2.x + size2.x &&
-		pos1.x + size1.x > pos2.x &&
-		pos1.y < pos2.y + size2.y &&
-		pos1.y + size1.y > pos2.y);
+	return (pos1.x < pos2.x + size2.x && pos1.x + size1.x > pos2.x &&
+		pos1.y < pos2.y + size2.y && pos1.y + size1.y > pos2.y);
 }
 
 void Level::handlePlayerAttack()
@@ -398,7 +375,6 @@ void Level::handlePlayerAttack()
 
 void Level::initializeItems() {
 	int tileSize = maps[0]->getTileSize();
-
 	initializeObjects(tileSize);
 	initializeWeapons(tileSize);
 }
@@ -550,10 +526,7 @@ void Level::initializeTransitionTiles()
 	// Clear any existing transitions
 	transitionTiles.clear();
 
-	// Tile 99 = Cart to dungeon entrance
 	transitionTiles.push_back({ 5002, "dungeon", 17, 38 });
-
-	// Tile 98 = Dungeon exit back to outside
 	transitionTiles.push_back({ 5102, "outside", 10, 10 });
 }
 
@@ -580,4 +553,26 @@ void Level::checkTransitionTiles()
 			}
 		}
 	}
+}
+
+void Level::checkMovingObjectCollisions()
+{
+    if (!player->isAlive()) return;
+    
+    glm::vec2 playerPos = player->getPositionFloat();
+    glm::vec2 playerSize(PLAYER_SIZE, PLAYER_SIZE);
+    
+    for (MovingObject* obj : movingObjects) {
+        if (obj == nullptr) continue;
+        
+        glm::vec2 objPos = obj->getPosition();
+        glm::vec2 objSize = obj->getCollisionSize();
+        
+        if (isColliding(playerPos, playerSize, objPos, objSize)) {
+            if (obj->getDealsDamage()) {
+                player->takeDamage(obj->getDamageAmount());
+                break;
+            }
+        }
+    }
 }

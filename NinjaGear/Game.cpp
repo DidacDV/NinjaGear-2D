@@ -77,53 +77,79 @@ void Game::init(int screenWidth, int screenHeight)
 	dungeonEnemies.push_back(EnemyConfig{ 10, 41,  "images/boss/flame.png", EnemyType::BOSS });
 
 	vector<MovingObjectConfig> dungeonObjects;
-	// AT ROOM
 	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(368.0f, 720.0f),            // startPos
-		glm::vec2(576.0f, 720.0f),           // endPos
-		500.0f,                              // speed
+		glm::vec2(336.0f, 720.0f),
+		glm::vec2(592.0f, 720.0f),
+		500.0f,
 		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
+		"images/statue.png",
+		glm::vec2(32.f, 47.f),
 		glm::vec2(1.0f, 1.0f),
-	});
-	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(576.0f, 784.0f),           // endPos
-		glm::vec2(368.0f, 784.0f),            // startPos
-		500.0f,                              // speed
-		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
-		glm::vec2(1.0f, 1.0f),
-	});
-	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(368.0f, 848.0f),            // startPos
-		glm::vec2(576.0f, 848.0f),           // endPos
-		500.0f,                              // speed
-		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
-		glm::vec2(1.0f, 1.0f),
-	});
-	// AT BOSS ROOM
-	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(48.0f, 800.0f),            // startPos
-		glm::vec2(112.0f, 800.0f),           // endPos
-		500.0f,                              // speed
-		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
-		glm::vec2(1.0f, 1.0f),
+		true,
+		1,
+		0,
+		0
 		});
 	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(48.0f, 896.0f),            // startPos
-		glm::vec2(112.0f, 896.0f),           // endPos
-		500.0f,                              // speed
+		glm::vec2(592.0f, 784.0f),
+		glm::vec2(336.0f, 784.0f),
+		500.0f,
 		MovingObjectType::MOVING_STATUE,
-		"images/statue.png",				 // spriteSheet
-		glm::vec2(32.f, 47.f),				 // Actual statue size
+		"images/statue.png",
+		glm::vec2(32.f, 47.f),
 		glm::vec2(1.0f, 1.0f),
+		true,
+		1,
+		0,
+		0
 		});
+	dungeonObjects.push_back(MovingObjectConfig{
+		glm::vec2(336.0f, 848.0f),
+		glm::vec2(592.0f, 848.0f),
+		500.0f,
+		MovingObjectType::MOVING_STATUE,
+		"images/statue.png",
+		glm::vec2(32.f, 47.f),
+		glm::vec2(1.0f, 1.0f),
+		true,
+		1,
+		0,
+		0
+		});
+	dungeonObjects.push_back(MovingObjectConfig{
+		glm::vec2(48.0f, 800.0f),
+		glm::vec2(112.0f, 800.0f),
+		500.0f,
+		MovingObjectType::MOVING_STATUE,
+		"images/statue.png",
+		glm::vec2(32.f, 47.f),
+		glm::vec2(1.0f, 1.0f),
+		false,
+		0,
+		0,
+		0
+		});
+	dungeonObjects.push_back(MovingObjectConfig{
+		glm::vec2(48.0f, 896.0f),
+		glm::vec2(112.0f, 896.0f),
+		500.0f,
+		MovingObjectType::MOVING_STATUE,
+		"images/statue.png",
+		glm::vec2(32.f, 47.f),
+		glm::vec2(1.0f, 1.0f),
+		false,
+		0,
+		0,
+		0
+		});
+
+	// SPIKES - alternating trap pattern
+	createSpikeTraps(dungeonObjects, 25.0f, 10.0f, 10);
+	createSpikeTraps(dungeonObjects, 25.0f, 12.0f, 10);
+	createSpikeTraps(dungeonObjects, 25.0f, 14.0f, 10);
+	createSpikeTraps(dungeonObjects, 25.0f, 16.0f, 10);
+
+
 	vector<MusicConfig> dungeonMusic;
 	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic, LevelType::DUNGEON);
 	addScene("dungeon", Dungeon);
@@ -216,8 +242,10 @@ void Game::keyPressed(int key)
 	else if (key == GLFW_KEY_B) {
 		setCurrentScene("dungeon");
 		int tileSize = 16.0f;
-		int targetTileX = 10; // Change to the tile X coordinate you want
-		int targetTileY = 51; // Change to the tile Y coordinate you want
+		/*int targetTileX = 10; 
+		int targetTileY = 51;*/
+		int targetTileX = 30; 
+		int targetTileY = 41;
 
 		glm::vec2 newPos(targetTileX * tileSize, targetTileY * tileSize);
 		player->setPosition(newPos);
@@ -294,3 +322,41 @@ glm::vec2 Game::getPlayerPosition() const {
 	return player->getPosition();
 }
 
+void Game::createSpikeTraps(vector<MovingObjectConfig>& objects, float startTileX, float tileY, int count)
+{
+	constexpr float TILE_SIZE = 16.0f;
+	constexpr int SPIKE_IDLE_DURATION_MS = 500;
+	constexpr int SPIKE_ACTIVE_DURATION_MS = 500;
+	constexpr int SPIKE_TRANSITION_DURATION_MS = 500;
+	const glm::vec2 SPIKE_SIZE(16.0f, 16.0f);
+	const glm::vec2 SPIKE_ANCHOR(0.5f, 1.0f);
+
+	const float startX = startTileX * TILE_SIZE;
+	const float fixedY = tileY * TILE_SIZE;
+	const int fullCycle = SPIKE_IDLE_DURATION_MS + SPIKE_TRANSITION_DURATION_MS +
+		SPIKE_ACTIVE_DURATION_MS + SPIKE_TRANSITION_DURATION_MS;
+	const int halfCycleDuration = fullCycle / 2;
+
+	objects.reserve(objects.size() + count);
+
+	for (int i = 0; i < count; ++i)
+	{
+		const float xPosition = startX + static_cast<float>(i) * TILE_SIZE;
+		const int timerOffset = ((i / 2) % 2 == 0) ? 0 : halfCycleDuration;
+
+		objects.push_back(MovingObjectConfig{
+			glm::vec2(xPosition, fixedY),
+			glm::vec2(xPosition, fixedY),
+			0.0f,
+			MovingObjectType::SPIKE_TRAP,
+			"images/spikes.png",
+			SPIKE_SIZE,
+			SPIKE_ANCHOR,
+			true,
+			1,
+			SPIKE_IDLE_DURATION_MS,
+			SPIKE_ACTIVE_DURATION_MS,
+			timerOffset
+			});
+	}
+}

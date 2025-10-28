@@ -13,73 +13,166 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Archivos de código fuente\Enemies">
+      <UniqueIdentifier>{17237c31-b6ba-4cd3-96a5-ca2e7ab78aa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de código fuente\Scenes">
+      <UniqueIdentifier>{ddeb8c09-5421-4722-afa3-4713da048412}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de código fuente\Objects">
+      <UniqueIdentifier>{74f4c76f-e02e-475b-b895-92fa11e76769}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de código fuente\UI">
+      <UniqueIdentifier>{227f97e1-9f68-4a04-ba7f-4d2ffba265f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de código fuente\Visuals">
+      <UniqueIdentifier>{0b18146c-ef47-4df5-a11a-be6b2373a7e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de código fuente\Projectiles">
+      <UniqueIdentifier>{83674a23-5b64-4f75-818b-7a0d476b052c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de código fuente\Services">
+      <UniqueIdentifier>{4ab3344a-adf8-454c-baa8-a70e70bbf245}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de código fuente\AI">
+      <UniqueIdentifier>{d68402cf-b866-48bc-aaa9-2e7ad90441e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de código fuente\Player">
+      <UniqueIdentifier>{94e06be2-b834-4ff5-91fa-0470ba122d82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Enemies">
+      <UniqueIdentifier>{a9f32eff-d44d-42e4-8bd0-08b92aa1a9c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Services">
+      <UniqueIdentifier>{297b6655-084c-4cb7-989d-576ac690510c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Player">
+      <UniqueIdentifier>{c6484371-0a0b-406b-bd10-4530d8a20053}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Projectiles">
+      <UniqueIdentifier>{b2bf345e-fbdc-4a7a-953e-b5b5d839a6c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Visuals">
+      <UniqueIdentifier>{edb8e6d4-3c43-41b2-876e-ceb5594cabe6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\UI">
+      <UniqueIdentifier>{3f58215e-f057-4f2c-a308-6e38d3f4c447}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Objects">
+      <UniqueIdentifier>{f908bad2-1ebf-4993-a22b-676611b4911a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Scenes">
+      <UniqueIdentifier>{9d39b0a1-be79-4d82-9c93-d27611d0a6bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\AI">
+      <UniqueIdentifier>{421a86c0-57cc-4077-813d-d24d38e07dbc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AnimKeyframes.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Game.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderProgram.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="TileMap.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Menu.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Level.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Enemy.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="GeometryUtils.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="Globals.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="MeleeEnemy.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Pathfinder.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Archivos de encabezado\AI</Filter>
     </ClInclude>
-    <ClInclude Include="RangedEnemy.h">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="GeometryUtils.h">
+      <Filter>Archivos de encabezado\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Archivos de encabezado\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimKeyframes.h">
+      <Filter>Archivos de encabezado\Visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Archivos de encabezado\Visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Archivos de encabezado\Visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderProgram.h">
+      <Filter>Archivos de encabezado\Visuals</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Archivos de encabezado\Visuals</Filter>
     </ClInclude>
     <ClInclude Include="Text.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Archivos de encabezado\UI</Filter>
     </ClInclude>
     <ClInclude Include="UIManager.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Archivos de encabezado\UI</Filter>
     </ClInclude>
     <ClInclude Include="UIManagerUtils.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Archivos de encabezado\UI</Filter>
     </ClInclude>
-    <ClInclude Include="MenuScene.h">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="SpikeTrap.h">
+      <Filter>Archivos de encabezado\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="MovingStatue.h">
+      <Filter>Archivos de encabezado\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="MovingObjectFactory.h">
+      <Filter>Archivos de encabezado\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="MovingObject.h">
+      <Filter>Archivos de encabezado\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Item.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Archivos de encabezado\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RangedEnemy.h">
+      <Filter>Archivos de encabezado\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="MeleeEnemy.h">
+      <Filter>Archivos de encabezado\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Boss.h">
+      <Filter>Archivos de encabezado\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>Archivos de encabezado\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="NullAudioService.h">
+      <Filter>Archivos de encabezado\Services</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniAudioService.h">
+      <Filter>Archivos de encabezado\Services</Filter>
+    </ClInclude>
+    <ClInclude Include="NullUIManager.h">
+      <Filter>Archivos de encabezado\Services</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceLocator.h">
+      <Filter>Archivos de encabezado\Services</Filter>
+    </ClInclude>
+    <ClInclude Include="miniaudio.h">
+      <Filter>Archivos de encabezado\Services</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioService.h">
+      <Filter>Archivos de encabezado\Services</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuScene.h">
+      <Filter>Archivos de encabezado\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>Archivos de encabezado\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.h">
+      <Filter>Archivos de encabezado\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Archivos de encabezado\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="TileMap.h">
+      <Filter>Archivos de encabezado\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectileManager.h">
+      <Filter>Archivos de encabezado\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Archivos de encabezado\Projectiles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -89,62 +182,92 @@
     <ClCompile Include="main.cpp">
       <Filter>Archivos de código fuente</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="ShaderProgram.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="Sprite.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="TileMap.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="Menu.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="Enemy.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
     <ClCompile Include="Globals.cpp">
       <Filter>Archivos de código fuente</Filter>
     </ClCompile>
-    <ClCompile Include="MeleeEnemy.cpp">
-      <Filter>Archivos de código fuente</Filter>
+    <ClCompile Include="Boss.cpp">
+      <Filter>Archivos de código fuente\Enemies</Filter>
     </ClCompile>
-    <ClCompile Include="Pathfinder.cpp">
-      <Filter>Archivos de código fuente</Filter>
+    <ClCompile Include="MeleeEnemy.cpp">
+      <Filter>Archivos de código fuente\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>Archivos de código fuente\Enemies</Filter>
     </ClCompile>
     <ClCompile Include="RangedEnemy.cpp">
-      <Filter>Archivos de código fuente</Filter>
+      <Filter>Archivos de código fuente\Enemies</Filter>
     </ClCompile>
-    <ClCompile Include="Text.cpp">
-      <Filter>Archivos de código fuente</Filter>
+    <ClCompile Include="Level.cpp">
+      <Filter>Archivos de código fuente\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="UIManager.cpp">
-      <Filter>Archivos de código fuente</Filter>
-    </ClCompile>
-    <ClCompile Include="UIManagerUtils.cpp">
-      <Filter>Archivos de código fuente</Filter>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Archivos de código fuente\Scenes</Filter>
     </ClCompile>
     <ClCompile Include="MenuScene.cpp">
-      <Filter>Archivos de código fuente</Filter>
+      <Filter>Archivos de código fuente\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Archivos de código fuente\Scenes</Filter>
     </ClCompile>
     <ClCompile Include="Item.cpp">
-      <Filter>Archivos de código fuente</Filter>
+      <Filter>Archivos de código fuente\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="MovingObject.cpp">
+      <Filter>Archivos de código fuente\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="MovingObjectFactory.cpp">
+      <Filter>Archivos de código fuente\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="MovingStatue.cpp">
+      <Filter>Archivos de código fuente\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="SpikeTrap.cpp">
+      <Filter>Archivos de código fuente\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="UIManager.cpp">
+      <Filter>Archivos de código fuente\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UIManagerUtils.cpp">
+      <Filter>Archivos de código fuente\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>Archivos de código fuente\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Archivos de código fuente\Visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderProgram.cpp">
+      <Filter>Archivos de código fuente\Visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Archivos de código fuente\Visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Archivos de código fuente\Visuals</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Archivos de código fuente\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectileManager.cpp">
+      <Filter>Archivos de código fuente\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="ServiceLocator.cpp">
+      <Filter>Archivos de código fuente\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniAudioService.cpp">
+      <Filter>Archivos de código fuente\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="miniaudio.cpp">
+      <Filter>Archivos de código fuente\Services</Filter>
+    </ClCompile>
+    <ClCompile Include="Pathfinder.cpp">
+      <Filter>Archivos de código fuente\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="TileMap.cpp">
+      <Filter>Archivos de código fuente\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Archivos de código fuente\Player</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

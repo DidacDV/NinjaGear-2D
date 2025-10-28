@@ -3,12 +3,18 @@
 
 
 #include <GLFW/glfw3.h>
-#include "Scene.h"
-#include "Level.h"
-#include "Menu.h"
-#include "UIManager.h"
 #include <map>
 #include <string>
+#include <vector>
+#include "Scene.h"
+#include "Level.h"       
+#include "Menu.h"
+#include "UIManager.h"
+
+using namespace std;
+
+class Level;
+struct MovingObjectConfig;
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 320
@@ -56,6 +62,7 @@ private:
 	bool keys[GLFW_KEY_LAST+1]; // Store key states so that 
 							    // we can have access at any time
 	map<string, Scene*> levels;
+	void createSpikeTraps(vector<MovingObjectConfig>& objects, float startTileX, float tileY, int count);
 	Scene* currentScene;
 	int mouseX, mouseY;
 };

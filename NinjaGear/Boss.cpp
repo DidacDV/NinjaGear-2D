@@ -7,7 +7,7 @@ Boss::Boss() : Enemy()
     health = 100;
     attackDamage = 15;
     moveSpeed = 3.0f;
-	enemySize = glm::vec2(50.f, 50.f);
+    enemySize = glm::vec2(50.f, 50.f);
     sizeInSpritesheet = glm::vec2(0.2f, 0.25f);
 }
 void Boss::initializeAnimations()
@@ -31,7 +31,7 @@ void Boss::initializeAnimations()
     sprite->addKeyframe(HIT, glm::vec2(1.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
     sprite->addKeyframe(HIT, glm::vec2(2.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
 
-	// PHASE 3 ANIMATIONS
+    // PHASE 3 ANIMATIONS
     sprite->setAnimationSpeed(IDLE_PHASE3, 8);
     sprite->addKeyframe(IDLE_PHASE3, glm::vec2(0.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
     sprite->addKeyframe(IDLE_PHASE3, glm::vec2(1.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
@@ -49,12 +49,12 @@ void Boss::initializeAnimations()
     sprite->setPosition(glm::vec2(float(tileMapDispl.x + posEnemy.x), float(tileMapDispl.y + posEnemy.y)));
 }
 
-void Boss::updateStateMachine(int deltaTime){
+void Boss::updateStateMachine(int deltaTime) {
     const int CAMERA_WIDTH = 320;
     const int CAMERA_HEIGHT = 320;
     if (!isOnScreen(CAMERA_WIDTH, CAMERA_HEIGHT)) {
 
-        return; 
+        return;
     }
     // PHASE MANAGEMENT
     float healthPercent = static_cast<float>(health) / 300.0f;
@@ -74,7 +74,7 @@ void Boss::updateStateMachine(int deltaTime){
         updatePhaseParameters();
         cout << "Boss entered Phase 3!" << endl;
     }
-    
+
     if (hitAnimationTimer > 0)
     {
         hitAnimationTimer -= deltaTime;
@@ -194,10 +194,10 @@ void Boss::shootAtPlayer(const glm::vec2& playerPos)
     int damage = 1;
 
     vector<glm::vec2> projectileKeyframes = {
-    glm::vec2(0.0f, 0.0f), 
-    glm::vec2(0.25f, 0.0f), 
+    glm::vec2(0.0f, 0.0f),
+    glm::vec2(0.25f, 0.0f),
     glm::vec2(0.50f, 0.0f),
-    glm::vec2(0.75f, 0.0f)  
+    glm::vec2(0.75f, 0.0f)
     };
 
     projectileManager->spawnProjectile(
@@ -217,7 +217,7 @@ void Boss::shootAtPlayer(const glm::vec2& playerPos)
 void Boss::changeAnimationsForDirection(glm::vec2 direction)
 {
     // Simple implementation - boss primarily moves horizontally
-    
+
 }
 
 bool Boss::isInAttackState() const
