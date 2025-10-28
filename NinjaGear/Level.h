@@ -25,6 +25,7 @@ struct EnemyConfig {
     int yTile;
     string spriteSheet;
     EnemyType type;
+    int patrolDistance = 5;
 };
 
 

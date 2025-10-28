@@ -29,7 +29,8 @@ private:
         PATROLLING,
 		ATTACKING
     };
-
+    float patrolWaitTimer = 0.0f; // Timer in milliseconds
+    const float PATROL_WAIT_TIME = 2000.0f; // Wait 2 seconds
     State currentState = State::IDLE;
     int trackingTimer = 0;
     const int MAX_TRACKING_TIME = 50000; 

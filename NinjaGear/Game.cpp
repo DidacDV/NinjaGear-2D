@@ -52,9 +52,17 @@ void Game::init(int screenWidth, int screenHeight)
 	};
 
 	vector<EnemyConfig> jungleEnemies;
-	jungleEnemies.push_back(EnemyConfig{35, 8, "images/enemies/miniFlame.png", EnemyType ::MELEE});
-	//jungleEnemies.push_back(EnemyConfig{15, 10, "images/enemies/larvaTank.png", EnemyType ::TANK});
-//	jungleEnemies.push_back(EnemyConfig{ 10, 5,  "images/enemies/cyclope.png", EnemyType::RANGED });
+	jungleEnemies.push_back(EnemyConfig{32, 13, "images/enemies/miniFlame.png", EnemyType ::MELEE, 4});
+	jungleEnemies.push_back(EnemyConfig{54, 25, "images/enemies/miniFlame.png", EnemyType ::MELEE, 5});
+	jungleEnemies.push_back(EnemyConfig{56, 46, "images/enemies/miniFlame.png", EnemyType ::MELEE, 4});
+	jungleEnemies.push_back(EnemyConfig{56, 49, "images/enemies/miniFlame.png", EnemyType ::MELEE, 0});
+	jungleEnemies.push_back(EnemyConfig{45, 67, "images/enemies/miniFlame.png", EnemyType ::MELEE, 1});
+	jungleEnemies.push_back(EnemyConfig{33, 4, "images/enemies/larvaTank.png", EnemyType ::TANK, 3});
+	jungleEnemies.push_back(EnemyConfig{35, 4, "images/enemies/larvaTank.png", EnemyType ::TANK, 3});
+	jungleEnemies.push_back(EnemyConfig{55, 30, "images/enemies/larvaTank.png", EnemyType ::TANK, 1});
+	jungleEnemies.push_back(EnemyConfig{54, 11, "images/enemies/larvaTank.png", EnemyType ::TANK, 4});
+	jungleEnemies.push_back(EnemyConfig{54, 55, "images/enemies/larvaTank.png", EnemyType ::TANK, 4});
+	jungleEnemies.push_back(EnemyConfig{ 55, 5,  "images/enemies/eye.png", EnemyType::MELEE, 3});
 
 	vector<MovingObjectConfig> jungleObjects;
 

@@ -37,6 +37,9 @@ public:
 	virtual bool isBoss() const { return false; }
 	void setCameraOffset(const glm::vec2& offset) { cameraOffset = offset; }
 
+	void setPatrolDistance(int distance) {
+		patrolDistance = distance;
+	}
 protected:
 	// Child class methods
 	virtual void initializeAnimations() = 0;
@@ -50,7 +53,7 @@ protected:
 	glm::ivec2 tileMapDispl;
 	glm::vec2 posEnemy; 
 	Direction currentDirection;
-
+	int patrolDistance;
 	// Visuals
 	Texture spritesheet;
 	Sprite* sprite;

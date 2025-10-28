@@ -66,7 +66,7 @@ void Enemy::initializeSprite(ShaderProgram& shaderProgram, const string& sprites
 bool Enemy::checkPlayerVisibility(const glm::vec2 playerPos)
 {
 	float distanceToPlayer = glm::distance(glm::vec2(posEnemy), playerPos);
-	const float MAX_VISION_DISTANCE = 200.0f;
+	const float MAX_VISION_DISTANCE = 100.f;
 
 	bool playerVisible = false;
 	if (distanceToPlayer <= MAX_VISION_DISTANCE) {
