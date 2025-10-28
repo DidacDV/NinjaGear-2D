@@ -15,7 +15,7 @@ class Enemy
 {
 public:
 	virtual ~Enemy() = default;
-	void init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet);
+	void init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet, vector<TileMap*> tileMaps);
 	virtual void update(int deltaTime);
 	virtual void render(const glm::mat4& view = glm::mat4(1.0f));
 
@@ -37,6 +37,9 @@ public:
 	virtual bool isBoss() const { return false; }
 	void setCameraOffset(const glm::vec2& offset) { cameraOffset = offset; }
 
+	void setPatrolDistance(int distance) {
+		patrolDistance = distance;
+	}
 protected:
 	// Child class methods
 	virtual void initializeAnimations() = 0;
@@ -50,7 +53,7 @@ protected:
 	glm::ivec2 tileMapDispl;
 	glm::vec2 posEnemy; 
 	Direction currentDirection;
-
+	int patrolDistance;
 	// Visuals
 	Texture spritesheet;
 	Sprite* sprite;
@@ -59,6 +62,7 @@ protected:
 
 	// Tilemap
 	TileMap* map;
+	vector<TileMap*> maps;
 	bool checkPlayerVisibility(const glm::vec2 playerPos);
 	float cachedTileSize;
 

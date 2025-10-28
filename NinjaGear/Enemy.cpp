@@ -15,11 +15,14 @@ enum EnemyAnims
 	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
 };
 
-void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet)
+void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet,
+	vector<TileMap*> tileMaps)
 {
 	//Template that every enemy will follow. 
+	maps.clear();
 	initializeSprite(shaderProgram, spritesheet);
 	map = tileMap;
+	maps = tileMaps;
 	cachedTileSize = static_cast<float>(map->getTileSize());
 	tileMapDispl = tileMapPos;
 	currentDirection = DOWN;
@@ -63,7 +66,7 @@ void Enemy::initializeSprite(ShaderProgram& shaderProgram, const string& sprites
 bool Enemy::checkPlayerVisibility(const glm::vec2 playerPos)
 {
 	float distanceToPlayer = glm::distance(glm::vec2(posEnemy), playerPos);
-	const float MAX_VISION_DISTANCE = 200.0f;
+	const float MAX_VISION_DISTANCE = 100.f;
 
 	bool playerVisible = false;
 	if (distanceToPlayer <= MAX_VISION_DISTANCE) {
@@ -77,7 +80,7 @@ bool Enemy::checkPlayerVisibility(const glm::vec2 playerPos)
 		glm::vec2 toPlayer = glm::normalize(playerPos - glm::vec2(posEnemy));
 		float dot = glm::dot(dirVec, toPlayer);
 		if (dot > 0.85f) { 
-			playerVisible = map->hasLineOfSight(glm::vec2(posEnemy), playerPos);
+			playerVisible = TileMap::hasLineOfSight(glm::vec2(posEnemy), playerPos, maps);
 		}
 	}
 

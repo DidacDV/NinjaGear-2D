@@ -1,6 +1,7 @@
 #include "Level.h"
 #include "RangedEnemy.h"
 #include "MeleeEnemy.h"
+#include "TankEnemy.h"
 #include "Boss.h"
 #include <iostream>
 #include "Projectile.h"
@@ -133,11 +134,11 @@ void Level::update(int deltaTime)
 		introMessageDelayTimer -= deltaTime;
 		if (introMessageDelayTimer <= 0)
 		{
-			ServiceLocator::getUI().showTemporaryMessage("HELLO SOLID NINJA, KILL ALL ENEMIES",
-				glm::vec2(320, 160), 1.f, glm::vec3(0.f, 0.f, 0.f), 4000);
+			//ServiceLocator::getUI().showTemporaryMessage("HELLO SOLID NINJA, KILL ALL ENEMIES",
+			//	glm::vec2(320, 160), 1.f, glm::vec3(0.f, 0.f, 0.f), 4000);
 
-			ServiceLocator::getUI().showTemporaryMessage("AND WE WON'T KILL YOU...",
-				glm::vec2(320, 200), 1.f, glm::vec3(1.f, 0.f, 0.f), 5000);
+			//ServiceLocator::getUI().showTemporaryMessage("AND WE WON'T KILL YOU...",
+			//	glm::vec2(320, 200), 1.f, glm::vec3(1.f, 0.f, 0.f), 5000);
 
 			introMessagesDisplayed = true;
 		}
@@ -229,6 +230,9 @@ void Level::initializeEnemies() {
 			case EnemyType::RANGED:
 				enemy = new RangedEnemy();
 				break;
+			case EnemyType::TANK:
+				enemy = new TankEnemy();
+				break;
 			case EnemyType::BOSS:
 				enemy = new Boss();
 				break;
@@ -236,7 +240,8 @@ void Level::initializeEnemies() {
 				enemy = nullptr;
 				break;
 		}
-		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0], config.spriteSheet);
+		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0], config.spriteSheet, maps);
+		enemy->setPatrolDistance(config.patrolDistance);
 		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
 		enemy->setProjectileManager(&projectileManager);
 		enemies.push_back(enemy);
@@ -408,21 +413,25 @@ void Level::initializeObjects(int tileSize) {
 	vector<ItemData> itemData = {
 		//Medipacks
 		{ "MEDIPACK", 1, "Restores 1 health points.", {34, 2}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {58, 8}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {34, 2}, medpackTexture },
+		{ "MEDIPACK", 1, "Restores 1 health points.", {58, 7}, medpackTexture },
 		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 31}, medpackTexture },
+		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 45}, medpackTexture },
+		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 46}, medpackTexture },
+		{ "MEDIPACK", 1, "Restores 1 health points.", {43, 67}, medpackTexture },
 
 		//Speed potions
-		{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {6, 10}, speedPotionTexture },
 		{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {58, 13}, speedPotionTexture },
+		{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {56, 55}, speedPotionTexture },
 
 		//Arrows
-		{ "ARROW", 2, "Projectile for bow", {17, 10}, arrowTexture },
-		{ "ARROW", 2, "Projectile for bow", {30, 18}, arrowTexture },
-		{ "ARROW", 1, "Projectile for bow", {45, 2}, arrowTexture },
-		{ "ARROW", 1, "Projectile for bow", {46, 2}, arrowTexture },
-		{ "ARROW", 3, "Projectile for bow", {55, 36}, arrowTexture },
-		{ "ARROW", 4, "Projectile for bow", {58, 27}, arrowTexture },
+		{ "ARROW", 3, "Projectile for bow", {17, 10}, arrowTexture },
+		{ "ARROW", 5, "Projectile for bow", {33, 16}, arrowTexture },
+		{ "ARROW", 5, "Projectile for bow", {45, 2}, arrowTexture },
+		{ "ARROW", 5, "Projectile for bow", {58, 8}, arrowTexture },
+		{ "ARROW", 3, "Projectile for bow", {58, 27}, arrowTexture },
+		{ "ARROW", 3, "Projectile for bow", {58, 26}, arrowTexture },
+		{ "ARROW", 2, "Projectile for bow", {56, 56}, arrowTexture },
+		{ "ARROW", 2, "Projectile for bow", {43, 68}, arrowTexture },
 	};
 
 	for (const auto& data : itemData) {

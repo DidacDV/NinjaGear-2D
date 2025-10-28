@@ -240,6 +240,33 @@ bool TileMap::hasLineOfSight(const glm::vec2& from, const glm::vec2& to) const
 	return true;
 }
 
+bool TileMap::hasLineOfSight(const glm::vec2& from, const glm::vec2& to,
+	const vector<TileMap*>& tileMaps)
+{
+	if (tileMaps.empty()) return true;
+
+	int tileSize = tileMaps[0]->getTileSize();
+	glm::vec2 fromTile = glm::vec2(from.x / tileSize, from.y / tileSize);
+	glm::vec2 toTile = glm::vec2(to.x / tileSize, to.y / tileSize);
+	float distance = diagonalDistance(fromTile, toTile);
+	int steps = static_cast<int>(distance);
+
+	for (int i = 0; i <= steps; i++) {
+		float t = (steps == 0) ? 0.0f : static_cast<float>(i) / static_cast<float>(steps);
+		glm::vec2 point = lerpPoint(fromTile, toTile, t);
+		glm::ivec2 tilePos = roundPoint(point);
+
+		//ALL layers
+		for (TileMap* tileMap : tileMaps) {
+			if (tileMap && tileMap->isTileBlocked(tilePos.x, tilePos.y)) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 int TileMap::getTileAt(int x, int y) const
 {
 	if (x < 0 || x >= mapSize.x || y < 0 || y >= mapSize.y)

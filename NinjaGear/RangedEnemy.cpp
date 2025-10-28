@@ -106,7 +106,7 @@ void RangedEnemy::startPatrol()
 void RangedEnemy::calculatePatrolPath(const glm::ivec2& targetTile)
 {
 	glm::ivec2 startTile = getEnemyTile();
-	currentPath = Pathfinder::instance().findPath(startTile, targetTile, map);
+	currentPath = Pathfinder::instance().findPath(startTile, targetTile, maps);
 	currentPathIndex = findClosestNodeInPath(currentPath, glm::vec2(posEnemy));
 }
 

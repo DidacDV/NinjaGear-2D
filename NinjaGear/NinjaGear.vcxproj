@@ -15,6 +15,7 @@
     <ClInclude Include="AudioService.h" />
     <ClInclude Include="Boss.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="EnemyTypes.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GeometryUtils.h" />
     <ClInclude Include="Globals.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="SpikeTrap.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="TankEnemy.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TileMap.h" />

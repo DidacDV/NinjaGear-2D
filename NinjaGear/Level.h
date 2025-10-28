@@ -22,6 +22,7 @@ enum class EnemyType {
     BASE,
     MELEE,
     RANGED,
+    TANK,
     BOSS
 };
 
@@ -30,6 +31,7 @@ struct EnemyConfig {
     int yTile;
     string spriteSheet;
     EnemyType type;
+    int patrolDistance = 5;
 };
 
 struct MusicConfig {

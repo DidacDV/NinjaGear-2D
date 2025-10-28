@@ -3,6 +3,9 @@
 
 void MeleeEnemy::updateStateMachine(int deltaTime)
 {
+    if (patrolWaitTimer > 0.0f) {
+        patrolWaitTimer -= deltaTime;
+    }
     glm::vec2 playerPos = Game::instance().getPlayerPosition();
     switch (currentState) {
     case State::IDLE:
@@ -133,7 +136,7 @@ void MeleeEnemy::stopTracking()
     if (!patrolInitialized) initializePatrol();
 
     glm::ivec2 startTile = getEnemyTile();
-    currentPath = Pathfinder::instance().findPath(startTile, originalPatrolPosition, map);
+    currentPath = Pathfinder::instance().findPath(startTile, originalPatrolPosition, maps);
     currentPathIndex = findClosestNodeInPath(currentPath, glm::vec2(posEnemy));
 
     movingToEnd = (originalPatrolPosition == patrolEndTile);
@@ -141,26 +144,32 @@ void MeleeEnemy::stopTracking()
 
 void MeleeEnemy::recalculatePathToPlayer(const glm::vec2& playerPos)
 {
-    currentPath = Pathfinder::instance().findPath(getEnemyTile(), getPlayerTile(playerPos), map);
+    currentPath = Pathfinder::instance().findPath(getEnemyTile(), getPlayerTile(playerPos), maps);
     currentPathIndex = findClosestPathIndex(currentPath, glm::vec2(posEnemy));
     lastTargetTile = getPlayerTile(playerPos);
 
 }
 
-// Patrolling logic
 void MeleeEnemy::initializePatrol()
 {
     glm::ivec2 currentTile = getEnemyTile();
 
     patrolStartTile = glm::ivec2(
         currentTile.x,
-        std::max(0, currentTile.y - 5)
+        std::max(0, currentTile.y - patrolDistance)
     );
 
     patrolEndTile = glm::ivec2(
         currentTile.x,
-        std::min(map->height() - 1, currentTile.y + 5)
+        std::min(map->height() - 1, currentTile.y + patrolDistance)
     );
+
+    if (patrolStartTile == currentTile) {
+        patrolStartTile.y = std::max(0, currentTile.y - 1);
+    }
+    if (patrolEndTile == currentTile) {
+        patrolEndTile.y = std::min(map->height() - 1, currentTile.y + 1);
+    }
 
     patrolInitialized = true;
 }
@@ -177,27 +186,74 @@ void MeleeEnemy::startPatrol()
 void MeleeEnemy::calculatePatrolPath(const glm::ivec2& targetTile)
 {
     glm::ivec2 startTile = getEnemyTile();
-    currentPath = Pathfinder::instance().findPath(startTile, targetTile, map);
+    currentPath = Pathfinder::instance().findPath(startTile, targetTile, maps);
     currentPathIndex = findClosestNodeInPath(currentPath, glm::vec2(posEnemy));
 
 }
 
 void MeleeEnemy::updatePatrol(int deltaTime, const glm::vec2& playerPos)
 {
+    //Check for player
     if (checkPlayerVisibility(playerPos)) {
         startTracking(playerPos);
         return;
     }
 
+    //If we are waiting, just stand still and do nothing else
+    if (patrolWaitTimer > 0.0f) {
+        return; 
+    }
+
+    //Timer is done, so we need to move
     glm::ivec2 currentTarget = movingToEnd ? patrolEndTile : patrolStartTile;
 
-    if (!followPathToTarget(deltaTime, currentTarget)) return; 
+    //Do we need to find a new path?
+    //(We need one if our path is empty, which happens on the first run,
+    //or after finishing a wait)
+    if (currentPath.empty()) {
 
+        //don't path to current tile since it crashes cpu
+        if (currentTarget == getEnemyTile()) {
+            //stand still, set timer, and flip target
+            sprite->changeAnimation(movingToEnd ? STAND_DOWN : STAND_UP);
+            patrolWaitTimer = PATROL_WAIT_TIME;
+            movingToEnd = !movingToEnd;
+            return;
+        }
+
+        //calculate a path to the target
+        calculatePatrolPath(currentTarget);
+
+        //if path is *still* empty, the target is unreachable
+        if (currentPath.empty()) {
+            //stand still, set timer, and flip target
+            sprite->changeAnimation(STAND_DOWN);
+            patrolWaitTimer = PATROL_WAIT_TIME;
+            movingToEnd = !movingToEnd;
+            return;
+        }
+    }
+
+    //Follow the path we have
+    // (This will run if path was not empty, or after we just calculated one)
+    bool pathFinished = followPathToTarget(deltaTime, currentTarget);
+
+    if (!pathFinished) {
+        return;
+    }
+
+    //pathFinished is TRUE, meaning we arrived
+    patrolWaitTimer = PATROL_WAIT_TIME;
     movingToEnd = !movingToEnd;
-    sprite->changeAnimation(movingToEnd ? MOVE_DOWN : MOVE_UP);
-    calculatePatrolPath(movingToEnd ? patrolEndTile : patrolStartTile);
-}
 
+    switch (currentDirection) {
+    case UP:    sprite->changeAnimation(STAND_UP); break;
+    case DOWN:  sprite->changeAnimation(STAND_DOWN); break;
+    case LEFT:  sprite->changeAnimation(STAND_LEFT); break;
+    case RIGHT: sprite->changeAnimation(STAND_RIGHT); break;
+    default:    sprite->changeAnimation(STAND_DOWN); break;
+    }
+}
 // Returning logic
 void MeleeEnemy::updateReturning(int deltaTime, const glm::vec2& playerPos)
 {
