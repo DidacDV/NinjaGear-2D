@@ -11,28 +11,14 @@
 #include "ProjectileManager.h"
 #include "Item.h"
 #include "UIManager.h"
+#include "GameConfig.h"
 
 class Enemy;
 class MovingStatue;
 class MovingObject;
+struct EnemyConfig;
 
 using namespace std;
-
-enum class EnemyType {
-    BASE,
-    MELEE,
-    RANGED,
-    TANK,
-    BOSS
-};
-
-struct EnemyConfig {
-    int xTile;
-    int yTile;
-    string spriteSheet;
-    EnemyType type;
-    int patrolDistance = 5;
-};
 
 struct MusicConfig {
     int sectorI;           
@@ -106,8 +92,8 @@ class Level :
         bool introMessagesDisplayed = false;
         int introMessageDelayTimer = 500;
         // Combat manager
-        static constexpr float PLAYER_SIZE = 16.0f;
-        static constexpr float ENEMY_SIZE = 16.0f;
+        static constexpr float PLAYER_SIZE = GameConfig::PLAYER_SIZE;
+        static constexpr float ENEMY_SIZE = GameConfig::ENEMY_SIZE;
         static constexpr int ENEMY_CONTACT_DAMAGE = 10;
         void checkCombat();
         void handlePlayerAttack();

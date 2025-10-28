@@ -70,10 +70,10 @@ void Menu::addButton(const glm::vec2& relativePos, const glm::vec2& relativeSize
 {
     Button btn;
 
-    btn.position = glm::vec2(relativePos.x * globalScreenWidth/2,
-        relativePos.y * globalScreenHeight/2);
-    btn.size = glm::vec2(relativeSize.x * globalScreenWidth/2,
-        relativeSize.y * globalScreenHeight/2);
+    btn.position = glm::vec2(relativePos.x * globalScreenWidth,
+        relativePos.y * globalScreenHeight);
+    btn.size = glm::vec2(relativeSize.x * globalScreenWidth,
+        relativeSize.y * globalScreenHeight);
     btn.action = action;
 
     buttons.push_back(btn);

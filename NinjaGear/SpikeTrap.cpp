@@ -1,4 +1,5 @@
 #include "SpikeTrap.h"
+#include "GameConfig.h"
 
 SpikeTrap::SpikeTrap(const glm::vec2& quadSize,
     const glm::vec2& sizeInSpritesheet,
@@ -18,7 +19,7 @@ SpikeTrap::SpikeTrap(const glm::vec2& quadSize,
 void SpikeTrap::update(int deltaTime)
 {
     MovingObject::update(deltaTime);
-    if (!isOnScreen(320, 320)) return;
+    if (!isOnScreen(GameConfig::CAMERA_WIDTH, GameConfig::CAMERA_HEIGHT)) return;
 
     stateTimer += deltaTime;
 

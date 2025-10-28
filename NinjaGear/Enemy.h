@@ -11,6 +11,22 @@
 
 enum Direction { LEFT, RIGHT, UP, DOWN };
 
+enum class EnemyType {
+	BASE,
+	MELEE,
+	RANGED,
+	TANK,
+	BOSS
+};
+
+struct EnemyConfig {
+	int xTile;
+	int yTile;
+	string spriteSheet;
+	EnemyType type;
+	int patrolDistance = 5;
+};
+
 class Enemy
 {
 public:

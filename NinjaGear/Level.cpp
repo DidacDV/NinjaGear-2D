@@ -1,18 +1,11 @@
 #include "Level.h"
-#include "RangedEnemy.h"
-#include "MeleeEnemy.h"
-#include "TankEnemy.h"
-#include "Boss.h"
 #include <iostream>
 #include "Projectile.h"
 #include "ServiceLocator.h"
 #include "MovingObjectFactory.h"
+#include "EnemyFactory.h"
 
-#define SCREEN_X 0
-#define SCREEN_Y 0
-
-#define CAMERA_WIDTH 320  
-#define CAMERA_HEIGHT 320
+#include "GameConfig.h"
 
 Level::Level()
 {
@@ -73,10 +66,11 @@ void Level::init()
 	projectileManager.init(&texProgram, maps[0]);
 
 	//Projection matrix override
-	projection = glm::ortho(0.f, float(CAMERA_WIDTH), float(CAMERA_HEIGHT), 0.f);
+	projection = glm::ortho(0.f, float(GameConfig::CAMERA_WIDTH), float(GameConfig::CAMERA_HEIGHT), 0.f);
 	
 	// Initialize player
-	if(!player->isInitialized() || type != LevelType::DUNGEON) player->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram);
+	if(!player->isInitialized() || type != LevelType::DUNGEON) 
+		player->init(glm::ivec2(GameConfig::SCREEN_X, GameConfig::SCREEN_Y), this->texProgram);
 	player->setPosition(glm::vec2(this->initPlayerX * maps[0]->getTileSize(), this->initPlayerY * maps[0]->getTileSize()));
 	player->setTileMaps(maps);
 
@@ -86,14 +80,14 @@ void Level::init()
 	int mapWidth = maps[0]->mapSize.x * maps[0]->getTileSize();
 	int mapHeight = maps[0]->mapSize.y * maps[0]->getTileSize();
 
-	numSectorsI = mapWidth / CAMERA_WIDTH;
-	numSectorsJ = mapHeight / CAMERA_HEIGHT;
+	numSectorsI = mapWidth / GameConfig::CAMERA_WIDTH;
+	numSectorsJ = mapHeight / GameConfig::CAMERA_HEIGHT;
 
-	if (mapWidth % CAMERA_WIDTH != 0) numSectorsI++;
-	if (mapHeight % CAMERA_HEIGHT != 0) numSectorsJ++;
+	if (mapWidth % GameConfig::CAMERA_WIDTH != 0) numSectorsI++;
+	if (mapHeight % GameConfig::CAMERA_HEIGHT != 0) numSectorsJ++;
 
-	sectorWidth = CAMERA_WIDTH;
-	sectorHeight = CAMERA_HEIGHT;
+	sectorWidth = GameConfig::CAMERA_WIDTH;
+	sectorHeight = GameConfig::CAMERA_HEIGHT;
 
 	glm::vec2 playerPos = player->getPosition();
 	currentSectorI = static_cast<int>(playerPos.x) / sectorWidth;
@@ -186,7 +180,17 @@ void Level::calculateCameraOffset()
 void Level::render()
 {
 	texProgram.use();
-	setupViewport(0.85f, 0.15f);
+
+	int uiHeight = static_cast<int>(GameConfig::WINDOW_HEIGHT * 0.15f);
+	int gameHeight = static_cast<int>(GameConfig::WINDOW_HEIGHT * 0.85f);
+
+	// Center the game area horizontally
+	int viewportX = (GameConfig::WINDOW_WIDTH - GameConfig::GAME_WIDTH) / 2;
+
+	int viewportY = uiHeight;
+	glViewport(viewportX, viewportY, GameConfig::GAME_WIDTH, gameHeight);
+
+
 
 	texProgram.setUniformMatrix4f("projection", projection);
 	texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
@@ -219,32 +223,17 @@ void Level::render()
 
 void Level::initializeEnemies() {
 	for (const auto& config : enemyConfigs) {
-		Enemy* enemy = nullptr;
-		switch (config.type) {
-			case EnemyType::BASE:
-				enemy = nullptr;
-				break;
-			case EnemyType::MELEE:
-				enemy = new MeleeEnemy();
-				break;
-			case EnemyType::RANGED:
-				enemy = new RangedEnemy();
-				break;
-			case EnemyType::TANK:
-				enemy = new TankEnemy();
-				break;
-			case EnemyType::BOSS:
-				enemy = new Boss();
-				break;
-			default:
-				enemy = nullptr;
-				break;
+		Enemy* enemy = EnemyFactory::create(
+			config,
+			glm::ivec2(GameConfig::SCREEN_X, GameConfig::SCREEN_Y),
+			texProgram,
+			maps[0],
+			maps,
+			&projectileManager
+		);
+		if (enemy) {
+			enemies.push_back(enemy);
 		}
-		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0], config.spriteSheet, maps);
-		enemy->setPatrolDistance(config.patrolDistance);
-		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
-		enemy->setProjectileManager(&projectileManager);
-		enemies.push_back(enemy);
 	}
 }
 
@@ -268,7 +257,7 @@ void Level::initializeMovingObjects()
 			&movingObjectTextures[i],
 			&texProgram,
 			maps,
-			glm::ivec2(SCREEN_X, SCREEN_Y)
+			glm::ivec2(GameConfig::SCREEN_X, GameConfig::SCREEN_Y)
 		);
 
 		if (obj) {
@@ -394,7 +383,7 @@ void Level::initializeObjects(int tileSize) {
 				glm::vec2(1.0f, 1.0f),
 				texture,
 				&this->texProgram,
-				glm::ivec2(SCREEN_X, SCREEN_Y)
+				glm::ivec2(GameConfig::SCREEN_X, GameConfig::SCREEN_Y)
 			);
 			item->setItem(name, quantity, description, position, isWeapon, tileSize);
 			return item;
@@ -450,7 +439,7 @@ void Level::initializeWeapons(int tileSize) {
 			glm::vec2(1.0f, 1.0f),
 			bowTexture,
 			&this->texProgram,
-			glm::ivec2(SCREEN_X, SCREEN_Y)
+			glm::ivec2(GameConfig::SCREEN_X, GameConfig::SCREEN_Y)
 		);
 		bow->setItem("BOW", 1, "Long range weapon.", glm::vec2(16, 10), true, tileSize);
 		items.push_back(bow);

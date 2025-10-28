@@ -4,14 +4,6 @@
 #include "Scene.h"
 #include "Game.h"
 
-
-#define SCREEN_X 0
-#define SCREEN_Y 0
-
-#define INIT_PLAYER_X_TILES 10
-#define INIT_PLAYER_Y_TILES 10
-
-
 Scene::Scene()
 {
 	this->currentTime = 0.0f;
@@ -101,7 +93,7 @@ void Scene::initShaders()
 void Scene::loadTileMaps()
 {
 	for (const string& file : mapFiles) {
-		TileMap* map = TileMap::createTileMap(file, glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
+		TileMap* map = TileMap::createTileMap(file, glm::vec2(GameConfig::SCREEN_X, GameConfig::SCREEN_Y), texProgram);
 		if (map != NULL) {
 			maps.push_back(map);
 			cout << "Loaded: " << file << endl;
@@ -113,8 +105,8 @@ void Scene::loadTileMaps()
 }
 
 void Scene::setupViewport(float heightPercent, float yOffsetPercent) {
-	int actualWindowWidth = globalScreenWidth / 2;
-	int actualWindowHeight = globalScreenHeight / 2;
+	int actualWindowWidth = globalScreenWidth;
+	int actualWindowHeight = globalScreenHeight;
 	int sectionHeight = static_cast<int>(actualWindowHeight * heightPercent);
 	int sectionY = static_cast<int>(actualWindowHeight * yOffsetPercent);
 	glViewport(0, sectionY, actualWindowWidth, sectionHeight);
@@ -122,5 +114,5 @@ void Scene::setupViewport(float heightPercent, float yOffsetPercent) {
 
 
 void Scene::resetViewportFullScreen() {
-	glViewport(0, 0, globalScreenWidth / 2, globalScreenHeight / 2);
+	glViewport(0, 0, globalScreenWidth, globalScreenHeight);
 }

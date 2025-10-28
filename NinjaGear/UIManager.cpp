@@ -5,6 +5,7 @@
 #include "UIManager.h"
 #include "Globals.h"
 #include "UIManagerUtils.h"
+#include "GameConfig.h"
 
 UIManager::UIManager()
 {
@@ -29,8 +30,8 @@ void UIManager::init()
 {
     weaponTextures.clear();
     objectTextures.clear();
-    screenWidth = globalScreenWidth / 2;
-    screenHeight = globalScreenHeight / 2;
+    screenWidth = GameConfig::WINDOW_WIDTH; 
+    screenHeight = GameConfig::WINDOW_HEIGHT;
 
     Shader vShader, fShader;
 
@@ -229,11 +230,9 @@ void UIManager::renderGameOverlay()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
-    // Setup viewport for game area (85% of screen, top portion)
+    int uiHeight = static_cast<int>(screenHeight * 0.15f);
     int gameHeight = static_cast<int>(screenHeight * 0.85f);
-    int gameY = static_cast<int>(screenHeight * 0.15f);  // Start above UI panel
-
-    glViewport(0, gameY, screenWidth, gameHeight);
+    glViewport(0, uiHeight, screenWidth, gameHeight);
 
     // Create projection for game viewport
     glm::mat4 gameProjection = glm::ortho(0.f, static_cast<float>(screenWidth),

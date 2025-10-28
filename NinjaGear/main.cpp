@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "Game.h"
+#include "GameConfig.h"
 #include "Globals.h"
 #include <stdio.h>
 #include "ServiceLocator.h"
@@ -42,17 +43,15 @@ int main(void)
 	GLFWwindow* window;
 	double timePerFrame = 1.f / TARGET_FRAMERATE, timePreviousFrame, currentTime;
 
-	/* Initialize the library */
 	if (!glfwInit())
 		return -1;
 
-	/* Create a windowed mode window and its OpenGL context */
-	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-	globalScreenWidth = mode->width;
-	globalScreenHeight = mode->height;
+	globalScreenWidth = GameConfig::WINDOW_WIDTH;
+	globalScreenHeight = GameConfig::WINDOW_HEIGHT;
 
-	window = glfwCreateWindow(globalScreenWidth / 2, globalScreenHeight / 2, "Ninja Gear", NULL, NULL); //if u want fullscreen, change first NULL to monitor
+	window = glfwCreateWindow(GameConfig::WINDOW_WIDTH, GameConfig::WINDOW_HEIGHT,
+		"Ninja Gear", NULL, NULL);
+
 	if (!window)
 	{
 		glfwTerminate();
@@ -72,7 +71,7 @@ int main(void)
 	glewInit();
 
 	/* Init step of the game loop */
-	Game::instance().init(globalScreenWidth / 2, globalScreenHeight / 2);
+	Game::instance().init(GameConfig::WINDOW_WIDTH, GameConfig::WINDOW_HEIGHT);
 	timePreviousFrame = glfwGetTime();
 
 	/* Loop until the user closes the window */

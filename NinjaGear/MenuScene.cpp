@@ -1,6 +1,7 @@
 #include "MenuScene.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include "GameConfig.h"
 using namespace std;
 
 MenuScene::MenuScene()
@@ -23,7 +24,8 @@ void MenuScene::init()
         menuTexture.loadFromFile(menuImagePath, TEXTURE_PIXEL_FORMAT_RGBA);
         menuTexture.setMinFilter(GL_NEAREST);
         menuTexture.setMagFilter(GL_NEAREST);
-        menuSprite = Sprite::createSprite(glm::ivec2(globalScreenWidth / 2, globalScreenHeight / 2),
+        menuSprite = Sprite::createSprite(
+            glm::ivec2(GameConfig::WINDOW_WIDTH, GameConfig::WINDOW_HEIGHT),
             glm::vec2(1.0f, 1.0f),
             &menuTexture,
             &texProgram);
@@ -49,8 +51,8 @@ void MenuScene::render()
     glm::mat4 modelview;
     texProgram.use();
 
-    glm::mat4 projection = glm::ortho(0.f, float(globalScreenWidth / 2),
-        float(globalScreenHeight / 2), 0.f);
+    glm::mat4 projection = glm::ortho(0.f, float(GameConfig::WINDOW_WIDTH),
+        float(GameConfig::WINDOW_HEIGHT), 0.f);
 
     texProgram.setUniformMatrix4f("projection", projection);
     texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
