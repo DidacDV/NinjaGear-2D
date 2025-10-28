@@ -15,7 +15,7 @@ class Enemy
 {
 public:
 	virtual ~Enemy() = default;
-	void init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet);
+	void init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet, vector<TileMap*> tileMaps);
 	virtual void update(int deltaTime);
 	virtual void render(const glm::mat4& view = glm::mat4(1.0f));
 
@@ -59,6 +59,7 @@ protected:
 
 	// Tilemap
 	TileMap* map;
+	vector<TileMap*> maps;
 	bool checkPlayerVisibility(const glm::vec2 playerPos);
 	float cachedTileSize;
 

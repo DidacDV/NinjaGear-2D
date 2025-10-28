@@ -18,7 +18,7 @@ public:
     vector<glm::ivec2> findPath(
         const glm::ivec2& start,
         const glm::ivec2& goal,
-        TileMap* tileMap
+        const vector<TileMap*>& tileMaps
     );
 
     glm::ivec2 worldToTile(const glm::vec2& worldPos, int tileSize) const;
@@ -48,7 +48,7 @@ private:
         const map<glm::ivec2, glm::ivec2, ivec2Compare>& cameFrom,
         glm::ivec2 current
     ) const;
-    bool isWalkable(const glm::ivec2& pos, TileMap* tileMap) const;
+    bool isWalkable(const glm::ivec2& pos, const vector<TileMap*>& tileMaps) const;
     vector<glm::ivec2> getNeighbors(const glm::ivec2& pos) const;
 };
 

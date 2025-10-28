@@ -15,11 +15,13 @@ enum EnemyAnims
 	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
 };
 
-void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet)
+void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet,
+	vector<TileMap*> tileMaps)
 {
 	//Template that every enemy will follow. 
 	initializeSprite(shaderProgram, spritesheet);
 	map = tileMap;
+	maps = tileMaps;
 	cachedTileSize = static_cast<float>(map->getTileSize());
 	tileMapDispl = tileMapPos;
 	currentDirection = DOWN;

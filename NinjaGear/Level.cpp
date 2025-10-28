@@ -236,7 +236,7 @@ void Level::initializeEnemies() {
 				enemy = nullptr;
 				break;
 		}
-		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0], config.spriteSheet);
+		enemy->init(glm::ivec2(SCREEN_X, SCREEN_Y), this->texProgram, maps[0], config.spriteSheet, maps);
 		enemy->setPosition(glm::ivec2(config.xTile * maps[0]->getTileSize(), config.yTile * maps[0]->getTileSize()));
 		enemy->setProjectileManager(&projectileManager);
 		enemies.push_back(enemy);
