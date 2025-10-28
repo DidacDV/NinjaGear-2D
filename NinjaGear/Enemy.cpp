@@ -19,6 +19,7 @@ void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, Til
 	vector<TileMap*> tileMaps)
 {
 	//Template that every enemy will follow. 
+	maps.clear();
 	initializeSprite(shaderProgram, spritesheet);
 	map = tileMap;
 	maps = tileMaps;
@@ -79,7 +80,7 @@ bool Enemy::checkPlayerVisibility(const glm::vec2 playerPos)
 		glm::vec2 toPlayer = glm::normalize(playerPos - glm::vec2(posEnemy));
 		float dot = glm::dot(dirVec, toPlayer);
 		if (dot > 0.85f) { 
-			playerVisible = map->hasLineOfSight(glm::vec2(posEnemy), playerPos);
+			playerVisible = TileMap::hasLineOfSight(glm::vec2(posEnemy), playerPos, maps);
 		}
 	}
 

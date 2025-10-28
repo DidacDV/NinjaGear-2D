@@ -15,6 +15,7 @@
     <ClInclude Include="AudioService.h" />
     <ClInclude Include="Boss.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="EnemyTypes.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GeometryUtils.h" />
     <ClInclude Include="Globals.h" />
