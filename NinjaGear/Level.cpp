@@ -322,6 +322,7 @@ void Level::checkCombat()
 					projectile->deactivate();
 
 					if (!enemy->isAlive()) {
+						if (enemy->isBoss()) Game::instance().victory();
 						delete enemy;
 						player->increaseRank(1);
 						it = enemies.erase(it);
