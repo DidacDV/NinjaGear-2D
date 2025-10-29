@@ -168,7 +168,6 @@ void Game::init(int screenWidth, int screenHeight)
 	createSpikeTraps(dungeonObjects, 25.0f, 14.0f, 10);
 	createSpikeTraps(dungeonObjects, 25.0f, 16.0f, 10);
 	//laberynth like lvl
-	createSpikeTraps(dungeonObjects, 24.0f, 27.0f, 1);
 	createSpikeTraps(dungeonObjects, 26.0f, 27.0f, 1);
 	createSpikeTraps(dungeonObjects, 28.0f, 27.0f, 1);
 
