@@ -28,12 +28,10 @@ MovingObject::MovingObject(const glm::vec2& quadSize,
 void MovingObject::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram,
     const glm::vec2& spriteSize, const glm::vec2& texCoordSize, Texture* texture)
 {
-	cout << "MovingObject init used. Should be overriden" << endl;
 }
 
 void MovingObject::setMovementPath(const glm::vec2& startPos, const glm::vec2& endPos, float speed)
 {
-    cout << "MovingObject setMovementPath used. Should be overriden" << endl;
 }
 
 void MovingObject::update(int deltaTime)
@@ -47,7 +45,6 @@ void MovingObject::update(int deltaTime)
 void MovingObject::updateMovementPattern(int deltaTime)
 {
     // Base implementation: simple velocity-based movement
-    cout << "MovingObject updateMovementPattern used. Should be overriden" << endl;
 }
 
 void MovingObject::setTileMapPosition(const glm::ivec2& tilePos, const glm::ivec2& tileMapDispl)

@@ -62,7 +62,6 @@ void Boss::updateStateMachine(int deltaTime) {
         ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
 
         updatePhaseParameters();
-        cout << "Boss entered Phase 2!" << endl;
     }
     else if (currentPhase == Phase::PHASE_TWO && healthPercent <= 0.5f) {
         currentPhase = Phase::PHASE_THREE;
@@ -73,7 +72,6 @@ void Boss::updateStateMachine(int deltaTime) {
 
         ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
         updatePhaseParameters();
-        cout << "Boss entered Phase 3!" << endl;
     }
     else if (currentPhase == Phase::PHASE_THREE && healthPercent <= 0.25f) {
         currentPhase = Phase::PHASE_FOUR;
@@ -84,7 +82,6 @@ void Boss::updateStateMachine(int deltaTime) {
 
         ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
         updatePhaseParameters();
-        cout << "Boss entered Phase 4!" << endl;
     }
 
     if (hitAnimationTimer > 0)
@@ -139,7 +136,6 @@ void Boss::updatePhaseParameters()
         shootCooldown = 1000;
         attackDamage = 20;
         attackSpeed += 50;
-        cout << "Boss is faster and shoots more frequently!" << endl;
         break;
     case Phase::PHASE_THREE:
         this->posEnemy = glm::ivec2(16.0f * map->getTileSize(), 49.0f * map->getTileSize());
@@ -148,7 +144,6 @@ void Boss::updatePhaseParameters()
         shootCooldown = 500;
         attackDamage = 25;
         attackSpeed += 10;
-        cout << "Boss enters rage mode!" << endl;
         break;
     case Phase::PHASE_FOUR:
         this->posEnemy = glm::ivec2(9.0f * map->getTileSize(), 41.0f * map->getTileSize());
@@ -157,7 +152,6 @@ void Boss::updatePhaseParameters()
         shootCooldown = 250;
         attackDamage = 25;
         attackSpeed += 10;
-        cout << "Boss enters rage mode!" << endl;
         break;
     }
 }
@@ -232,7 +226,6 @@ void Boss::updateMovement(int deltaTime)
 void Boss::shootAtPlayer(const glm::vec2& playerPos)
 {
     if (!projectileManager) return;
-    cout << "about to shoot!" << endl;
     glm::vec2 direction = glm::normalize(playerPos - posEnemy);
     int damage = 1;
 

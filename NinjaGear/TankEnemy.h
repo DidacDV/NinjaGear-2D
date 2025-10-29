@@ -11,7 +11,7 @@ public:
     {
         // Tank stats: slower, tankier, hits harder, more cooldown between attacks
         moveSpeed = 0.8f;      
-        health = 10;            
+        health = 12;            
         attackDamage = 2;            
 
         attackCooldown = 2000; 

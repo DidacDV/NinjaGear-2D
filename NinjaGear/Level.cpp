@@ -254,7 +254,6 @@ void Level::initializeMovingObjects()
 		const MovingObjectConfig& config = movingObjectConfigs[i];
 
 		if (!movingObjectTextures[i].loadFromFile(config.spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA)) {
-			std::cout << "ERROR: Failed to load texture: " << config.spriteSheet << std::endl;
 			continue;
 		}
 
@@ -509,7 +508,6 @@ void Level::checkItemPickUp() {
 		glm::vec2 itemPos = items[i]->getPosition();
 		if (checkColission(playerPos, itemPos, 16, 16)) 
 		{
-			std::cout << "Item picked up at position: (" << itemPos.x << ", " << itemPos.y << ")\n";
 			itemPickUpEvent(i);
 			break;
 		}

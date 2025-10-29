@@ -12,7 +12,6 @@ Scene::Scene()
 
 Scene::Scene(const vector<string>& tileMapFiles)
 {
-	cout << "detecting tilemaps" << endl;
 	this->currentTime = 0.0f;
 	mapFiles = tileMapFiles;
 }
@@ -33,7 +32,6 @@ void Scene::init()
 	initShaders();
 	loadTileMaps();
 	if (maps.empty()) {
-		cout << "ERROR: No tilemaps loaded!" << endl;
 		return;
 	}
 

@@ -63,7 +63,7 @@ protected:
 	virtual void changeAnimationsForDirection(glm::vec2 direction) = 0;
     glm::vec2 cameraOffset = glm::vec2(0.0f, 0.0f);
 	// Attributes
-	int health = 10;
+	int health = 8;
 	int attackDamage = 1;
 	glm::vec2 enemySize = glm::vec2(16.f, 16.f);
 	glm::ivec2 tileMapDispl;

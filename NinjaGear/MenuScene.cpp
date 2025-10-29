@@ -33,7 +33,6 @@ void MenuScene::init()
         if (menuSprite != NULL) {
             menuSprite->setPosition(glm::vec2(0, 0));
             imageLoaded = true;
-            cout << "Menu image loaded successfully: " << menuImagePath << endl;
         }
     }
 }

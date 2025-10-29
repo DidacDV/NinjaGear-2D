@@ -215,7 +215,7 @@ void RangedEnemy::shootAtPlayer(const glm::vec2& playerPos)
 		direction,
 		speed,
 		damage,
-		"images/projectiles/Rock.png",
+		"images/projectiles/energyBall.png",
 		false
 	);
 }

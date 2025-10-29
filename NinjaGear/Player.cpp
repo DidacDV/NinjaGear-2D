@@ -499,7 +499,6 @@ glm::vec2 Player::getPunchHitbox() const
 }
 
 void Player::increaseRank(const int& increase) {
-	cout << "increased rank by" << increase << endl;
 	rank += increase;
 	ServiceLocator::getAudio().playSound("sounds/rankup.wav");
 }
@@ -529,8 +528,6 @@ void Player::initDefaultWeapon() {
 	weaponInventory.push_back(punchWeapon);
 	currentWeaponIndex = 0;
 	equippedWeapon = "PUNCH";
-
-	cout << "Initialized default weapon: PUNCH" << endl;
 }
 
 
@@ -541,10 +538,6 @@ void Player::addItem(Item* item) {
 		//auto-switch to newly picked weapon
 		currentWeaponIndex = weaponInventory.size() - 1;
 		equippedWeapon = item->getName();
-
-		cout << "Added WEAPON " << item->getName() << " to weapon inventory" << endl;
-		cout << "Weapon inventory size: " << weaponInventory.size() << endl;
-		cout << "Switched to: " << equippedWeapon << endl;
 	}
 	else {
 		string name = item->getName();
@@ -594,7 +587,6 @@ Item* Player::getCurrentItem() const {
 
 void Player::useCurrentItem() {
 	if (itemInventory.empty()) {
-		cout << "No items to use!" << endl;
 		return;
 	}
 
@@ -605,7 +597,6 @@ void Player::useCurrentItem() {
 		if (health == maxHealth)
 			return;
 		heal(1.f);
-		cout << "Used MEDIPACK! Health: " << health << "/" << maxHealth << endl;
 		int randomHit = (rand() % 8) + 1;
 		std::string soundPath = "sounds/Cure" + std::to_string(randomHit) + ".wav";
 		ServiceLocator::getAudio().playSound(soundPath.c_str());
@@ -641,7 +632,6 @@ void Player::consumeItem(Item* item, string& itemName) {
 void Player::applyBuff(BuffType type, float duration, float multiplier)
 {
 	activeBuffs[type] = { type, duration, duration, multiplier };
-	std::cout << "Applied buff: " << (int)type << " for " << duration << "s" << std::endl;
 }
 
 void Player::checkBuffsState(int deltaTime) {
@@ -652,7 +642,6 @@ void Player::checkBuffsState(int deltaTime) {
 		it->second.remainingTime -= deltaSec;
 		if (it->second.remainingTime <= 0.0f)
 		{
-			std::cout << "Buff expired: " << (int)it->second.type << std::endl;
 			it = activeBuffs.erase(it); //remove expired buff
 		}
 		else ++it;
@@ -673,7 +662,6 @@ void Player::shootBowProjectile()
 	if (!projectileManager) return;
 
 	if (getItemQuantity("ARROW") <= 0) {
-		cout << "No arrows!" << endl;
 		return;
 	}
 
@@ -694,7 +682,7 @@ void Player::shootBowProjectile()
 	}
 
 	float speed = 100.f;
-	int damage = 3;
+	int damage = 2;
 
 	//SPAWN PROJECTILE FIRST
 	projectileManager->spawnProjectile(
@@ -725,13 +713,9 @@ void Player::shootBowProjectile()
 			}
 		}
 	}
-
-	cout << "Shot arrow! Remaining: " << getItemQuantity("ARROW") << endl;
 }
 
 void Player::giveAllItems() {
-	cout << "=== GIVING ALL ITEMS ===" << endl;
-
 	for (auto& item : itemInventory) {
 		delete item;
 	}
@@ -763,8 +747,4 @@ void Player::giveAllItems() {
 
 
 	if (!itemInventory.empty()) currentItemIndex = 0;
-
-	cout << "Given: MEDIPACK, SPEED POTION, ARROW (x5), BOW" << endl;
-	cout << "Total items: " << itemInventory.size() << endl;
-	cout << "Total weapons: " << weaponInventory.size() << endl;
 }

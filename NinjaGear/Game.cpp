@@ -319,7 +319,6 @@ void Game::mouseMove(int x, int y)
 
 void Game::mousePress(int button)
 {
-	cout << mouseX << " " << mouseY << endl;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		// Check if we're in a menu and handle the click
 		Menu* menu = dynamic_cast<Menu*>(currentScene);
