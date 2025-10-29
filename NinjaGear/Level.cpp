@@ -312,11 +312,10 @@ void Level::checkCombat()
 	for (Projectile* projectile : projectileManager.getActiveProjectiles()) {
 		if (projectile->getIsPlayerProjectile()) {
 			// PLAYER projectiles hit ENEMIES
-			glm::vec2 enemySize(ENEMY_SIZE, ENEMY_SIZE);
 
 			for (auto it = enemies.begin(); it != enemies.end(); ) {
 				Enemy* enemy = *it;
-
+				glm::vec2 enemySize = enemy->getEnemySize();
 				if (isColliding(projectile->getPosition(), projectile->getSize(),
 					enemy->getPosition(), enemySize)) {
 					enemy->takeDamage(projectile->getDamage());
