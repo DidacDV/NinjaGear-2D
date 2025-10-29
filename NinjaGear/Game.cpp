@@ -70,8 +70,6 @@ void Game::init(int screenWidth, int screenHeight)
 	jungleMusic.push_back(MusicConfig{ 0, 0, "sounds/music/jungle.mp3" });
 	jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/music/jungle.mp3" });
 	jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/music/desert.mp3" });
-	//jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/village.wav" });
-	//jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
 	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic, LevelType::OUTSIDE);
 	addScene("outside", Jungle1);
 

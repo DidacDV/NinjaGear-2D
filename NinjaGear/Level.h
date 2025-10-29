@@ -123,5 +123,26 @@ class Level :
         void itemPickUpEvent(int indexInVector);
         void clearProjectiles();
         LevelType type;
+
+        // Ambient
+        struct Particle {
+            Sprite* sprite;
+            glm::vec2 position;
+            glm::vec2 velocity;
+            float lifetime;
+            float maxLifetime;
+            float scale;
+            int animationFrame;
+        };
+
+        std::vector<Particle> particles;
+        Texture particleTexture;
+        float particleSpawnTimer;
+        float particleSpawnInterval; 
+
+        void initializeParticleSystem();
+        void updateParticles(int deltaTime);
+        void spawnParticle();
+        void renderParticles();
 };
 
