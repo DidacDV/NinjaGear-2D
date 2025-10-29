@@ -497,7 +497,7 @@ void Level::itemPickUpEvent(int indexInVector) {
 	player->addItem(itemPicked);
 
 	std::string pickupText = "PICKED UP " + itemPicked->getName() + "!";
-	glm::vec2 messagePos(320, 160);
+	glm::vec2 messagePos(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200);
 	glm::vec3 messageColor(0.f, 0.f, 0.f);
 	ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
 

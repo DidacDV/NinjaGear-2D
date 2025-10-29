@@ -28,7 +28,7 @@ void Game::init(int screenWidth, int screenHeight)
 	startMenu->setMenuImage("images/StartMenu.png");
 
 	Menu* settingsMenu = new Menu(MenuType::SETTINGS);
-	settingsMenu->setMenuImage("images/SettingsMenu.png");
+	settingsMenu->setMenuImage("images/SettingsMenu.jpg");
 
 	Menu* deathMenu = new Menu(MenuType::DEATH);
 	deathMenu->setMenuImage("images/DeathMenu.png");
@@ -223,7 +223,7 @@ void Game::keyPressed(int key)
 		else {
 			setCurrentScene("dungeon");
 			ServiceLocator::getUI().showTemporaryMessage("INTERIOR TP ACTIVATED",
-				glm::vec2(GameConfig::CENTER_X, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+				glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 		}
 	}
 	else if (key == GLFW_KEY_Z)
@@ -232,20 +232,20 @@ void Game::keyPressed(int key)
 	else if (key == GLFW_KEY_I) {
 		player->giveAllItems();
 		ServiceLocator::getUI().showTemporaryMessage("ALL ITEMS CHEAT ACTIVATED",
-			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+			glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
 	//heal cheat
 	else if (key == GLFW_KEY_H) {
 		player->setHealth(player->getMaxHealth());
 		ServiceLocator::getUI().showTemporaryMessage("FULL HEAL ACTIVATED",
-			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+			glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
 	//god mode cheat
 	else if (key == GLFW_KEY_G) {
 		player->toggleGodMode();
 		string message = player->isGodModeOn() ? "GOD MODE ACTIVATED" : "GOD MODE DEACTIVATED";
 		ServiceLocator::getUI().showTemporaryMessage(message,
-			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+			glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
 	//boss tp cheat
 	else if (key == GLFW_KEY_B) {
@@ -259,7 +259,7 @@ void Game::keyPressed(int key)
 		glm::vec2 newPos(targetTileX * tileSize, targetTileY * tileSize);
 		player->setPosition(newPos);
 		ServiceLocator::getUI().showTemporaryMessage("BOSS TP ACTIVATED",
-			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+			glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
 		
 
