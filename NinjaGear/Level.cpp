@@ -105,7 +105,6 @@ void Level::update(int deltaTime)
 {
 	Scene::update(deltaTime);
 	player->update(deltaTime);
-
 	checkTransitionTiles();
 
 	for (unsigned int i = 0; i < enemies.size(); i++) {
@@ -176,7 +175,7 @@ void Level::updateMusic()
 		const MusicConfig& config = it->second;
 		if (config.musicFile != currentMusicFile) {
 			currentMusicFile = config.musicFile;
-			ServiceLocator::getAudio().playMusic(config.musicFile.c_str());
+			if(musicPlaying) ServiceLocator::getAudio().playMusic(currentMusicFile.c_str());
 		}
 	}
 }
@@ -217,18 +216,18 @@ void Level::render()
 	for (unsigned int i = 0; i < maps.size(); i++)
 		maps[i]->render();
 
-	for (unsigned int i = 0; i < items.size(); i++)
-		items[i]->render(view);
-
-	// Render all enemies
-	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->render(view);
-	projectileManager.render(view);
 	// Player render - pass the view matrix
 	for (MovingObject* obj : movingObjects) {
 		if (obj != nullptr) {
 			obj->render(view);
 		}
 	}
+	for (unsigned int i = 0; i < items.size(); i++)
+		items[i]->render(view);
+	// Render all enemies
+	for (unsigned int i = 0; i < enemies.size(); i++) enemies[i]->render(view);
+	projectileManager.render(view);
+
 	player->render(view);
 }
 

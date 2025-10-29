@@ -24,11 +24,15 @@ public:
 	virtual void update(int deltaTime);
 	virtual void render();
 	virtual void resetViewportFullScreen();
+	void playMusic();
+	void stopMusic();
 
 protected:
 	void initShaders();
 	void loadTileMaps();
 	void setupViewport(float heightPercent, float yOffsetPercent);
+	string currentMusicFile;
+	bool musicPlaying = false;
 	vector<string> mapFiles;
 	vector<TileMap*> maps;
 	ShaderProgram texProgram;

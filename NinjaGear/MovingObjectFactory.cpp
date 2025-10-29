@@ -67,7 +67,8 @@ MovingObject* MovingObjectFactory::createSpikeTrap(
     trap->addKeyframe(1, glm::vec2(0.5f, 0.0f));
 
     trap->setAnimationSpeed(2, 8);
-    trap->addKeyframe(2, glm::vec2(0.0f, 0.5f));
+    trap->addKeyframe(2, glm::vec2(0.0f, 0.0f));
+    trap->addKeyframe(2, glm::vec2(0.5f, 0.0f));
 
     trap->changeAnimation(0);
     trap->setCollisionBox(glm::vec2(8.0f, 8.0f));

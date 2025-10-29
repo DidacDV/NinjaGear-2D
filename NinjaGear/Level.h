@@ -76,8 +76,7 @@ class Level :
         ProjectileManager projectileManager;
         //Music
         vector<MusicConfig> musicConfigs;
-        map<pair<int, int>, MusicConfig> sectorMusicMap;  
-        string currentMusicFile;
+        map<pair<int, int>, MusicConfig> sectorMusicMap;
 
 		vector<Item*> items;
         // Camera sector traking

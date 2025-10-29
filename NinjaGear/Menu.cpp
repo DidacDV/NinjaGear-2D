@@ -11,6 +11,7 @@ Menu::Menu(MenuType menuType, const string& musicFile) : MenuScene()
     imageLoaded = false;
     type = menuType;
     music = musicFile;
+    currentMusicFile = musicFile;
 }
 
 Menu::~Menu()

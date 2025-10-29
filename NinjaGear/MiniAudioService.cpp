@@ -40,6 +40,7 @@ void MiniaudioService::playSound(const char* filepath)
 
     if (result == MA_SUCCESS) {
         ma_sound_start(sound);
+        ma_sound_set_volume(sound, 0.1f);
         activeSounds.push_back(sound);
     }
     else {
@@ -99,7 +100,7 @@ void MiniaudioService::playMusic(const char* filepath, bool loop)
     ma_result result = ma_sound_init_from_file(&engine, filepath, 0, NULL, NULL, &currentMusic);
     if (result == MA_SUCCESS) {
         ma_sound_set_looping(&currentMusic, loop ? MA_TRUE : MA_FALSE);
-        ma_sound_set_volume(&currentMusic, 0.2f);
+        ma_sound_set_volume(&currentMusic, 0.05f);
         ma_sound_start(&currentMusic);
         musicLoaded = true;
     }
