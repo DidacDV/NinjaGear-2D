@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="NinjaGear/images/StartMenu.png" alt="Game Banner" width="800"/>
+</div>
+
 # Software Design Patterns & Principles - Ninja Gear
 
 This document explains the software design patterns and architectural decisions used in the Ninja Gear game engine.
