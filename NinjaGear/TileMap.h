@@ -43,7 +43,7 @@ const int BLOCKED_TILES[] = {
 								// DUNGEON
 								6119, 6219, 6319, 6324, 6325, 6424, 6425, 7661, 7662, 7663, 7664, 7665, 7761, 7762, 7763, 7764, 7765, 7864, 7865, 
 								7926, 7927, 7940, 7941, 7945, 8025,8028, 8040, 8041, 8044, 8125,  8126, 8129, 8140, 8145, 
-								8342, 8343, 8541, 8428, 8542, 8640, 8641, 
+								8342, 8343, 8541, 8428, 8542, 8640, 8641, 8540
 							};
 
 class TileMap
@@ -70,8 +70,7 @@ public:
 	bool collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size) const;
 	bool collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size) const;
 	bool hasLineOfSight(const glm::vec2& from, const glm::vec2& to) const;
-	static bool hasLineOfSight(const glm::vec2& from, const glm::vec2& to,
-		const vector<TileMap*>& tileMaps);
+	static bool hasLineOfSight(const glm::vec2& from, const glm::vec2& to, const TileMap* tileMap);
 	//NEW FUNCTIONS
 	void addBlockedTiles(const vector<int> tilesToBlock, int count);
 

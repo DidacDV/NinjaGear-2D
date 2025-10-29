@@ -6,6 +6,7 @@
 #include "EnemyFactory.h"
 
 #include "GameConfig.h"
+#include "InterpolatedTileMap.h"
 
 Level::Level()
 {
@@ -60,10 +61,11 @@ void Level::reStartLevel() {
 void Level::init() 
 {	
 	Scene::init();
+	navigationMap = InterpolatedTileMap::createComposite(maps);
 	reStartLevel();
 	initializeTransitionTiles();
 	// Initialize projectile manager
-	projectileManager.init(&texProgram, maps[0]);
+	projectileManager.init(&texProgram, navigationMap);
 
 	//Projection matrix override
 	projection = glm::ortho(0.f, float(GameConfig::CAMERA_WIDTH), float(GameConfig::CAMERA_HEIGHT), 0.f);
@@ -227,8 +229,7 @@ void Level::initializeEnemies() {
 			config,
 			glm::ivec2(GameConfig::SCREEN_X, GameConfig::SCREEN_Y),
 			texProgram,
-			maps[0],
-			maps,
+			navigationMap,
 			&projectileManager
 		);
 		if (enemy) {

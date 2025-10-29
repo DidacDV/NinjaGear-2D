@@ -17,8 +17,8 @@ struct MovingObjectConfig {
     glm::vec2 texCoordSize;
     bool dealsDamage;
     int damage;
-    int idleDuration;
-    int spikeDuration;
+    int idleDuration = 0;
+    int spikeDuration = 0;
     int timerOffset = 0;
 };
 

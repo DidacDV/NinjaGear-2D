@@ -13,7 +13,8 @@ public:
         bool isPlayerProjectile = false,
         const glm::vec2& sizeInSprite = glm::vec2(1.0f, 1.0f),
         int animationSpeed = 10,
-        const vector<glm::vec2>& animationKeyframes = {}
+        const vector<glm::vec2>& animationKeyframes = {},
+        bool ignoreCollision = false
     );
 
     void update(int deltaTime);

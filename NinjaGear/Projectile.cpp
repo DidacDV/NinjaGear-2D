@@ -6,9 +6,11 @@ void Projectile::init(const glm::vec2& startPos, const glm::vec2& direction,
     const string& spritePath, TileMap* map,
     const glm::vec2& sizeInSprite,
     int animationSpeed, 
-    const std::vector<glm::vec2>& animationKeyframes
+    const std::vector<glm::vec2>& animationKeyframes,
+    bool ignoreCollision
 )
 {
+	this->ignoreCollision = ignoreCollision;
     this->position = startPos;
     this->direction = glm::normalize(direction);
     this->speed = speed;
@@ -56,7 +58,7 @@ void Projectile::update(int deltaTime)
 
     // Check wall collision
     position = newPosition;
-    if (checkWallCollision()) {
+    if (checkWallCollision() && !ignoreCollision) {
         active = false;
         return;
     }
