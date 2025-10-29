@@ -12,7 +12,8 @@ public:
         const std::string& spritePath, TileMap* map,
         const glm::vec2& sizeInSprite,
         int animationSpeed,
-        const std::vector<glm::vec2>& animationKeyframes);
+        const std::vector<glm::vec2>& animationKeyframes,
+        bool ignoreCollision);
 
     void update(int deltaTime);
     void render(const glm::mat4& view);
@@ -48,7 +49,7 @@ private:
     // Rendering
     Sprite* sprite;
     Texture spritesheet;
-
+    bool ignoreCollision;
     // Collision
     TileMap* map;
     bool checkWallCollision() const;

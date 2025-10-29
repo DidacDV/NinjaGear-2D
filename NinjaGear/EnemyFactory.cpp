@@ -9,7 +9,6 @@ Enemy* EnemyFactory::create(
     const glm::ivec2& screenPos,
     ShaderProgram& texProgram,
     TileMap* map,
-    const std::vector<TileMap*>& maps,
     ProjectileManager* projectileManager)
 {
     Enemy* enemy = nullptr;
@@ -32,7 +31,7 @@ Enemy* EnemyFactory::create(
     }
 
     if (enemy) {
-        enemy->init(screenPos, texProgram, map, config.spriteSheet, maps);
+        enemy->init(screenPos, texProgram, map, config.spriteSheet);
         enemy->setPatrolDistance(config.patrolDistance);
         enemy->setPosition(glm::ivec2(config.xTile * map->getTileSize(), config.yTile * map->getTileSize()));
         enemy->setProjectileManager(projectileManager);

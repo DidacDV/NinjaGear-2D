@@ -136,7 +136,7 @@ void MeleeEnemy::stopTracking()
     if (!patrolInitialized) initializePatrol();
 
     glm::ivec2 startTile = getEnemyTile();
-    currentPath = Pathfinder::instance().findPath(startTile, originalPatrolPosition, maps);
+    currentPath = Pathfinder::instance().findPath(startTile, originalPatrolPosition, map);
     currentPathIndex = findClosestNodeInPath(currentPath, glm::vec2(posEnemy));
 
     movingToEnd = (originalPatrolPosition == patrolEndTile);
@@ -144,7 +144,7 @@ void MeleeEnemy::stopTracking()
 
 void MeleeEnemy::recalculatePathToPlayer(const glm::vec2& playerPos)
 {
-    currentPath = Pathfinder::instance().findPath(getEnemyTile(), getPlayerTile(playerPos), maps);
+    currentPath = Pathfinder::instance().findPath(getEnemyTile(), getPlayerTile(playerPos), map);
     currentPathIndex = findClosestPathIndex(currentPath, glm::vec2(posEnemy));
     lastTargetTile = getPlayerTile(playerPos);
 
@@ -186,7 +186,7 @@ void MeleeEnemy::startPatrol()
 void MeleeEnemy::calculatePatrolPath(const glm::ivec2& targetTile)
 {
     glm::ivec2 startTile = getEnemyTile();
-    currentPath = Pathfinder::instance().findPath(startTile, targetTile, maps);
+    currentPath = Pathfinder::instance().findPath(startTile, targetTile, map);
     currentPathIndex = findClosestNodeInPath(currentPath, glm::vec2(posEnemy));
 
 }

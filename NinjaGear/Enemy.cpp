@@ -15,14 +15,11 @@ enum EnemyAnims
 	MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN,
 };
 
-void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet,
-	vector<TileMap*> tileMaps)
+void Enemy::init(const glm::ivec2& tileMapPos, ShaderProgram& shaderProgram, TileMap* tileMap, const string& spritesheet)
 {
 	//Template that every enemy will follow. 
-	maps.clear();
 	initializeSprite(shaderProgram, spritesheet);
 	map = tileMap;
-	maps = tileMaps;
 	cachedTileSize = static_cast<float>(map->getTileSize());
 	tileMapDispl = tileMapPos;
 	currentDirection = DOWN;
@@ -80,7 +77,7 @@ bool Enemy::checkPlayerVisibility(const glm::vec2 playerPos)
 		glm::vec2 toPlayer = glm::normalize(playerPos - glm::vec2(posEnemy));
 		float dot = glm::dot(dirVec, toPlayer);
 		if (dot > 0.85f) { 
-			playerVisible = TileMap::hasLineOfSight(glm::vec2(posEnemy), playerPos, maps);
+			playerVisible = TileMap::hasLineOfSight(glm::vec2(posEnemy), playerPos, map);
 		}
 	}
 

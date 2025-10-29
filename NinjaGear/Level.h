@@ -65,7 +65,7 @@ class Level :
         vector<MovingObject*> movingObjects;
         vector<MovingObjectConfig> movingObjectConfigs;
         vector<Texture> movingObjectTextures;
-
+        TileMap* navigationMap;
         //Player
         Player* player;
         int initPlayerX, initPlayerY;

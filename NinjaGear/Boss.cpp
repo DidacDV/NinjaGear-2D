@@ -4,7 +4,7 @@
 
 Boss::Boss() : Enemy()
 {
-    health = 100;
+    health = 20;
     attackDamage = 15;
     moveSpeed = 3.0f;
     enemySize = glm::vec2(50.f, 50.f);
@@ -52,9 +52,9 @@ void Boss::initializeAnimations()
 void Boss::updateStateMachine(int deltaTime) {
     if (!isOnScreen(GameConfig::CAMERA_WIDTH, GameConfig::CAMERA_HEIGHT)) return;
     // PHASE MANAGEMENT
-    float healthPercent = static_cast<float>(health) / 300.0f;
+    float healthPercent = static_cast<float>(health) / 20.0f;
 
-    if (currentPhase == Phase::PHASE_ONE && healthPercent <= 0.66f) {
+    if (currentPhase == Phase::PHASE_ONE && healthPercent <= 0.75f) {
         currentPhase = Phase::PHASE_TWO;
         std::string pickupText = "I AM TIRED OF YOU! GO DIE! ";
         glm::vec2 messagePos(GameConfig::CENTER_X, GameConfig::CENTER_Y);
@@ -64,10 +64,27 @@ void Boss::updateStateMachine(int deltaTime) {
         updatePhaseParameters();
         cout << "Boss entered Phase 2!" << endl;
     }
-    else if (currentPhase == Phase::PHASE_TWO && healthPercent <= 0.33f) {
+    else if (currentPhase == Phase::PHASE_TWO && healthPercent <= 0.5f) {
         currentPhase = Phase::PHASE_THREE;
+
+        std::string pickupText = "THIS IS IT! DIE!";
+        glm::vec2 messagePos(GameConfig::CENTER_X, GameConfig::CENTER_Y);
+        glm::vec3 messageColor(0.f, 0.f, 0.f);
+
+        ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
         updatePhaseParameters();
         cout << "Boss entered Phase 3!" << endl;
+    }
+    else if (currentPhase == Phase::PHASE_THREE && healthPercent <= 0.25f) {
+        currentPhase = Phase::PHASE_FOUR;
+
+        std::string pickupText = "THIS IS IT! DIE!";
+        glm::vec2 messagePos(GameConfig::CENTER_X, GameConfig::CENTER_Y);
+        glm::vec3 messageColor(0.f, 0.f, 0.f);
+
+        ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
+        updatePhaseParameters();
+        cout << "Boss entered Phase 4!" << endl;
     }
 
     if (hitAnimationTimer > 0)
@@ -77,12 +94,15 @@ void Boss::updateStateMachine(int deltaTime) {
         {
             sprite->changeAnimation(getIdleAnim());
         }
-        else
-        {
-            return;
-        }
     }
 
+    if (hitAnimationTimer > 0)
+    {
+        lastHitTimer -= deltaTime;
+        if (lastHitTimer <= 0) lastHitTimer = 0;
+    }
+    
+    
 
     switch (currentState) {
     case State::IDLE:
@@ -108,19 +128,35 @@ void Boss::updatePhaseParameters()
     switch (currentPhase) {
     case Phase::PHASE_ONE:
         moveSpeed = 3.0f;
-        shootCooldown = 2000;
+        shootCooldown = 1500;
         attackDamage = 15;
+        attackSpeed += 50;
         break;
     case Phase::PHASE_TWO:
+        this->posEnemy = glm::ivec2(1.0f * map->getTileSize(), 49.0f * map->getTileSize());
+        initializeMovement(true);
         moveSpeed = 4.5f;
-        shootCooldown = 1500;
+        shootCooldown = 1000;
         attackDamage = 20;
+        attackSpeed += 50;
         cout << "Boss is faster and shoots more frequently!" << endl;
         break;
     case Phase::PHASE_THREE:
+        this->posEnemy = glm::ivec2(16.0f * map->getTileSize(), 49.0f * map->getTileSize());
+        initializeMovement(true);
         moveSpeed = 6.0f;
-        shootCooldown = 1000;
+        shootCooldown = 500;
         attackDamage = 25;
+        attackSpeed += 10;
+        cout << "Boss enters rage mode!" << endl;
+        break;
+    case Phase::PHASE_FOUR:
+        this->posEnemy = glm::ivec2(9.0f * map->getTileSize(), 41.0f * map->getTileSize());
+        initializeMovement();
+        moveSpeed = 6.0f;
+        shootCooldown = 250;
+        attackDamage = 25;
+        attackSpeed += 10;
         cout << "Boss enters rage mode!" << endl;
         break;
     }
@@ -128,20 +164,33 @@ void Boss::updatePhaseParameters()
 
 
 // Movement
-void Boss::initializeMovement()
+void Boss::initializeMovement(bool vertical)
 {
     glm::ivec2 currentTile = getEnemyTile();
 
     // Set horizontal movement range (e.g., 8 tiles left and right)
-    moveStartTile = glm::ivec2(
-        std::max(0, currentTile.x - 4),
-        currentTile.y
-    );
+    if (!vertical) {
+        moveStartTile = glm::ivec2(
+            std::max(0, currentTile.x - 5),
+            currentTile.y
+        );
 
-    moveEndTile = glm::ivec2(
-        std::min(map->width() - 1, currentTile.x + 4),
-        currentTile.y
-    );
+        moveEndTile = glm::ivec2(
+            std::min(map->width() - 1, currentTile.x + 5),
+            currentTile.y
+        );
+    }
+    else {
+        moveStartTile = glm::ivec2(
+            currentTile.x,
+            std::max(0, currentTile.y - 7)
+        );
+
+        moveEndTile = glm::ivec2(
+            currentTile.x,
+            std::min(map->height() - 1, currentTile.y + 7)
+        );
+    }
 
     movementInitialized = true;
 }
@@ -185,7 +234,6 @@ void Boss::shootAtPlayer(const glm::vec2& playerPos)
     if (!projectileManager) return;
     cout << "about to shoot!" << endl;
     glm::vec2 direction = glm::normalize(playerPos - posEnemy);
-    float speed = 100.0f;
     int damage = 1;
 
     vector<glm::vec2> projectileKeyframes = {
@@ -198,22 +246,20 @@ void Boss::shootAtPlayer(const glm::vec2& playerPos)
     projectileManager->spawnProjectile(
         posEnemy,
         direction,
-        speed,
+        attackSpeed,
         damage,
         "images/projectiles/fireball.png",
         false,
         glm::vec2(0.25f, 1.0f),
         10,
-        projectileKeyframes
+        projectileKeyframes,
+        true
     );
 }
 
 
 void Boss::changeAnimationsForDirection(glm::vec2 direction)
-{
-    // Simple implementation - boss primarily moves horizontally
-
-}
+{}
 
 bool Boss::isInAttackState() const
 {
@@ -225,6 +271,7 @@ void Boss::onDamageReceived()
 {
     sprite->changeAnimation(getHitAnim());
     hitAnimationTimer = HIT_ANIMATION_DURATION;
+    lastHitTimer = HIT_COOLDOWN;
 }
 
 bool Boss::isOnScreen(int cameraWidth, int cameraHeight, float margin) const

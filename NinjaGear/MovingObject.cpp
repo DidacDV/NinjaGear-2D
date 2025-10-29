@@ -110,7 +110,7 @@ bool MovingObject::isOnScreen(int cameraWidth, int cameraHeight, float margin) c
 
 void MovingObject::playSoundIfOnScreen(const std::string& soundFile) const
 {
-    if (!isOnScreen(GameConfig::CAMERA_WIDTH, GameConfig::CAMERA_HEIGHT)) {
-    return;
-}
+    if (isOnScreen(GameConfig::CAMERA_WIDTH, GameConfig::CAMERA_HEIGHT)) {
+        ServiceLocator::getAudio().playSound(soundFile.c_str());
+    }
 }
