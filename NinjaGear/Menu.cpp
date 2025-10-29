@@ -78,9 +78,6 @@ void Menu::addButton(const glm::vec2& relativePos, const glm::vec2& relativeSize
     btn.action = action;
 
     buttons.push_back(btn);
-
-    std::cout << "Added button: " << action << " at (" << btn.position.x << ", " << btn.position.y
-        << ") size (" << btn.size.x << ", " << btn.size.y << ")" << std::endl;
 }
 
 string Menu::getClickedButton(int mouseX, int mouseY)
@@ -102,8 +99,6 @@ void Menu::handleClick(int mouseX, int mouseY)
     string action = getClickedButton(mouseX, mouseY);
 
     if (!action.empty()) {
-        cout << "Button clicked: " << action << endl;
-
         if (action == "start") {
             Game::instance().setCurrentScene("outside");
         }

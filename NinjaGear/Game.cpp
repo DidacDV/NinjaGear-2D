@@ -70,8 +70,6 @@ void Game::init(int screenWidth, int screenHeight)
 	jungleMusic.push_back(MusicConfig{ 0, 0, "sounds/music/jungle.mp3" });
 	jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/music/jungle.mp3" });
 	jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/music/desert.mp3" });
-	//jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/village.wav" });
-	//jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
 	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic, LevelType::OUTSIDE);
 	addScene("outside", Jungle1);
 
@@ -170,7 +168,6 @@ void Game::init(int screenWidth, int screenHeight)
 	createSpikeTraps(dungeonObjects, 25.0f, 14.0f, 10);
 	createSpikeTraps(dungeonObjects, 25.0f, 16.0f, 10);
 	//laberynth like lvl
-	createSpikeTraps(dungeonObjects, 24.0f, 27.0f, 1);
 	createSpikeTraps(dungeonObjects, 26.0f, 27.0f, 1);
 	createSpikeTraps(dungeonObjects, 28.0f, 27.0f, 1);
 
@@ -319,7 +316,6 @@ void Game::mouseMove(int x, int y)
 
 void Game::mousePress(int button)
 {
-	cout << mouseX << " " << mouseY << endl;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		// Check if we're in a menu and handle the click
 		Menu* menu = dynamic_cast<Menu*>(currentScene);

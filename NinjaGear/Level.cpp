@@ -41,6 +41,12 @@ Level::~Level()
 			delete obj;
 		}
 	}
+	for (auto& p : particles) {
+		if (p.sprite != nullptr) {
+			delete p.sprite;
+		}
+	}
+	particles.clear();
 	movingObjects.clear();
 	clearEnemies();
 	clearItems();
@@ -64,6 +70,7 @@ void Level::init()
 	navigationMap = InterpolatedTileMap::createComposite(maps);
 	reStartLevel();
 	initializeTransitionTiles();
+	if (type == LevelType::OUTSIDE) initializeParticleSystem();
 	// Initialize projectile manager
 	projectileManager.init(&texProgram, navigationMap);
 
@@ -104,6 +111,7 @@ void Level::init()
 void Level::update(int deltaTime)
 {
 	Scene::update(deltaTime);
+	if (type == LevelType::OUTSIDE)updateParticles(deltaTime);
 	player->update(deltaTime);
 	checkTransitionTiles();
 
@@ -229,6 +237,7 @@ void Level::render()
 	projectileManager.render(view);
 
 	player->render(view);
+	if(type == LevelType::OUTSIDE) renderParticles();
 }
 
 void Level::initializeEnemies() {
@@ -254,7 +263,6 @@ void Level::initializeMovingObjects()
 		const MovingObjectConfig& config = movingObjectConfigs[i];
 
 		if (!movingObjectTextures[i].loadFromFile(config.spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA)) {
-			std::cout << "ERROR: Failed to load texture: " << config.spriteSheet << std::endl;
 			continue;
 		}
 
@@ -509,7 +517,6 @@ void Level::checkItemPickUp() {
 		glm::vec2 itemPos = items[i]->getPosition();
 		if (checkColission(playerPos, itemPos, 16, 16)) 
 		{
-			std::cout << "Item picked up at position: (" << itemPos.x << ", " << itemPos.y << ")\n";
 			itemPickUpEvent(i);
 			break;
 		}
@@ -549,11 +556,9 @@ bool Level::checkColission(glm::vec2& pos1, glm::vec2& pos2, int size1, int size
 
 void Level::initializeTransitionTiles()
 {
-	// Clear any existing transitions
 	transitionTiles.clear();
-
 	transitionTiles.push_back({ 5002, "dungeon", 17, 38 });
-	transitionTiles.push_back({ 5102, "outside", 10, 10 });
+	transitionTiles.push_back({ 5102, "dungeon", 10, 10 });
 }
 
 void Level::checkTransitionTiles()
@@ -567,15 +572,15 @@ void Level::checkTransitionTiles()
 	for (unsigned int layer = 0; layer < maps.size(); layer++) {
 		int tileId = maps[layer]->getTileAt(playerTileX, playerTileY);
 
-		// Check if this tile triggers a transition
 		for (const auto& transition : transitionTiles) {
 			if (transition.tileId == tileId) {
 				Game::instance().setCurrentScene(transition.targetScene);
 
 				glm::vec2 newPos(transition.targetTileX * tileSize,
 					transition.targetTileY * tileSize);
+				ServiceLocator::getAudio().playSound("sounds/teleport.wav");
 				player->setPosition(newPos);
-				return; // Exit after triggering transition
+				return; 
 			}
 		}
 	}
@@ -601,4 +606,107 @@ void Level::checkMovingObjectCollisions()
             }
         }
     }
+}
+
+void Level::initializeParticleSystem()
+{
+	string particlePath = "images/particles/Leaf.png";
+	if (!particleTexture.loadFromFile(particlePath, TEXTURE_PIXEL_FORMAT_RGBA)) return;
+	particleTexture.setMinFilter(GL_NEAREST);
+	particleTexture.setMagFilter(GL_NEAREST);
+
+	particleSpawnTimer = 0;
+	particleSpawnInterval = 450;
+}
+
+void Level::spawnParticle()
+{
+	Particle p;
+	glm::ivec2 particleSize = glm::ivec2(12, 7);
+	glm::vec2 frames = glm::vec2(1.0f / 6.0f, 1.0f);
+
+	p.sprite = Sprite::createSprite(
+		particleSize,  
+		frames, 
+		&particleTexture,
+		&texProgram
+	);
+
+	p.sprite->setNumberAnimations(1);
+	p.sprite->setAnimationSpeed(0, 12);
+
+	for (int i = 0; i < 6; i++) {
+		float row = 1.0f / 6.0f;
+		p.sprite->addKeyframe(0, glm::vec2(i * row, 0.0f));
+	}
+	p.sprite->changeAnimation(0);
+
+	p.position = glm::vec2(
+		rand() % GameConfig::CAMERA_WIDTH,
+		-20.0f  // Start above screen
+	);
+
+	p.velocity = glm::vec2(
+		(rand() % 20 - 10) / 10.0f, 
+		(rand() % 30 + 20) / 10.0f   
+	);
+
+	p.scale = (rand() % 50 + 75) / 100.0f;  
+	p.lifetime = 0;
+	p.maxLifetime = 3000.0f;
+	p.animationFrame = 0;
+
+	particles.push_back(p);
+}
+
+void Level::updateParticles(int deltaTime)
+{
+	particleSpawnTimer += deltaTime;
+	if (particleSpawnTimer >= particleSpawnInterval) {
+		spawnParticle();
+		particleSpawnTimer = 0;
+	}
+
+	for (auto it = particles.begin(); it != particles.end(); ) {
+		it->lifetime += deltaTime;
+		it->sprite->update(deltaTime);
+
+		it->position.x += it->velocity.x;
+		it->position.y += it->velocity.y;
+
+		if (it->lifetime >= it->maxLifetime ||
+			it->position.y > GameConfig::CAMERA_HEIGHT + 20) {
+			delete it->sprite;
+			it = particles.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+}
+
+void Level::renderParticles()
+{
+	texProgram.use();
+	texProgram.setUniformMatrix4f("projection", projection);
+
+	glm::mat4 fixedView = glm::mat4(1.0f);
+
+	for (auto& p : particles) {
+		p.sprite->setPosition(p.position);
+
+		glm::mat4 modelview = glm::translate(fixedView, glm::vec3(p.position, 0.0f));
+		modelview = glm::scale(modelview, glm::vec3(p.scale, p.scale, 1.0f));
+
+		float alpha = 1.0f;
+		if (p.lifetime > p.maxLifetime * 0.7f) {
+			alpha = 1.0f - ((p.lifetime - p.maxLifetime * 0.7f) / (p.maxLifetime * 0.3f));
+		}
+		texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, alpha);
+
+		texProgram.setUniformMatrix4f("modelview", modelview);
+		p.sprite->render();
+	}
+
+	texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
 }
