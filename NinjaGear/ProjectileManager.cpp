@@ -13,7 +13,8 @@ void ProjectileManager::spawnProjectile(const glm::vec2& startPos,
     bool isPlayerProjectile,
     const glm::vec2& sizeInSprite,
     int animationSpeed,
-    const vector<glm::vec2>& animationKeyframes
+    const vector<glm::vec2>& animationKeyframes,
+    bool ignoreCollision
     )  
 {
     if (projectiles.size() >= MAX_PROJECTILES) {
@@ -21,7 +22,7 @@ void ProjectileManager::spawnProjectile(const glm::vec2& startPos,
     }
 
     auto projectile = std::make_unique<Projectile>();
-    projectile->init(startPos, direction, speed, *shaderProgram, spritePath, map, sizeInSprite, animationSpeed, animationKeyframes);
+    projectile->init(startPos, direction, speed, *shaderProgram, spritePath, map, sizeInSprite, animationSpeed, animationKeyframes, ignoreCollision);
     projectile->setDamage(damage);
     projectile->setIsPlayerProjectile(isPlayerProjectile); 
     projectiles.push_back(std::move(projectile));

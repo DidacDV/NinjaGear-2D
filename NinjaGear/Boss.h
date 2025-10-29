@@ -23,24 +23,27 @@ private:
         SHOOTING
     };
     int hitAnimationTimer; 
-    const int HIT_ANIMATION_DURATION = 375;
+    int lastHitTimer;
+    const int HIT_ANIMATION_DURATION = 100;
+    const int HIT_COOLDOWN = 500;
 
 	State currentState = State::IDLE;
 
     enum class Phase {
         PHASE_ONE,
         PHASE_TWO,
-        PHASE_THREE
+        PHASE_THREE,
+        PHASE_FOUR
 	};
 	Phase currentPhase = Phase::PHASE_ONE;
 
-    bool isOnScreen(int cameraWidth, int cameraHeight, float margin = 50.0f) const;
+    bool isOnScreen(int cameraWidth, int cameraHeight, float margin = 0.0f) const;
     // Moving
     glm::ivec2 moveStartTile;
     glm::ivec2 moveEndTile;
     bool movingRight = true;
     bool movementInitialized = false;
-    void initializeMovement();
+    void initializeMovement(bool vertical = false);
     void updateMovement(int deltaTime);
 
 	// Shooting
@@ -50,8 +53,8 @@ private:
 
 	// Phase Management
     void updatePhaseParameters();
-    int getIdleAnim() { return (currentPhase == Phase::PHASE_THREE) ? IDLE_PHASE3 : IDLE; }
-    int getHitAnim() { return (currentPhase == Phase::PHASE_THREE) ? HIT_PHASE3 : HIT; }
+    int getIdleAnim() { return (currentPhase == Phase::PHASE_FOUR) ? IDLE_PHASE3 : IDLE; }
+    int getHitAnim() { return (currentPhase == Phase::PHASE_FOUR) ? HIT_PHASE3 : HIT; }
 
 };
 

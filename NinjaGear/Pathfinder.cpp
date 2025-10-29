@@ -3,46 +3,47 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <set>
 
 vector<glm::ivec2> Pathfinder::findPath(
     const glm::ivec2& start,
     const glm::ivec2& goal,
-    const vector<TileMap*>& tileMaps)
+    const TileMap* tileMap)
 {
-    if (tileMaps.empty() || !isWalkable(goal, tileMaps)) return {};
+    if ( !isWalkable(goal, tileMap)) return {};
 
-    using Node = pair<float, glm::ivec2>; // (fScore, position)
+    using Node = pair<float, glm::ivec2>;
     priority_queue<Node, vector<Node>, NodeCompare> openSet;
-
     map<glm::ivec2, glm::ivec2, ivec2Compare> cameFrom;
     map<glm::ivec2, float, ivec2Compare> gScore;
-    map<glm::ivec2, float, ivec2Compare> fScore;
+    set<glm::ivec2, ivec2Compare> closedSet;
 
     gScore[start] = 0.0f;
-    fScore[start] = heuristic(start, goal);
-    openSet.push({ fScore[start], start });
+    openSet.push({ heuristic(start, goal), start });
 
     while (!openSet.empty()) {
         glm::ivec2 current = openSet.top().second;
         openSet.pop();
 
+        if (closedSet.count(current)) continue;
+        closedSet.insert(current);
+
         if (current == goal) return reconstructPath(cameFrom, current);
 
         for (const glm::ivec2& neighbor : getNeighbors(current)) {
-            if (!isWalkable(neighbor, tileMaps)) continue;
+            if (!isWalkable(neighbor, tileMap) || closedSet.count(neighbor)) continue;
 
             float g = gScore[current] + 1.0f;
 
             if (gScore.find(neighbor) == gScore.end() || g < gScore[neighbor]) {
                 cameFrom[neighbor] = current;
                 gScore[neighbor] = g;
-                fScore[neighbor] = g + heuristic(neighbor, goal);
-                openSet.push({ fScore[neighbor], neighbor });
+                openSet.push({ g + heuristic(neighbor, goal), neighbor });
             }
         }
     }
 
-    return {}; 
+    return {};
 }
 
 float Pathfinder::heuristic(const glm::ivec2& a, const glm::ivec2& b) const {
@@ -63,13 +64,14 @@ vector<glm::ivec2> Pathfinder::reconstructPath(
     return path;
 }
 
-bool Pathfinder::isWalkable(const glm::ivec2& pos, const vector<TileMap*>& tileMaps) const {
-    for (TileMap* tileMap : tileMaps) {
-        if (tileMap && tileMap->isTileBlocked(pos.x, pos.y)) {
-            return false;
-        }
+bool Pathfinder::isWalkable(const glm::ivec2& pos, const TileMap* tileMap) const {
+    if (!tileMap) return false;
+
+    if (pos.x < 0 || pos.y < 0 || pos.x >= tileMap->mapSize.x || pos.y >= tileMap->mapSize.y) {
+        return false;
     }
-    return true;
+
+    return !tileMap->isTileBlocked(pos.x, pos.y);
 }
 
 vector<glm::ivec2> Pathfinder::getNeighbors(const glm::ivec2& pos) const {

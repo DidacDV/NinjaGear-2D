@@ -83,7 +83,16 @@ void Game::init(int screenWidth, int screenHeight)
 	};
 
 	vector<EnemyConfig> dungeonEnemies;
-	dungeonEnemies.push_back(EnemyConfig{ 10, 41,  "images/boss/flame.png", EnemyType::BOSS });
+	dungeonEnemies.push_back(EnemyConfig{ 13, 25, "images/enemies/miniFlame.png", EnemyType::RANGED, 1 });
+	dungeonEnemies.push_back(EnemyConfig{ 17, 18, "images/enemies/miniFlame.png", EnemyType::RANGED, 3 });
+	dungeonEnemies.push_back(EnemyConfig{ 13, 9, "images/enemies/miniFlame.png", EnemyType::RANGED, 3 });
+	dungeonEnemies.push_back(EnemyConfig{ 6, 8, "images/enemies/larvaTank.png", EnemyType::TANK, 2 });
+	dungeonEnemies.push_back(EnemyConfig{ 9, 14, "images/enemies/larvaTank.png", EnemyType::TANK, 2 });
+	dungeonEnemies.push_back(EnemyConfig{ 6, 19, "images/enemies/larvaTank.png", EnemyType::TANK, 2 });
+
+
+
+	dungeonEnemies.push_back(EnemyConfig{ 9, 41,  "images/boss/flame.png", EnemyType::BOSS });
 
 	vector<MovingObjectConfig> dungeonObjects;
 	dungeonObjects.push_back(MovingObjectConfig{
@@ -96,8 +105,6 @@ void Game::init(int screenWidth, int screenHeight)
 		glm::vec2(1.0f, 1.0f),
 		true,
 		1,
-		0,
-		0
 		});
 	dungeonObjects.push_back(MovingObjectConfig{
 		glm::vec2(592.0f, 784.0f),
@@ -109,8 +116,6 @@ void Game::init(int screenWidth, int screenHeight)
 		glm::vec2(1.0f, 1.0f),
 		true,
 		1,
-		0,
-		0
 		});
 	dungeonObjects.push_back(MovingObjectConfig{
 		glm::vec2(336.0f, 848.0f),
@@ -122,34 +127,28 @@ void Game::init(int screenWidth, int screenHeight)
 		glm::vec2(1.0f, 1.0f),
 		true,
 		1,
-		0,
-		0
 		});
 	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(48.0f, 800.0f),
-		glm::vec2(112.0f, 800.0f),
+		glm::vec2(48.0f, 816.0f),
+		glm::vec2(240.0f, 816.0f),
 		500.0f,
 		MovingObjectType::MOVING_STATUE,
 		"images/statue.png",
 		glm::vec2(32.f, 47.f),
 		glm::vec2(1.0f, 1.0f),
-		false,
-		0,
-		0,
-		0
+		true,
+		1
 		});
 	dungeonObjects.push_back(MovingObjectConfig{
-		glm::vec2(48.0f, 896.0f),
-		glm::vec2(112.0f, 896.0f),
+		glm::vec2(240.0f, 752.0f),
+		glm::vec2(48.0f, 752.0f),
 		500.0f,
 		MovingObjectType::MOVING_STATUE,
 		"images/statue.png",
 		glm::vec2(32.f, 47.f),
 		glm::vec2(1.0f, 1.0f),
-		false,
-		0,
-		0,
-		0
+		true,
+		1
 		});
 
 	// SPIKES - alternating trap pattern
@@ -251,10 +250,8 @@ void Game::keyPressed(int key)
 	else if (key == GLFW_KEY_B) {
 		setCurrentScene("dungeon");
 		int tileSize = 16.0f;
-		/*int targetTileX = 10; 
-		int targetTileY = 51;*/
-		int targetTileX = 30; 
-		int targetTileY = 41;
+		int targetTileX = 10; 
+		int targetTileY = 51;
 
 		glm::vec2 newPos(targetTileX * tileSize, targetTileY * tileSize);
 		player->setPosition(newPos);

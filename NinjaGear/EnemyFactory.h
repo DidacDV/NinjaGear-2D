@@ -14,7 +14,6 @@ public:
         const glm::ivec2& screenPos,
         ShaderProgram& texProgram,
         TileMap* map,
-        const vector<TileMap*>& maps,
         ProjectileManager* projectileManager);
 };
 

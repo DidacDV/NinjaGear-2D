@@ -21,6 +21,7 @@
     <ClInclude Include="GameConfig.h" />
     <ClInclude Include="GeometryUtils.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="InterpolatedTileMap.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="MeleeEnemy.h" />
@@ -57,6 +58,7 @@
     <ClCompile Include="EnemyFactory.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Globals.cpp" />
+    <ClCompile Include="InterpolatedTileMap.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
