@@ -1,0 +1,44 @@
+Dídac Dalmases Valcárcel, Rubén Palà Vacas
+PER A MÉS DETALL SOBRE EL CODI, PATRONS USATS I MÉS, VEURE EL REPO: https://github.com/DidacDV/NinjaGear-2D
+
+-Funcionalitats implementades:
+
+BASE: 
+
++ Menú principal, settings, derrota i crèdits
++ 6 pantalles exteriors (NIVELL EXTERIOR)
++ 8 pantalles interiors (NIVELL DUNGEON + BOSS)
++ Un personatge amb moviment WASD + fletxes de moviment. Cops de puny amb la Z.
++ Tres enemics: melee, ranged i tank. 
++ Detecció dels enemics si no hi ha sigil.
++ 2 objectes funcionals: medikit -cura- i poció de velocitat -buff-.
++ 1 arma (arc) i la seva munició (fletxes)
++ Intercanvi de objectes amb C, intercanvi de armes amb V,
++ UI interactiva (amb tecles) que mostra RANG, VIDA, ARMA EQUIPADA i OBJECTE EQUIPAT
++ Boss final amb 4 fases (amb dificultat en augment) 
++ CHEATS ( 'G' god mode, 'H' heal, 'I' inventari complet, 'K' tp dungeon, 'B' tp boss)
+
+POLISH:
++ Objectes interactius: estatues que es mouen, spikes.
++ Partícules d'ambient (nivell EXTERIOR)
++ Sons i música per combat, objectes, armes i entitats.
++ Animacions d'entitats i elements visuals.
+
+-Instruccions de joc:
+
+------GAMPEPLAY-----
+
++ TECLES DE MOVIMENT: WASD o FLETXES
++ COMBAT: Z
++ CANVI ARMA: V
++ OBJECTE: X
++ CANVI OBJECTE: C
++ SORTIR MENU: ESC
++++ DANCE: Y +++
+
+-------CHEATS-------
++ GOD MODE: G
++ HEAL: H
++ INVENTORY: I
++ TP DUNGEON: K
++ TP BOSS: B
