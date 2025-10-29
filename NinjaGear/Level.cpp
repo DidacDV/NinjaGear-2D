@@ -429,7 +429,7 @@ void Level::initializeObjects(int tileSize) {
 			{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {56, 55}, speedPotionTexture },
 
 			//Arrows
-			{ "ARROW", 3, "Projectile for bow", {17, 10}, arrowTexture },
+			{ "ARROW", 10, "Projectile for bow", {17, 10}, arrowTexture },
 			{ "ARROW", 5, "Projectile for bow", {33, 16}, arrowTexture },
 			{ "ARROW", 5, "Projectile for bow", {45, 2}, arrowTexture },
 			{ "ARROW", 5, "Projectile for bow", {58, 8}, arrowTexture },
