@@ -24,13 +24,13 @@ void Game::init(int screenWidth, int screenHeight)
 	this->player = new Player();
 	this->player->setSpriteSheet("images/characters/ninja_dark/SpriteSheet.png");
 	
-	Menu* startMenu = new Menu(MenuType::START);
+	Menu* startMenu = new Menu(MenuType::START, "sounds/music/ninja.mp3");
 	startMenu->setMenuImage("images/StartMenu.png");
 
 	Menu* settingsMenu = new Menu(MenuType::SETTINGS);
 	settingsMenu->setMenuImage("images/SettingsMenu.png");
 
-	Menu* deathMenu = new Menu(MenuType::DEATH);
+	Menu* deathMenu = new Menu(MenuType::DEATH, "sounds/music/defeat.mp3");
 	deathMenu->setMenuImage("images/DeathMenu.png");
 
 	Menu* winMenu = new Menu(MenuType::CREDITS);
@@ -67,7 +67,9 @@ void Game::init(int screenWidth, int screenHeight)
 	vector<MovingObjectConfig> jungleObjects;
 
 	vector<MusicConfig> jungleMusic;
-	//jungleMusic.push_back(MusicConfig{ 0, 0, "sounds/village.wav" });
+	jungleMusic.push_back(MusicConfig{ 0, 0, "sounds/music/jungle.mp3" });
+	jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/music/jungle.mp3" });
+	jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/music/desert.mp3" });
 	//jungleMusic.push_back(MusicConfig{ 2, 0, "sounds/village.wav" });
 	//jungleMusic.push_back(MusicConfig{ 2, 1, "sounds/punch.wav" });
 	Level* Jungle1 = new Level(jungle_layers, player, 10, 10, jungleEnemies, jungleObjects, jungleMusic, LevelType::OUTSIDE);
@@ -159,6 +161,11 @@ void Game::init(int screenWidth, int screenHeight)
 
 
 	vector<MusicConfig> dungeonMusic;
+	dungeonMusic.push_back(MusicConfig{ 0, 0, "sounds/music/dungeon.mp3" });
+	dungeonMusic.push_back(MusicConfig{ 0, 1, "sounds/music/dungeon.mp3" });
+	dungeonMusic.push_back(MusicConfig{ 0, 2, "sounds/music/boss1.wav" });
+	dungeonMusic.push_back(MusicConfig{ 0, 3, "sounds/music/dungeon.mp3" });
+
 	Level* Dungeon = new Level(dungeon_layers, player, 17, 38, dungeonEnemies, dungeonObjects, dungeonMusic, LevelType::DUNGEON);
 	addScene("dungeon", Dungeon);
 
@@ -216,14 +223,14 @@ void Game::keyPressed(int key)
 		}
 	}
 	//interior tp cheat
-	//interior tp cheat
 	else if (key == GLFW_KEY_K) {
-		if (currentScene == levels["dungeon"]) setCurrentScene("Jungle1");
+		if (currentScene == levels["dungeon"]) setCurrentScene("dungeon");
 		else {
 			setCurrentScene("dungeon");
 			ServiceLocator::getUI().showTemporaryMessage("INTERIOR TP ACTIVATED",
 				glm::vec2(GameConfig::CENTER_X, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 		}
+		ServiceLocator::getAudio().playSound("sounds/teleport.wav");
 	}
 	else if (key == GLFW_KEY_Z)
 		player->onPunchKeyPressed();
@@ -236,6 +243,9 @@ void Game::keyPressed(int key)
 	//heal cheat
 	else if (key == GLFW_KEY_H) {
 		player->setHealth(player->getMaxHealth());
+		int randomHit = (rand() % 8) + 1;
+		std::string soundPath = "sounds/Cure" + std::to_string(randomHit) + ".wav";
+		ServiceLocator::getAudio().playSound(soundPath.c_str());
 		ServiceLocator::getUI().showTemporaryMessage("FULL HEAL ACTIVATED",
 			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
@@ -243,6 +253,7 @@ void Game::keyPressed(int key)
 	else if (key == GLFW_KEY_G) {
 		player->toggleGodMode();
 		string message = player->isGodModeOn() ? "GOD MODE ACTIVATED" : "GOD MODE DEACTIVATED";
+		ServiceLocator::getAudio().playSound("sounds/god_mode.mp3");
 		ServiceLocator::getUI().showTemporaryMessage(message,
 			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
@@ -255,6 +266,7 @@ void Game::keyPressed(int key)
 
 		glm::vec2 newPos(targetTileX * tileSize, targetTileY * tileSize);
 		player->setPosition(newPos);
+		ServiceLocator::getAudio().playSound("sounds/teleport.wav");
 		ServiceLocator::getUI().showTemporaryMessage("BOSS TP ACTIVATED",
 			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
@@ -307,11 +319,15 @@ void Game::setCurrentScene(const string& name)
 	if (it != levels.end()) {
 		currentScene = it->second;
 		currentScene->init();
+		currentScene->playMusic();
 	}
 }
 
 void Game::victory() {
+	ServiceLocator::getAudio().stopAllSounds();
+	ServiceLocator::getAudio().playSound("sounds/victory.mp3");
 	setCurrentScene("win");
+	ServiceLocator::getAudio().playMusic("sounds/music/victory.mp3");
 }
 
 Scene* Game::getCurrentScene() const

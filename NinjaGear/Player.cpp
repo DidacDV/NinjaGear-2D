@@ -404,7 +404,9 @@ void Player::takeDamage(int damage)
 	if (health < 0) {
 		health = 0;
 	}
-
+	int randomHit = (rand() % 4) + 1;
+	std::string soundPath = "sounds/damage" + std::to_string(randomHit) + ".wav";
+	ServiceLocator::getAudio().playSound(soundPath.c_str());
 	invulnerable = true;
 	invulnerabilityTimer = 1000; 
 
@@ -459,11 +461,19 @@ glm::vec2 Player::getPunchHitbox() const
 void Player::increaseRank(const int& increase) {
 	cout << "increased rank by" << increase << endl;
 	rank += increase;
+	ServiceLocator::getAudio().playSound("sounds/rankup.wav");
 }
 
 void Player::onPunchKeyPressed()
 {
-	//ServiceLocator::getAudio().playSound("sounds/punch.wav");
+	if (getCurrentWeapon()->getName() == "PUNCH") {
+		int randomHit = (rand() % 5) + 1;
+		std::string soundPath = "sounds/hit" + std::to_string(randomHit) + ".mp3";
+		ServiceLocator::getAudio().playSound(soundPath.c_str());
+	}
+	else {
+		ServiceLocator::getAudio().playSound("sounds/bow-shot.mp3");
+	}
 }
 void Player::heal(float amount) {
 	health += amount;
@@ -556,11 +566,15 @@ void Player::useCurrentItem() {
 			return;
 		heal(1.f);
 		cout << "Used MEDIPACK! Health: " << health << "/" << maxHealth << endl;
+		int randomHit = (rand() % 8) + 1;
+		std::string soundPath = "sounds/Cure" + std::to_string(randomHit) + ".wav";
+		ServiceLocator::getAudio().playSound(soundPath.c_str());
 		consumeItem(item, itemName);
 	}
 
 	if (itemName == "SPEED POTION") {
 		applyBuff(BuffType::SPEED, 3, 2.f);
+		ServiceLocator::getAudio().playSound("sounds/potion.wav");
 		consumeItem(item, itemName);
 	}
 

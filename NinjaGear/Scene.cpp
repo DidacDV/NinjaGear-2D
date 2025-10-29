@@ -3,6 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Scene.h"
 #include "Game.h"
+#include "ServiceLocator.h"
 
 Scene::Scene()
 {
@@ -115,4 +116,14 @@ void Scene::setupViewport(float heightPercent, float yOffsetPercent) {
 
 void Scene::resetViewportFullScreen() {
 	glViewport(0, 0, globalScreenWidth, globalScreenHeight);
+}
+
+void Scene::playMusic() {
+	musicPlaying = true;
+	if(currentMusicFile !="" ) ServiceLocator::getAudio().playMusic(currentMusicFile.c_str());
+}
+
+void Scene::stopMusic() {
+	musicPlaying = false;
+	ServiceLocator::getAudio().playMusic("");
 }
