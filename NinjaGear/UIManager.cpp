@@ -359,7 +359,7 @@ void UIManager::renderTemporaryMessages()
 }
 
 void UIManager::showMessageAndDialog(TemporaryMessage msg, float alpha, glm::vec3 color) {
-    float paddingX = 15;
+    float paddingX = 25;
     float paddingY = 4.0f;
 
     float estimatedWidth = msg.text.size() * FONT_SIZE * msg.scale * 0.75f;
@@ -399,4 +399,8 @@ void UIManager::updateTemporaryMessages(int deltaTime) {
             temporaryMessages.erase(temporaryMessages.begin() + i);
         }
     }
+}
+
+void UIManager::clearAllTemporaryMessages() {
+    temporaryMessages.clear();
 }

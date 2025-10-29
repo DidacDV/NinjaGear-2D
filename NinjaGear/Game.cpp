@@ -62,7 +62,7 @@ void Game::init(int screenWidth, int screenHeight)
 	jungleEnemies.push_back(EnemyConfig{55, 30, "images/enemies/larvaTank.png", EnemyType ::TANK, 1});
 	jungleEnemies.push_back(EnemyConfig{54, 11, "images/enemies/larvaTank.png", EnemyType ::TANK, 4});
 	jungleEnemies.push_back(EnemyConfig{54, 55, "images/enemies/larvaTank.png", EnemyType ::TANK, 4});
-	jungleEnemies.push_back(EnemyConfig{55, 5,  "images/enemies/miniFlame.png", EnemyType::MELEE, 3});
+	jungleEnemies.push_back(EnemyConfig{54, 7,  "images/enemies/miniFlame.png", EnemyType::MELEE, 2});
 
 	vector<MovingObjectConfig> jungleObjects;
 

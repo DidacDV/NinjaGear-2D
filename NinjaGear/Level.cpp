@@ -54,8 +54,8 @@ void Level::reStartLevel() {
 	initializeEnemies();
 	initializeItems();
 	initializeMusic();
-	introMessagesDisplayed = false;
 	introMessageDelayTimer = 500;
+	introMessagesDisplayed = false;
 }
 
 void Level::init() 
@@ -125,16 +125,25 @@ void Level::update(int deltaTime)
 	checkItemPickUp();
 	updateCameraSector();
 
-	if (!introMessagesDisplayed)
+	if (!introMessagesDisplayed && type == LevelType::OUTSIDE)
 	{
 		introMessageDelayTimer -= deltaTime;
 		if (introMessageDelayTimer <= 0)
 		{
-			//ServiceLocator::getUI().showTemporaryMessage("HELLO SOLID NINJA, KILL ALL ENEMIES",
-			//	glm::vec2(320, 160), 1.f, glm::vec3(0.f, 0.f, 0.f), 4000);
+			ServiceLocator::getUI().showTemporaryMessage(
+				"MISSION START: SHADOW OPERATIVE – 'SILENT EDGE'",
+				glm::vec2(GameConfig::CENTER_X - 240, GameConfig::CENTER_Y - 260),
+				1.f, glm::vec3(0.f, 0.f, 0.f), 5000);
 
-			//ServiceLocator::getUI().showTemporaryMessage("AND WE WON'T KILL YOU...",
-			//	glm::vec2(320, 200), 1.f, glm::vec3(1.f, 0.f, 0.f), 5000);
+			ServiceLocator::getUI().showTemporaryMessage(
+				"INFILTRATE THE FORTRESS - NEUTRALIZE ALL ENEMY UNITS.",
+				glm::vec2(GameConfig::CENTER_X - 240, GameConfig::CENTER_Y - 220),
+				1.f, glm::vec3(0.f, 0.f, 0.f), 6000);
+
+			ServiceLocator::getUI().showTemporaryMessage(
+				"OBJECTIVE: REACH THE COMMAND CHAMBER AND ELIMINATE THE FLAME LORD.",
+				glm::vec2(GameConfig::CENTER_X - 240, GameConfig::CENTER_Y - 180),
+				1.f, glm::vec3(1.f, 0.f, 0.f), 7000);
 
 			introMessagesDisplayed = true;
 		}
@@ -518,6 +527,7 @@ void Level::itemPickUpEvent(int indexInVector) {
 	std::string pickupText = "PICKED UP " + itemPicked->getName() + "!";
 	glm::vec2 messagePos(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200);
 	glm::vec3 messageColor(0.f, 0.f, 0.f);
+	ServiceLocator::getUI().clearAllTemporaryMessages();
 	ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
 
 	//only delete if itss not the first (Player keeps first instance)

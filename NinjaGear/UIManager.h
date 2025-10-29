@@ -34,7 +34,7 @@ public:
     virtual void showTemporaryMessage(const std::string& text, const glm::vec2& position,
         float scale, const glm::vec3& color, int durationMs);
     virtual void showMessageAndDialog(TemporaryMessage msg, float alpha, glm::vec3 color);
-
+    void clearAllTemporaryMessages();
 private:
     void setupViewport(float heightPercent, float yOffset);
     void renderPanel(const glm::vec2& position, const glm::vec2& size, Texture* texture = nullptr, const glm::vec4& color = glm::vec4(1.f));
@@ -48,7 +48,7 @@ private:
 
     void renderTemporaryMessages();
     void updateTemporaryMessages(int deltaTime);
-
+    
 private:
     ShaderProgram texProgram;
     glm::mat4 projection;

@@ -55,7 +55,7 @@ void Menu::setMenuImage(const string& imagePath)
 
 void Menu::setUpButtons() {
     if (type == MenuType::START) {
-        addButton(glm::vec2(0.38, 0.66f), glm::vec2(0.29f, 0.115f), "start"); //0.38 -> 365/960, where 360 was original position on my 1920width screen
+        addButton(glm::vec2(0.38, 0.66f), glm::vec2(0.29f, 0.115f), "start"); //0.38 -> X/1920
         addButton(glm::vec2(0.38, 0.833f), glm::vec2(0.29f, 0.115f), "settings");
     }
     if (type == MenuType::DEATH) {
