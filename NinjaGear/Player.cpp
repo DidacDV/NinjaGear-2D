@@ -28,6 +28,9 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 	godMode = false;
 	health = 5.0f;
 	maxHealth = 5.0f;
+	useRedSprite = false;
+	invulnerable = false;
+	invulnerabilityTimer = 0;
 
 	activeBuffs.clear();
 	showAura = false;
@@ -41,80 +44,17 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
   
 	spritesheet.loadFromFile(this->spriteSheet, TEXTURE_PIXEL_FORMAT_RGBA);
-
 	sprite = Sprite::createSprite(QUAD_SIZE, glm::vec2(0.25f, 0.142857f), &spritesheet, &shaderProgram);
-	sprite->setNumberAnimations(13);
-		// STANDING ANIMATIONS
-		sprite->setAnimationSpeed(STAND_DOWN, 8);
-		sprite->addKeyframe(STAND_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
 
-		sprite->setAnimationSpeed(STAND_UP, 8);
-		sprite->addKeyframe(STAND_UP, glm::vec2(1.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	redSpritesheet.loadFromFile("images/characters/ninja_damage/Spritesheet.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	redSprite = Sprite::createSprite(QUAD_SIZE, glm::vec2(0.25f, 0.142857f), &redSpritesheet, &shaderProgram);
 
-		sprite->setAnimationSpeed(STAND_LEFT, 8);
-		sprite->addKeyframe(STAND_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-
-
-		sprite->setAnimationSpeed(STAND_RIGHT, 8);
-		sprite->addKeyframe(STAND_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-
-
-		//MOVING ANIMATIONS
-		sprite->setAnimationSpeed(MOVE_DOWN, 8);
-		sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
-
-		sprite->setAnimationSpeed(MOVE_UP, 8);
-		sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
-
-
-		sprite->setAnimationSpeed(MOVE_LEFT, 8);
-		sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
-
-
-
-		sprite->setAnimationSpeed(MOVE_RIGHT, 8);
-		sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
-		// DANCE
-		sprite->setAnimationSpeed(DANCE, 6);
-		sprite->addKeyframe(DANCE, glm::vec2(0.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(DANCE, glm::vec2(1.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(DANCE, glm::vec2(2.0f * FRAME_WIDTH, 5.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(DANCE, glm::vec2(2.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(DANCE, glm::vec2(3.0f * FRAME_WIDTH, 5.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(DANCE, glm::vec2(3.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
-
-
-		// PUNCHING
-		sprite->setAnimationSpeed(PUNCH_LEFT, 6);
-		sprite->addKeyframe(PUNCH_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 4.0f * FRAME_HEIGHT)); // PUNCH
-		sprite->addKeyframe(PUNCH_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT)); // STAND
-
-		sprite->setAnimationSpeed(PUNCH_RIGHT, 6);
-		sprite->addKeyframe(PUNCH_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 4.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(PUNCH_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-
-		sprite->setAnimationSpeed(PUNCH_UP, 6);
-		sprite->addKeyframe(PUNCH_UP, glm::vec2(1.0f * FRAME_WIDTH, 4.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(PUNCH_UP, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
-
-		sprite->setAnimationSpeed(PUNCH_DOWN, 6);
-		sprite->addKeyframe(PUNCH_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 4.0f * FRAME_HEIGHT));
-		sprite->addKeyframe(PUNCH_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	setUpPlayerAnimation(sprite);
+	setUpPlayerAnimation(redSprite);
 
 		
-	sprite->changeAnimation(STAND_DOWN); // Cambia a una animación que tenga keyframes válidos
+	sprite->changeAnimation(STAND_DOWN); 
+	redSprite->changeAnimation(STAND_DOWN); 
 	
 	setUpBowSprite(shaderProgram);
 
@@ -124,6 +64,81 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 	tileMapDispl = tileMapPos;
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
 	
+}
+
+void Player::setUpPlayerAnimation(Sprite* spr) {
+	const float FRAME_WIDTH = 1.0f / 4.0f;
+	const float FRAME_HEIGHT = 1.0f / 7.0f;
+	const glm::vec2 QUAD_SIZE = glm::vec2(16.f, 16.f);
+	spr->setNumberAnimations(13);
+	// STANDING ANIMATIONS
+	spr->setAnimationSpeed(STAND_DOWN, 8);
+	spr->addKeyframe(STAND_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+	spr->setAnimationSpeed(STAND_UP, 8);
+	spr->addKeyframe(STAND_UP, glm::vec2(1.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+	spr->setAnimationSpeed(STAND_LEFT, 8);
+	spr->addKeyframe(STAND_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+
+	spr->setAnimationSpeed(STAND_RIGHT, 8);
+	spr->addKeyframe(STAND_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+
+	//MOVING ANIMATIONS
+	spr->setAnimationSpeed(MOVE_DOWN, 8);
+	spr->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
+
+	spr->setAnimationSpeed(MOVE_UP, 8);
+	spr->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_UP, glm::vec2(1.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
+
+
+	spr->setAnimationSpeed(MOVE_LEFT, 8);
+	spr->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
+
+
+
+	spr->setAnimationSpeed(MOVE_RIGHT, 8);
+	spr->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 1.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 2.0f * FRAME_HEIGHT));
+	spr->addKeyframe(MOVE_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 3.0f * FRAME_HEIGHT));
+	// DANCE
+	spr->setAnimationSpeed(DANCE, 6);
+	spr->addKeyframe(DANCE, glm::vec2(0.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
+	spr->addKeyframe(DANCE, glm::vec2(1.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
+	spr->addKeyframe(DANCE, glm::vec2(2.0f * FRAME_WIDTH, 5.0f * FRAME_HEIGHT));
+	spr->addKeyframe(DANCE, glm::vec2(2.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
+	spr->addKeyframe(DANCE, glm::vec2(3.0f * FRAME_WIDTH, 5.0f * FRAME_HEIGHT));
+	spr->addKeyframe(DANCE, glm::vec2(3.0f * FRAME_WIDTH, 6.0f * FRAME_HEIGHT));
+
+
+	// PUNCHING
+	spr->setAnimationSpeed(PUNCH_LEFT, 6);
+	spr->addKeyframe(PUNCH_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 4.0f * FRAME_HEIGHT)); // PUNCH
+	spr->addKeyframe(PUNCH_LEFT, glm::vec2(2.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT)); // STAND
+
+	spr->setAnimationSpeed(PUNCH_RIGHT, 6);
+	spr->addKeyframe(PUNCH_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 4.0f * FRAME_HEIGHT));
+	spr->addKeyframe(PUNCH_RIGHT, glm::vec2(3.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+	spr->setAnimationSpeed(PUNCH_UP, 6);
+	spr->addKeyframe(PUNCH_UP, glm::vec2(1.0f * FRAME_WIDTH, 4.0f * FRAME_HEIGHT));
+	spr->addKeyframe(PUNCH_UP, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
+
+	spr->setAnimationSpeed(PUNCH_DOWN, 6);
+	spr->addKeyframe(PUNCH_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 4.0f * FRAME_HEIGHT));
+	spr->addKeyframe(PUNCH_DOWN, glm::vec2(0.0f * FRAME_WIDTH, 0.0f * FRAME_HEIGHT));
 }
 
 void Player::setUpBowSprite(ShaderProgram& shaderProgram) {
@@ -166,13 +181,28 @@ void Player::update(int deltaTime)
 	lastFrameAnimation = sprite->animation();
 	sprite->update(deltaTime);
 
+	if (redSprite && redSprite->animation() != sprite->animation()) {
+		redSprite->changeAnimation(sprite->animation());
+	}
+	if (redSprite) {
+		redSprite->update(deltaTime);
+	}
+
 	if (invulnerable) {
 		invulnerabilityTimer -= deltaTime;
+		static int flashTimer = 0;
+		flashTimer += deltaTime;
+		if (flashTimer >= 100) {
+			useRedSprite = !useRedSprite;
+			flashTimer = 0;
+		}
+
 		if (invulnerabilityTimer <= 0) {
 			invulnerable = false;
 			invulnerabilityTimer = 0;
+			useRedSprite = false;
 		}
-	}
+}
 	
 	float moveSpeed = baseSpeed;
 
@@ -309,7 +339,12 @@ void Player::update(int deltaTime)
 		else if(sprite->animation() == DANCE)
 			sprite->changeAnimation(STAND_DOWN);
 	}
+
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
+	if (redSprite) {
+		redSprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
+	}
+
 	if (bowSprite) {
 		bowSprite->update(deltaTime);
 		bowSprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
@@ -333,7 +368,12 @@ void Player::render(const glm::mat4& view)
 		bowSprite->render(view);
 	}
 	else {
-		sprite->render(view);
+		if (useRedSprite && redSprite) {
+			redSprite->render(view);
+		}
+		else {
+			sprite->render(view);
+		}
 	}
 }
 
@@ -409,7 +449,7 @@ void Player::takeDamage(int damage)
 	invulnerabilityTimer = 1000; 
 
 	//TODO visuals
-
+	useRedSprite = true;
 }
 
 // Punching
