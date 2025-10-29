@@ -54,8 +54,8 @@ void Level::reStartLevel() {
 	initializeEnemies();
 	initializeItems();
 	initializeMusic();
-	introMessagesDisplayed = false;
 	introMessageDelayTimer = 500;
+	introMessagesDisplayed = false;
 }
 
 void Level::init() 
@@ -125,16 +125,25 @@ void Level::update(int deltaTime)
 	checkItemPickUp();
 	updateCameraSector();
 
-	if (!introMessagesDisplayed)
+	if (!introMessagesDisplayed && type == LevelType::OUTSIDE)
 	{
 		introMessageDelayTimer -= deltaTime;
 		if (introMessageDelayTimer <= 0)
 		{
-			//ServiceLocator::getUI().showTemporaryMessage("HELLO SOLID NINJA, KILL ALL ENEMIES",
-			//	glm::vec2(320, 160), 1.f, glm::vec3(0.f, 0.f, 0.f), 4000);
+			ServiceLocator::getUI().showTemporaryMessage(
+				"MISSION START: SHADOW OPERATIVE – 'SILENT EDGE'",
+				glm::vec2(GameConfig::CENTER_X - 240, GameConfig::CENTER_Y - 260),
+				1.f, glm::vec3(0.f, 0.f, 0.f), 5000);
 
-			//ServiceLocator::getUI().showTemporaryMessage("AND WE WON'T KILL YOU...",
-			//	glm::vec2(320, 200), 1.f, glm::vec3(1.f, 0.f, 0.f), 5000);
+			ServiceLocator::getUI().showTemporaryMessage(
+				"INFILTRATE THE FORTRESS - NEUTRALIZE ALL ENEMY UNITS.",
+				glm::vec2(GameConfig::CENTER_X - 240, GameConfig::CENTER_Y - 220),
+				1.f, glm::vec3(0.f, 0.f, 0.f), 6000);
+
+			ServiceLocator::getUI().showTemporaryMessage(
+				"OBJECTIVE: REACH THE COMMAND CHAMBER AND ELIMINATE THE FLAME LORD.",
+				glm::vec2(GameConfig::CENTER_X - 240, GameConfig::CENTER_Y - 180),
+				1.f, glm::vec3(1.f, 0.f, 0.f), 7000);
 
 			introMessagesDisplayed = true;
 		}
@@ -375,8 +384,6 @@ void Level::initializeItems() {
 }
 
 void Level::initializeObjects(int tileSize) {
-	if (type != LevelType::OUTSIDE) return;
-
 	auto createItem = [&](Texture* texture, const string& name, int quantity,
 		const string& description, const glm::vec2& position, bool isWeapon = false) -> Item* {
 			Item* item = new Item(
@@ -399,30 +406,50 @@ void Level::initializeObjects(int tileSize) {
 
 	auto* arrowTexture = new Texture();
 	arrowTexture->loadFromFile("images/items/Arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	vector<ItemData> itemData;
+	if (type == LevelType::OUTSIDE) {
+		itemData = {
+			//Medipacks
+			{ "MEDIPACK", 1, "Restores 1 health points.", {34, 2}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {58, 7}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {57, 31}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {57, 45}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {57, 46}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {43, 67}, medpackTexture },
 
-	vector<ItemData> itemData = {
-		//Medipacks
-		{ "MEDIPACK", 1, "Restores 1 health points.", {34, 2}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {58, 7}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 31}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 45}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 46}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {43, 67}, medpackTexture },
+			//Speed potions
+			{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {58, 13}, speedPotionTexture },
+			{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {56, 55}, speedPotionTexture },
 
-		//Speed potions
-		{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {58, 13}, speedPotionTexture },
-		{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {56, 55}, speedPotionTexture },
+			//Arrows
+			{ "ARROW", 3, "Projectile for bow", {17, 10}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {33, 16}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {45, 2}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {58, 8}, arrowTexture },
+			{ "ARROW", 3, "Projectile for bow", {58, 27}, arrowTexture },
+			{ "ARROW", 3, "Projectile for bow", {58, 26}, arrowTexture },
+			{ "ARROW", 2, "Projectile for bow", {56, 56}, arrowTexture },
+			{ "ARROW", 2, "Projectile for bow", {43, 68}, arrowTexture },
+		};
+	}
+	else {
+		itemData = {
+			{ "MEDIPACK", 1, "Restores 1 health points.", {23, 13}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {27, 27}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {30, 71}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {4, 69}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {15, 69}, medpackTexture },
 
-		//Arrows
-		{ "ARROW", 3, "Projectile for bow", {17, 10}, arrowTexture },
-		{ "ARROW", 5, "Projectile for bow", {33, 16}, arrowTexture },
-		{ "ARROW", 5, "Projectile for bow", {45, 2}, arrowTexture },
-		{ "ARROW", 5, "Projectile for bow", {58, 8}, arrowTexture },
-		{ "ARROW", 3, "Projectile for bow", {58, 27}, arrowTexture },
-		{ "ARROW", 3, "Projectile for bow", {58, 26}, arrowTexture },
-		{ "ARROW", 2, "Projectile for bow", {56, 56}, arrowTexture },
-		{ "ARROW", 2, "Projectile for bow", {43, 68}, arrowTexture },
-	};
+			{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {25, 32}, speedPotionTexture },
+			{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {29, 71}, speedPotionTexture },
+
+			{ "ARROW", 5, "Projectile for bow", {17, 10}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {35, 29}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {33, 34}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {5, 69}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {16, 69}, arrowTexture },
+		};
+	}
 
 	for (const auto& data : itemData) {
 		items.push_back(createItem(data.texture, data.name, data.quantity, data.description, data.pos));
@@ -498,8 +525,9 @@ void Level::itemPickUpEvent(int indexInVector) {
 	player->addItem(itemPicked);
 
 	std::string pickupText = "PICKED UP " + itemPicked->getName() + "!";
-	glm::vec2 messagePos(320, 160);
+	glm::vec2 messagePos(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200);
 	glm::vec3 messageColor(0.f, 0.f, 0.f);
+	ServiceLocator::getUI().clearAllTemporaryMessages();
 	ServiceLocator::getUI().showTemporaryMessage(pickupText, messagePos, 1.0f, messageColor, 2000);
 
 	//only delete if itss not the first (Player keeps first instance)

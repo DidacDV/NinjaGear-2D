@@ -28,7 +28,7 @@ void Game::init(int screenWidth, int screenHeight)
 	startMenu->setMenuImage("images/StartMenu.png");
 
 	Menu* settingsMenu = new Menu(MenuType::SETTINGS);
-	settingsMenu->setMenuImage("images/SettingsMenu.png");
+	settingsMenu->setMenuImage("images/SettingsMenu.jpg");
 
 	Menu* deathMenu = new Menu(MenuType::DEATH);
 	deathMenu->setMenuImage("images/DeathMenu.png");
@@ -62,7 +62,7 @@ void Game::init(int screenWidth, int screenHeight)
 	jungleEnemies.push_back(EnemyConfig{55, 30, "images/enemies/larvaTank.png", EnemyType ::TANK, 1});
 	jungleEnemies.push_back(EnemyConfig{54, 11, "images/enemies/larvaTank.png", EnemyType ::TANK, 4});
 	jungleEnemies.push_back(EnemyConfig{54, 55, "images/enemies/larvaTank.png", EnemyType ::TANK, 4});
-	jungleEnemies.push_back(EnemyConfig{ 55, 5,  "images/enemies/eye.png", EnemyType::MELEE, 3});
+	jungleEnemies.push_back(EnemyConfig{54, 7,  "images/enemies/miniFlame.png", EnemyType::MELEE, 2});
 
 	vector<MovingObjectConfig> jungleObjects;
 
@@ -83,13 +83,24 @@ void Game::init(int screenWidth, int screenHeight)
 	};
 
 	vector<EnemyConfig> dungeonEnemies;
-	dungeonEnemies.push_back(EnemyConfig{ 13, 25, "images/enemies/miniFlame.png", EnemyType::RANGED, 1 });
-	dungeonEnemies.push_back(EnemyConfig{ 17, 18, "images/enemies/miniFlame.png", EnemyType::RANGED, 3 });
-	dungeonEnemies.push_back(EnemyConfig{ 13, 9, "images/enemies/miniFlame.png", EnemyType::RANGED, 3 });
+	dungeonEnemies.push_back(EnemyConfig{ 13, 25, "images/enemies/eye.png", EnemyType::RANGED, 1 });
+	dungeonEnemies.push_back(EnemyConfig{ 17, 18, "images/enemies/eye.png", EnemyType::RANGED, 3 });
+	dungeonEnemies.push_back(EnemyConfig{ 13, 12, "images/enemies/eye.png", EnemyType::RANGED, 3 });
 	dungeonEnemies.push_back(EnemyConfig{ 6, 8, "images/enemies/larvaTank.png", EnemyType::TANK, 2 });
 	dungeonEnemies.push_back(EnemyConfig{ 9, 14, "images/enemies/larvaTank.png", EnemyType::TANK, 2 });
 	dungeonEnemies.push_back(EnemyConfig{ 6, 19, "images/enemies/larvaTank.png", EnemyType::TANK, 2 });
-
+	dungeonEnemies.push_back(EnemyConfig{ 24, 13, "images/enemies/larvaTank.png", EnemyType::TANK, 2 });
+	//pre-pre-boss lvl
+	dungeonEnemies.push_back(EnemyConfig{ 38, 70, "images/enemies/miniFlame.png", EnemyType::MELEE, 7 });
+	dungeonEnemies.push_back(EnemyConfig{ 32, 76, "images/enemies/larvaTank.png", EnemyType::TANK, 1 });
+	dungeonEnemies.push_back(EnemyConfig{ 29, 76, "images/enemies/larvaTank.png", EnemyType::TANK, 1 });
+	dungeonEnemies.push_back(EnemyConfig{ 29, 65, "images/enemies/eye.png", EnemyType::RANGED, 5 });
+	dungeonEnemies.push_back(EnemyConfig{ 30, 65, "images/enemies/eye.png", EnemyType::RANGED, 5 });
+	//pre-boss lvl
+	dungeonEnemies.push_back(EnemyConfig{ 4, 69, "images/enemies/miniFlameBlue.png", EnemyType::MELEE, 7 });
+	dungeonEnemies.push_back(EnemyConfig{ 6, 69, "images/enemies/larvaTankBlue.png", EnemyType::TANK, 7 });
+	dungeonEnemies.push_back(EnemyConfig{ 15, 69, "images/enemies/miniFlameBlue.png", EnemyType::MELEE, 7 });
+	dungeonEnemies.push_back(EnemyConfig{ 13, 69, "images/enemies/larvaTankBlue.png", EnemyType::TANK, 7 });
 
 
 	dungeonEnemies.push_back(EnemyConfig{ 9, 41,  "images/boss/flame.png", EnemyType::BOSS });
@@ -156,6 +167,25 @@ void Game::init(int screenWidth, int screenHeight)
 	createSpikeTraps(dungeonObjects, 25.0f, 12.0f, 10);
 	createSpikeTraps(dungeonObjects, 25.0f, 14.0f, 10);
 	createSpikeTraps(dungeonObjects, 25.0f, 16.0f, 10);
+	//laberynth like lvl
+	createSpikeTraps(dungeonObjects, 24.0f, 27.0f, 1);
+	createSpikeTraps(dungeonObjects, 26.0f, 27.0f, 1);
+	createSpikeTraps(dungeonObjects, 28.0f, 27.0f, 1);
+
+	createSpikeTraps(dungeonObjects, 32.0f, 29.0f, 1);
+	createSpikeTraps(dungeonObjects, 34.0f, 29.0f, 1);
+	createSpikeTraps(dungeonObjects, 36.0f, 29.0f, 1);
+
+	createSpikeTraps(dungeonObjects, 32.0f, 34.0f, 1);
+	createSpikeTraps(dungeonObjects, 34.0f, 34.0f, 1);
+	createSpikeTraps(dungeonObjects, 36.0f, 34.0f, 1);
+
+	createSpikeTraps(dungeonObjects, 24.0f, 32.0f, 1);
+	createSpikeTraps(dungeonObjects, 26.0f, 32.0f, 1);
+	createSpikeTraps(dungeonObjects, 28.0f, 32.0f, 1);
+
+	//pre-boss lvl
+	createSpikeTraps(dungeonObjects, 7.0f, 61.0f, 6);
 
 
 	vector<MusicConfig> dungeonMusic;
@@ -222,7 +252,7 @@ void Game::keyPressed(int key)
 		else {
 			setCurrentScene("dungeon");
 			ServiceLocator::getUI().showTemporaryMessage("INTERIOR TP ACTIVATED",
-				glm::vec2(GameConfig::CENTER_X, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+				glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 		}
 	}
 	else if (key == GLFW_KEY_Z)
@@ -231,20 +261,20 @@ void Game::keyPressed(int key)
 	else if (key == GLFW_KEY_I) {
 		player->giveAllItems();
 		ServiceLocator::getUI().showTemporaryMessage("ALL ITEMS CHEAT ACTIVATED",
-			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+			glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
 	//heal cheat
 	else if (key == GLFW_KEY_H) {
 		player->setHealth(player->getMaxHealth());
 		ServiceLocator::getUI().showTemporaryMessage("FULL HEAL ACTIVATED",
-			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+			glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
 	//god mode cheat
 	else if (key == GLFW_KEY_G) {
 		player->toggleGodMode();
 		string message = player->isGodModeOn() ? "GOD MODE ACTIVATED" : "GOD MODE DEACTIVATED";
 		ServiceLocator::getUI().showTemporaryMessage(message,
-			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+			glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
 	//boss tp cheat
 	else if (key == GLFW_KEY_B) {
@@ -256,7 +286,7 @@ void Game::keyPressed(int key)
 		glm::vec2 newPos(targetTileX * tileSize, targetTileY * tileSize);
 		player->setPosition(newPos);
 		ServiceLocator::getUI().showTemporaryMessage("BOSS TP ACTIVATED",
-			glm::vec2(320, 40), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
+			glm::vec2(GameConfig::CENTER_X + 200, GameConfig::CENTER_Y - 200), 1.f, glm::vec3(0.f, 0.f, 0.f), 1500);
 	}
 		
 

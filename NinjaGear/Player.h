@@ -148,6 +148,12 @@ private:
 	bool lastFrameWasAttackingWithBow = false;
 	//godmode cheat
 	bool godMode = false;
+
+	//taking dmg animation
+	Texture redSpritesheet;
+	Sprite* redSprite;
+	bool useRedSprite = false;
+	void setUpPlayerAnimation(Sprite* spr);
 public:
 	~Player() {
 		for (Item* item : itemInventory) delete item;
