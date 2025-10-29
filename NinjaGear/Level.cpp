@@ -375,8 +375,6 @@ void Level::initializeItems() {
 }
 
 void Level::initializeObjects(int tileSize) {
-	if (type != LevelType::OUTSIDE) return;
-
 	auto createItem = [&](Texture* texture, const string& name, int quantity,
 		const string& description, const glm::vec2& position, bool isWeapon = false) -> Item* {
 			Item* item = new Item(
@@ -399,30 +397,50 @@ void Level::initializeObjects(int tileSize) {
 
 	auto* arrowTexture = new Texture();
 	arrowTexture->loadFromFile("images/items/Arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	vector<ItemData> itemData;
+	if (type == LevelType::OUTSIDE) {
+		itemData = {
+			//Medipacks
+			{ "MEDIPACK", 1, "Restores 1 health points.", {34, 2}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {58, 7}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {57, 31}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {57, 45}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {57, 46}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {43, 67}, medpackTexture },
 
-	vector<ItemData> itemData = {
-		//Medipacks
-		{ "MEDIPACK", 1, "Restores 1 health points.", {34, 2}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {58, 7}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 31}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 45}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {57, 46}, medpackTexture },
-		{ "MEDIPACK", 1, "Restores 1 health points.", {43, 67}, medpackTexture },
+			//Speed potions
+			{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {58, 13}, speedPotionTexture },
+			{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {56, 55}, speedPotionTexture },
 
-		//Speed potions
-		{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {58, 13}, speedPotionTexture },
-		{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {56, 55}, speedPotionTexture },
+			//Arrows
+			{ "ARROW", 3, "Projectile for bow", {17, 10}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {33, 16}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {45, 2}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {58, 8}, arrowTexture },
+			{ "ARROW", 3, "Projectile for bow", {58, 27}, arrowTexture },
+			{ "ARROW", 3, "Projectile for bow", {58, 26}, arrowTexture },
+			{ "ARROW", 2, "Projectile for bow", {56, 56}, arrowTexture },
+			{ "ARROW", 2, "Projectile for bow", {43, 68}, arrowTexture },
+		};
+	}
+	else {
+		itemData = {
+			{ "MEDIPACK", 1, "Restores 1 health points.", {23, 13}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {27, 27}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {30, 71}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {4, 69}, medpackTexture },
+			{ "MEDIPACK", 1, "Restores 1 health points.", {15, 69}, medpackTexture },
 
-		//Arrows
-		{ "ARROW", 3, "Projectile for bow", {17, 10}, arrowTexture },
-		{ "ARROW", 5, "Projectile for bow", {33, 16}, arrowTexture },
-		{ "ARROW", 5, "Projectile for bow", {45, 2}, arrowTexture },
-		{ "ARROW", 5, "Projectile for bow", {58, 8}, arrowTexture },
-		{ "ARROW", 3, "Projectile for bow", {58, 27}, arrowTexture },
-		{ "ARROW", 3, "Projectile for bow", {58, 26}, arrowTexture },
-		{ "ARROW", 2, "Projectile for bow", {56, 56}, arrowTexture },
-		{ "ARROW", 2, "Projectile for bow", {43, 68}, arrowTexture },
-	};
+			{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {25, 32}, speedPotionTexture },
+			{ "SPEED POTION", 1, "Increases speed for 3 seconds.", {29, 71}, speedPotionTexture },
+
+			{ "ARROW", 5, "Projectile for bow", {17, 10}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {35, 29}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {33, 34}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {5, 69}, arrowTexture },
+			{ "ARROW", 5, "Projectile for bow", {16, 69}, arrowTexture },
+		};
+	}
 
 	for (const auto& data : itemData) {
 		items.push_back(createItem(data.texture, data.name, data.quantity, data.description, data.pos));

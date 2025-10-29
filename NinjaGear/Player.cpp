@@ -688,19 +688,19 @@ void Player::giveAllItems() {
 	Item* medipack = new Item();
 	medipack->setItem("MEDIPACK", 1, "Restores 50 health points.", glm::vec2(0, 0), false, 16);
 	itemInventory.push_back(medipack);
-	itemQuantities["MEDIPACK"] = 1;
+	itemQuantities["MEDIPACK"] = 10;
 
 	//SPEED POTION
 	Item* speedPotion = new Item();
 	speedPotion->setItem("SPEED POTION", 1, "Increases speed for 10 seconds.", glm::vec2(0, 0), false, 16);
 	itemInventory.push_back(speedPotion);
-	itemQuantities["SPEED POTION"] = 1;
+	itemQuantities["SPEED POTION"] = 10;
 
 	//ARROW
 	Item* arrow = new Item();
 	arrow->setItem("ARROW", 1, "Projectile for bow", glm::vec2(0, 0), false, 16);
 	itemInventory.push_back(arrow);
-	itemQuantities["ARROW"] = 5; // Give 5 arrows
+	itemQuantities["ARROW"] = 40;
 
 	//BOW weapon
 	Item* bow = new Item();
